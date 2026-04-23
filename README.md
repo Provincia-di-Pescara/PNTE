@@ -87,7 +87,8 @@ git clone <repository-url>
 cd <repository-directory>
 
 # Configurazione environment
-cp .env.example .env
+touch .env
+# Compilare `.env` con i valori richiesti per l'ambiente locale
 
 # Build e Start dei servizi
 docker-compose up -d --build
