@@ -68,28 +68,25 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 WORKDIR /var/www/html
 
 # Application code (vendor/ and public/build/ excluded via .dockerignore)
-COPY --link --chown=www-data:www-data . .
+# --chown is incompatible with --link (BuildKit limitation); ownership set below
+COPY --link . .
 
 # Overlay with build-stage artifacts
-COPY --link --chown=www-data:www-data --from=vendor_builder /app/vendor        ./vendor
-COPY --link --chown=www-data:www-data --from=node_builder   /app/public/build  ./public/build
+COPY --link --from=vendor_builder /app/vendor       ./vendor
+COPY --link --from=node_builder   /app/public/build ./public/build
 
 # Infrastructure config
-COPY --link docker/nginx/nginx.conf          /etc/nginx/nginx.conf
-COPY --link docker/nginx/default.conf        /etc/nginx/sites-available/default
-COPY --link docker/php/php.ini               /usr/local/etc/php/conf.d/99-app.ini
-COPY --link docker/php/www.conf              /usr/local/etc/php-fpm.d/www.conf
+COPY --link docker/nginx/nginx.conf            /etc/nginx/nginx.conf
+COPY --link docker/nginx/default.conf          /etc/nginx/sites-available/default
+COPY --link docker/php/php.ini                 /usr/local/etc/php/conf.d/99-app.ini
+COPY --link docker/php/www.conf                /usr/local/etc/php-fpm.d/www.conf
 COPY --link docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY --link docker/entrypoint.sh             /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY --link docker/entrypoint.sh               /entrypoint.sh
 
-# Writable dirs with correct ownership — no recursive chown
-RUN install -d -o www-data -g www-data -m 775 \
-        storage/logs \
-        storage/framework/cache \
-        storage/framework/sessions \
-        storage/framework/views \
-        bootstrap/cache
+# Set ownership and permissions in a single layer
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod +x /entrypoint.sh \
+    && chmod -R 775 storage bootstrap/cache
 
 # ── ARGs last: changing these does not invalidate dependency cache layers ──
 ARG APP_VERSION=development
