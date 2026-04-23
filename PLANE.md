@@ -15,6 +15,31 @@ Prima di implementare il codice, è fondamentale avere chiaro il ciclo di vita d
 
 ---
 
+## Adeguamento Strategico MIT: "National-Ready" (Proroga al 2027)
+
+La proroga delle linee guida MIT non indica un ripensamento normativo, ma una criticità operativa: i dati infrastrutturali locali non sono ancora digitalizzati in modo completo (ponti, viadotti, portate).
+
+Il progetto GTE-Abruzzo, quindi, va posizionato come **sistema di censimento infrastrutturale** oltre che gestionale autorizzativo. L'alimentazione dei dati da parte di Comuni e Province diventa un contributo diretto alla base informativa richiesta a livello nazionale.
+
+### Implicazioni Tecniche per GTE-Abruzzo
+
+1. **Integrazione AINOP (Archivio Informatico Nazionale delle Opere Pubbliche)**
+   - Inserire una fase esplicita di interoperabilità con AINOP (tramite PDND) nella roadmap.
+   - Obiettivo: verificare in tempo reale la portata/limitazioni delle opere su un percorso.
+   - **Azione sul modello dati:** aggiungere il campo `codice_univoco_ainop` nelle tabelle che rappresentano ponti/opere d'arte.
+
+2. **Piano Nazionale e Corridoi Infrastrutturali Idonei**
+   - Il modulo WebGIS deve poter importare e gestire i "Corridoi Nazionali" definiti dal Piano.
+   - In fase di tracciamento percorso, il sistema deve:
+     - privilegiare i tratti già classificati come idonei;
+     - evidenziare come "agevolato" il passaggio su infrastrutture censite idonee.
+
+3. **Posizionamento Strategico e Riuso**
+   - La finestra temporale fino al 2027 è un vantaggio: consente di arrivare alla piena conformità prima dell'obbligo stringente.
+   - Messaggio istituzionale chiave: il sistema permette alla Provincia di arrivare al 2027 già allineata agli standard AINOP e al Piano Nazionale.
+
+---
+
 ## Roadmap di Sviluppo (Milestones & Task)
 
 Il lavoro è suddiviso in 5 blocchi operativi (Sprint/Milestone), progettati per un rilascio incrementale delle funzionalità.
@@ -57,6 +82,10 @@ Il lavoro è suddiviso in 5 blocchi operativi (Sprint/Milestone), progettati per
 * **[Task 3.3] Intersezione Spaziale Backend:**
   * Sviluppo delle query spaziali a DB (tramite funzioni `ST_Intersection` e `ST_Length`).
   * Logica di estrazione automatica delle `entities` attraversate dal poligono della `LineString` e relativo calcolo dei chilometri di competenza.
+* **[Task 3.4] Integrazione PDND-AINOP (Sincronizzazione Infrastrutturale):**
+  * Sviluppo del modulo per consumare le API AINOP non appena disponibili via PDND.
+  * Workflow di allineamento: quando un Comune inserisce un ponte/opera d'arte nel gestionale, il sistema tenta il collegamento automatico all'opera AINOP tramite coordinate geografiche e/o identificativi univoci.
+  * Esposizione in WebGIS e nei controlli di istruttoria dello stato di corrispondenza con AINOP e delle informazioni di idoneità disponibili.
 
 ### 🚩 Milestone 4: La Macchina a Stati e il Flusso Burocratico
 **Obiettivo:** Compilazione della pratica, validazione e gestione asincrona dei Nulla Osta.
