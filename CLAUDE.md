@@ -51,9 +51,9 @@ The production stack runs: `app` (Laravel/PHP-FPM + Nginx), `db` (MariaDB 10.11 
 ## Architecture
 
 ### Tech Stack
-- **Backend**: Laravel 11, PHP 8.3 (8.2+ minimum), Eloquent ORM
-- **Frontend**: Blade templates + Tailwind CSS 3 + Alpine.js, bundled via Vite 6
-- **Database**: MariaDB 10.11 with native GIS/spatial index support (required for route geometry)
+- **Backend**: Laravel 12, PHP 8.4, Eloquent ORM
+- **Frontend**: Blade templates + Tailwind CSS v4 (zero-runtime) + Alpine.js, bundled via Vite 6
+- **Database**: MariaDB 11.4 LTS with native GIS/spatial index support (required for route geometry)
 - **Queue/Cache**: Redis (async jobs for PEC email, PDF generation, payment webhooks)
 - **GIS Routing**: Self-hosted OSRM for snap-to-road route calculation
 - **PDF Generation**: Browsershot (Headless Chrome)
@@ -134,8 +134,8 @@ All enums go in `App\Enums\`. Enum case names must be TitleCase (e.g., `WaitingC
 ### Configuration
 Never call `env()` outside of `config/` files. Always use `config('key')` in application code.
 
-### Middleware (Laravel 11)
-Middleware is configured in `bootstrap/app.php` via `Application::configure()->withMiddleware()`, not in a `Kernel.php`.
+### Middleware (Laravel 12)
+Middleware is configured in `bootstrap/app.php` via `Application::configure()->withMiddleware()`, not in a `Kernel.php`. Laravel 12 retains the same streamlined structure introduced in Laravel 11.
 
 ### Comments & PHPDoc
 Prefer PHPDoc blocks over inline comments. Add inline comments only when the logic would surprise a reader — never to describe what the code does. Use array shape annotations in PHPDoc when the structure is non-obvious.

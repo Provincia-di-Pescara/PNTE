@@ -1,59 +1,95 @@
 publiccodeYmlVersion: '0.2'
+
 name: GTE-Abruzzo
 url: 'https://github.com/provincia-pescara/gte-abruzzo'
 softwareVersion: '1.0.0'
 releaseDate: '2026-04-23'
+
 platforms:
   - web
+
 categories:
   - geographic-information-systems
   - public-services
   - urban-issues
+  - it-infrastructure
+
 usedBy:
   - Provincia di Pescara
+
 developmentStatus: development
 softwareType: standalone/web
+
 legal:
   license: EUPL-1.2
   mainCopyrightOwner: Provincia di Pescara
   repoOwner: Provincia di Pescara
+
 maintenance:
   type: internal
   contacts:
     - name: Settore Innovazione Tecnologica - Provincia di Pescara
       email: innovazione@provincia.pescara.it
+
 dependsOn:
   open:
     - name: Docker
+      versionMin: '24.0'
     - name: PHP
-      version: '8.3'
+      version: '8.4'
+    - name: Laravel
+      version: '12.x'
     - name: MariaDB
-      version: '10.11'
+      version: '11.4'
     - name: Redis
     - name: OSRM
     - name: Nginx
+    - name: Chromium
+
 localisation:
   localisationReady: true
   supportedLanguages:
     - it
+
 description:
   it:
     localisedName: GTE-Abruzzo
-    shortDescription: Gestionale SaaS per il ciclo di vita e il rilascio delle autorizzazioni per i Trasporti Eccezionali.
+    shortDescription: >
+      Gestionale SaaS multi-tenant per il ciclo di vita e il rilascio delle
+      autorizzazioni per i Trasporti Eccezionali, conforme alle linee guida MIT 2027.
     longDescription: |
-      GTE-Abruzzo è la piattaforma web a riuso sviluppata dalla Provincia di Pescara come ente capofila per gestire in modalità SaaS (Software as a Service) l'intero iter burocratico dei Trasporti Eccezionali sull'intero territorio regionale.
-      
-      Il software permette ad aziende e agenzie di pratiche auto di autenticarsi, compilare la propria anagrafica mezzi (Garage Virtuale) e tracciare su mappa il percorso richiesto. Grazie all'integrazione di un motore GIS (OSRM) e alle query spaziali, il sistema calcola automaticamente le intersezioni con i confini comunali e provinciali per determinare le competenze.
-      
-      Gestisce in autonomia l'istruttoria, l'invio delle richieste di Nulla Osta agli enti terzi attraversati (Comuni, ANAS, Autostrade), la generazione dello IUV per il pagamento dell'indennizzo di maggiore usura stradale (tramite PagoPA) e la ripartizione dei fondi tra gli enti. Infine, genera l'autorizzazione in PDF, la protocolla e si interfaccia con i sistemi di Firma Remota PAdES.
+      GTE-Abruzzo è la piattaforma web a riuso sviluppata dalla Provincia di Pescara
+      come ente capofila per gestire in modalità SaaS (Software as a Service) l'intero
+      iter burocratico dei Trasporti Eccezionali sull'intero territorio regionale.
+
+      Il software permette ad aziende e agenzie di pratiche auto di autenticarsi tramite
+      SPID/CIE, compilare la propria anagrafica mezzi (Garage Virtuale) e tracciare su
+      mappa il percorso richiesto. Grazie all'integrazione di un motore GIS (OSRM) e alle
+      query spaziali su MariaDB 11.4 LTS, il sistema calcola automaticamente le
+      intersezioni con i confini comunali e provinciali per determinare le competenze di
+      ogni ente attraversato.
+
+      Gestisce in autonomia l'istruttoria, l'invio delle richieste di Nulla Osta agli enti
+      terzi (Comuni, ANAS, Autostrade), la generazione dello IUV per il pagamento
+      dell'indennizzo di maggiore usura stradale tramite PagoPA e la ripartizione dei
+      fondi. Genera l'autorizzazione in PDF, la protocolla e la firma digitalmente tramite
+      API di Firma Remota PAdES.
+
+      Il sistema è architetturalmente predisposto per l'integrazione con AINOP (Archivio
+      Informatico Nazionale delle Opere Pubbliche) tramite PDND, per la verifica
+      automatica della tenuta infrastrutturale di ponti e viadotti lungo il percorso
+      autorizzativo, in anticipo sulle scadenze normative MIT 2027.
     features:
-      - Integrazione nativa SPID e CIE
-      - Integrazione nativa PagoPA per generazione IUV e ascolto RT
-      - Motore WebGIS integrato con OSRM per snap-to-road vettoriale
-      - Analisi spaziale per calcolo esatto dei chilometri di pertinenza per singolo Comune/Ente
-      - Generazione PDF dinamica via Headless Chrome con QR Code di validazione per le forze dell'ordine
-      - Integrazione API per Protocollo Informatico e Firma Digitale Remota
-      - Architettura Multi-tenant (SaaS) basata su ruoli per estensione a livello regionale
+      - Integrazione nativa SPID e CIE tramite Socialite
+      - Integrazione nativa PagoPA per generazione IUV e ascolto Ricevuta Telematica
+      - Motore WebGIS con OSRM per routing snap-to-road vettoriale
+      - Analisi spaziale MariaDB per calcolo esatto dei km di competenza per Comune/Ente
+      - Predisposizione per integrazione AINOP via PDND (verifica portata ponti/viadotti)
+      - Generazione PDF via Headless Chrome con QR Code di validazione pubblica
+      - Integrazione API Protocollo Informatico e Firma Digitale Remota PAdES
+      - Architettura Multi-tenant SaaS con RBAC per estensione regionale e nazionale
+      - Conforme alle Linee Guida AgID e alle direttive MIT con orizzonte 2027
+
 it:
   countryExtensionVersion: '0.2'
   piattaforme:
@@ -64,3 +100,4 @@ it:
   conformsTo:
     - Linee guida design web della PA
     - Modello di interoperabilità
+    - CAP. 69 D.Lgs. 82/2005 (CAD - riuso del software)

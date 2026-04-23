@@ -30,7 +30,7 @@ RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
 # ─────────────────────────────────────────────────────────────
 # Stage 3: Runtime (PHP-FPM + Nginx in the same container)
 # ─────────────────────────────────────────────────────────────
-FROM php:8.3-fpm-bookworm AS runtime
+FROM php:8.4-fpm-bookworm AS runtime
 
 # System packages: Nginx, Supervisor, PHP extension deps, Chromium (for Browsershot)
 RUN apt-get update \
