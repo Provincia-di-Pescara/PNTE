@@ -1,14 +1,10 @@
 services:
 
   # ── Application (PHP-FPM + Nginx) ─────────────────────────────────────────
+  # Image is built by CI and pushed to GHCR. APP_VERSION selects the tag
+  # (e.g. latest, v0.2.0, dev). Version metadata is baked into the image.
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        APP_VERSION: "${APP_VERSION:-dev}"
-        APP_VERSION_LABEL: "${APP_VERSION_LABEL:-dev}"
-        APP_VERSION_TYPE: "${APP_VERSION_TYPE:-dev}"
+    image: ghcr.io/provincia-pescara/gte-abruzzo-app:${APP_VERSION:-latest}
     restart: unless-stopped
     env_file: .env
     depends_on:
@@ -28,14 +24,12 @@ services:
     image: mariadb:11.4
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-secret}"
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
       MARIADB_DATABASE: "${DB_DATABASE:-gte_abruzzo}"
       MARIADB_USER: "${DB_USERNAME:-gte}"
-      MARIADB_PASSWORD: "${DB_PASSWORD:-secret}"
+      MARIADB_PASSWORD: "${DB_PASSWORD}"
     volumes:
       - db_data:/var/lib/mysql
-    ports:
-      - "${DB_EXTERNAL_PORT:-3306}:3306"
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
@@ -52,8 +46,6 @@ services:
     command: redis-server --save 60 1 --loglevel warning
     volumes:
       - redis_data:/data
-    ports:
-      - "${REDIS_EXTERNAL_PORT:-6379}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -74,8 +66,6 @@ services:
     command: osrm-routed --algorithm mld /data/abruzzo-latest.osrm
     volumes:
       - ./osrm-data:/data:ro
-    ports:
-      - "${OSRM_EXTERNAL_PORT:-5000}:5000"
     profiles:
       - gis
     networks:

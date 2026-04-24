@@ -1,16 +1,19 @@
 name: Version Resolver
-description: Extracts version, version_label, and version_type from the Git ref.
+description: Derives version, version_type, version_label, ref_url from GITHUB_REF/SHA.
 
 outputs:
   version:
-    description: "Semantic version string (e.g. v1.0.0 or dev)"
+    description: "Version string (e.g. v0.1.0, dev, short-sha)"
     value: ${{ steps.resolve.outputs.version }}
   version_label:
-    description: "Version with short SHA for non-release builds (e.g. v1.0.0 or dev@abc1234)"
+    description: "Human-readable label (e.g. v0.1.0 or dev@abc1234)"
     value: ${{ steps.resolve.outputs.version_label }}
   version_type:
-    description: "One of: release, tag, dev"
+    description: "One of: development | dev | release | tag | commit"
     value: ${{ steps.resolve.outputs.version_type }}
+  ref_url:
+    description: "GitHub URL for this commit/tag/release"
+    value: ${{ steps.resolve.outputs.ref_url }}
 
 runs:
   using: composite
@@ -19,24 +22,31 @@ runs:
       id: resolve
       shell: bash
       run: |
-        REF="${GITHUB_REF}"
+        set -euo pipefail
+        repo_url="https://github.com/${GITHUB_REPOSITORY}"
+        commit_url="${repo_url}/commit/${GITHUB_SHA}"
         SHA_SHORT="${GITHUB_SHA::7}"
 
-        if [[ "$REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+([.-].+)?$ ]]; then
-          # Semver tag: v1.2.3 or v1.2.3-rc.1
-          VERSION="${REF#refs/tags/}"
-          echo "version=${VERSION}"       >> "$GITHUB_OUTPUT"
-          echo "version_label=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "version_type=release"     >> "$GITHUB_OUTPUT"
-        elif [[ "$REF" =~ ^refs/tags/ ]]; then
-          # Non-semver tag
-          VERSION="${REF#refs/tags/}"
-          echo "version=${VERSION}"       >> "$GITHUB_OUTPUT"
-          echo "version_label=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "version_type=tag"         >> "$GITHUB_OUTPUT"
+        if [[ "${GITHUB_REF}" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+([.-].+)?$ ]]; then
+          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "version=${VERSION}"                          >> "$GITHUB_OUTPUT"
+          echo "version_label=${VERSION}"                    >> "$GITHUB_OUTPUT"
+          echo "version_type=release"                        >> "$GITHUB_OUTPUT"
+          echo "ref_url=${repo_url}/releases/tag/${VERSION}" >> "$GITHUB_OUTPUT"
+        elif [[ "${GITHUB_REF}" =~ ^refs/tags/ ]]; then
+          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "version=${VERSION}"                     >> "$GITHUB_OUTPUT"
+          echo "version_label=${VERSION}"               >> "$GITHUB_OUTPUT"
+          echo "version_type=tag"                       >> "$GITHUB_OUTPUT"
+          echo "ref_url=${repo_url}/tree/${VERSION}"    >> "$GITHUB_OUTPUT"
+        elif [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+          echo "version=dev"                            >> "$GITHUB_OUTPUT"
+          echo "version_label=dev@${SHA_SHORT}"         >> "$GITHUB_OUTPUT"
+          echo "version_type=dev"                       >> "$GITHUB_OUTPUT"
+          echo "ref_url=${commit_url}"                  >> "$GITHUB_OUTPUT"
         else
-          # Branch or PR
-          echo "version=dev"                        >> "$GITHUB_OUTPUT"
-          echo "version_label=dev@${SHA_SHORT}"     >> "$GITHUB_OUTPUT"
-          echo "version_type=dev"                   >> "$GITHUB_OUTPUT"
+          echo "version=${SHA_SHORT}"                   >> "$GITHUB_OUTPUT"
+          echo "version_label=${SHA_SHORT}"             >> "$GITHUB_OUTPUT"
+          echo "version_type=commit"                    >> "$GITHUB_OUTPUT"
+          echo "ref_url=${commit_url}"                  >> "$GITHUB_OUTPUT"
         fi

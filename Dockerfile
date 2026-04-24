@@ -31,7 +31,6 @@ RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
 # Stage 3: Runtime (PHP-FPM + Nginx in the same container)
 # ─────────────────────────────────────────────────────────────
 FROM php:8.4-fpm-bookworm AS runtime
-# NOTE: update to php:8.5-fpm-bookworm once the official Docker image is published
 
 # System packages: Nginx, Supervisor, PHP extension deps, Chromium (for Browsershot)
 RUN apt-get update \
@@ -89,15 +88,33 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod +x /entrypoint.sh \
     && chmod -R 775 storage bootstrap/cache
 
-# ── ARGs last: changing these does not invalidate dependency cache layers ──
+# ── Version info (ARGs last: changing these does not bust dependency cache) ──
 ARG APP_VERSION=development
 ARG APP_VERSION_LABEL=development
 ARG APP_VERSION_TYPE=dev
+ARG APP_REF_URL=
+ARG APP_COMMIT_SHA=unknown
 
 ENV APP_VERSION=${APP_VERSION} \
     APP_VERSION_LABEL=${APP_VERSION_LABEL} \
     APP_VERSION_TYPE=${APP_VERSION_TYPE} \
+    APP_REF_URL=${APP_REF_URL} \
+    APP_COMMIT_SHA=${APP_COMMIT_SHA} \
     CHROMIUM_PATH=/usr/bin/chromium
+
+RUN printf '%s\n' "$APP_VERSION" > /var/www/html/VERSION \
+    && php -r ' \
+        $d = [ \
+            "version"       => getenv("APP_VERSION")       ?: "development", \
+            "version_type"  => getenv("APP_VERSION_TYPE")  ?: "development", \
+            "version_label" => getenv("APP_VERSION_LABEL") ?: "development", \
+            "commit"        => getenv("APP_COMMIT_SHA")    ?: "unknown", \
+            "ref_url"       => getenv("APP_REF_URL")       ?: "", \
+        ]; \
+        file_put_contents( \
+            "/var/www/html/VERSION_INFO.json", \
+            json_encode($d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) \
+        );'
 
 EXPOSE 80
 ENTRYPOINT ["/entrypoint.sh"]
