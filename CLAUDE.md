@@ -1,12 +1,12 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working this repo.
 
 ## Project Overview
 
-**GTE-Abruzzo** (Gestionale Trasporti Eccezionali) is a multi-tenant SaaS platform developed by Provincia di Pescara to digitize the full lifecycle of exceptional vehicle transport authorizations in the Abruzzo region, intended for reuse across Italian public administration via Developers Italia.
+**GTE-Abruzzo** (Gestionale Trasporti Eccezionali) — multi-tenant SaaS by Provincia di Pescara. Digitize full lifecycle of exceptional vehicle transport authorizations in Abruzzo. Intended for reuse across Italian public admin via Developers Italia.
 
-The application must comply with: Art. 10 D.Lgs 285/1992 (Codice della Strada), D.P.R. 495/1992 wear formulas, AgID guidelines, and MIT bridge-safety directives.
+Must comply: Art. 10 D.Lgs 285/1992 (Codice della Strada), D.P.R. 495/1992 wear formulas, AgID guidelines, MIT bridge-safety directives.
 
 ## Development Commands
 
@@ -36,7 +36,7 @@ php artisan test --compact --testsuite=Unit
 php artisan test --compact --testsuite=Feature
 ```
 
-Every code change must be covered by a test (new or updated). Run only the minimum tests needed to verify the change.
+Every change need test (new or updated). Run minimum tests to verify change.
 
 ## Production Deployment (Docker)
 
@@ -46,23 +46,23 @@ docker-compose exec app composer install
 docker-compose exec app php artisan migrate --seed
 ```
 
-The production stack runs: `app` (Laravel/PHP-FPM + Nginx), `db` (MariaDB 10.11 with spatial extensions), `redis`, `osrm` (self-hosted routing engine), `chrome` (headless PDF rendering).
+Prod stack: `app` (Laravel/PHP-FPM + Nginx), `db` (MariaDB 10.11 with spatial extensions), `redis`, `osrm` (self-hosted routing engine), `chrome` (headless PDF rendering).
 
 ## Architecture
 
 ### Tech Stack
 - **Backend**: Laravel 12, PHP 8.4, Eloquent ORM
-- **Frontend**: Blade templates + Tailwind CSS v4 (zero-runtime) + Alpine.js, bundled via Vite 6
-- **Database**: MariaDB 11.4 LTS with native GIS/spatial index support (required for route geometry)
-- **Queue/Cache**: Redis (async jobs for PEC email, PDF generation, payment webhooks)
-- **GIS Routing**: Self-hosted OSRM for snap-to-road route calculation
+- **Frontend**: Blade + Tailwind CSS v4 (zero-runtime) + Alpine.js, Vite 6
+- **Database**: MariaDB 11.4 LTS, native GIS/spatial index (required for route geometry)
+- **Queue/Cache**: Redis (async: PEC email, PDF generation, payment webhooks)
+- **GIS Routing**: Self-hosted OSRM, snap-to-road
 - **PDF Generation**: Browsershot (Headless Chrome)
 - **Auth**: SPID/CIE via `laravel/socialite` + `socialiteproviders/manager`
-- **Payments**: PagoPA integration (planned)
+- **Payments**: PagoPA (planned)
 
 ### Core Domain Model
 
-The central entity is the **application** (transport authorization request), which moves through a rigid state machine:
+Central entity: **application** (transport authorization request). Rigid state machine:
 
 ```
 draft → submitted → waiting_clearances → waiting_payment → approved
@@ -71,10 +71,10 @@ draft → submitted → waiting_clearances → waiting_payment → approved
 Key Eloquent models (planned, not yet implemented):
 - `users` — natural persons with fiscal identity (SPID/CIE data)
 - `companies` — companies/agencies with delegations via `company_user` pivot
-- `vehicles` — tractor units and trailers with axle/weight configurations (`vehicle_axles`)
+- `vehicles` — tractor units and trailers with axle/weight configs (`vehicle_axles`)
 - `entities` — municipalities, provinces, ANAS, motorways with GIS polygons and PEC addresses
-- `applications` — the transport authorization request and its state
-- `routes` — LineString geometry of the authorized route with per-entity km breakdown
+- `applications` — transport authorization request and its state
+- `routes` — LineString geometry of authorized route with per-entity km breakdown
 - `clearances` — third-party approvals (Nulla Osta) per entity per application
 - `tariffs` — historically-versioned wear coefficients used by `WearCalculationService`
 
@@ -85,21 +85,21 @@ Key Eloquent models (planned, not yet implemented):
 - `citizen` — transport companies/agencies submitting requests
 
 ### Planned Services
-- **`WearCalculationService`** — computes road wear indemnity using per-axle weight × km × tariff coefficients (formula from D.P.R. 495/1992)
-- **GIS spatial queries** — `ST_Intersection` + `ST_Length` against entity polygon table to extract which entities a route traverses and how many km per entity
-- **AINOP integration** — via PDND API to verify bridge/infrastructure capacity along a route (field `codice_univoco_ainop` on infrastructure records)
-- **PagoPA clearing** — single IUV generated from `WearCalculationService` output; RT webhook unlocks the application; proceeds split among entities
+- **`WearCalculationService`** — road wear indemnity via per-axle weight × km × tariff coefficients (D.P.R. 495/1992)
+- **GIS spatial queries** — `ST_Intersection` + `ST_Length` against entity polygon table; extract entities a route traverses + km per entity
+- **AINOP integration** — via PDND API, verify bridge/infrastructure capacity along route (`codice_univoco_ainop` on infrastructure records)
+- **PagoPA clearing** — single IUV from `WearCalculationService` output; RT webhook unlocks application; proceeds split among entities
 
 ### Geographic/GIS Layer
-MariaDB spatial fields (`POLYGON`, `MULTIPOLYGON`, `LINESTRING`) store entity boundaries and route geometries. Spatial indices are required. The OSRM container must be pre-loaded with the regional road graph. The frontend uses Leaflet for the interactive map.
+MariaDB spatial fields (`POLYGON`, `MULTIPOLYGON`, `LINESTRING`) store entity boundaries + route geometries. Spatial indices required. OSRM container must pre-load regional road graph. Frontend: Leaflet for interactive map.
 
 ### Architecture Docs
-The `.ai/` directory (to be created) contains deep-dive documentation on complex subsystems: `STATE_MACHINE.md`, `GIS_ROUTING.md`, `WEAR_CALCULATION.md`, `PAGOPA.md`. Read these before working on the relevant domain.
+`.ai/` dir (to be created): deep-dive docs on complex subsystems — `STATE_MACHINE.md`, `GIS_ROUTING.md`, `WEAR_CALCULATION.md`, `PAGOPA.md`. Read before working on relevant domain.
 
 ## PHP & Laravel Conventions
 
 ### Strict Typing
-Every PHP file must begin with `declare(strict_types=1);`. Always declare explicit return types on all methods and functions. Use PHP 8 type hints for all parameters.
+Every PHP file begin with `declare(strict_types=1);`. Explicit return types on all methods/functions. PHP 8 type hints on all params.
 
 ```php
 declare(strict_types=1);
@@ -115,37 +115,37 @@ public function __construct(
 ```
 
 ### Service Classes
-Services in `App\Services\` must be `final`. Use constructor property promotion with `private readonly` for injected dependencies.
+Services in `App\Services\` must be `final`. Constructor property promotion with `private readonly` for injected deps.
 
 ### Enums
-All enums go in `App\Enums\`. Enum case names must be TitleCase (e.g., `WaitingClearances`, `Approved`). Use backed enums (`string` or `int`) for values stored in the database.
+All enums in `App\Enums\`. Case names TitleCase (e.g., `WaitingClearances`, `Approved`). Backed enums (`string` or `int`) for DB-stored values.
 
 ### Eloquent
-- Always use eager loading to prevent N+1 queries.
+- Eager load always — prevent N+1.
 - Prefer `Model::query()->...` over `DB::` raw queries.
-- Define casts in the `casts()` method, not the `$casts` property.
-- Always use Eloquent relationship methods with return type hints.
+- Define casts in `casts()` method, not `$casts` property.
+- Eloquent relationship methods must have return type hints.
 
 ### Controllers & Validation
-- Use `php artisan make:` commands with `--no-interaction` to generate all new files (models, migrations, controllers, jobs, etc.).
-- Always create dedicated `App\Http\Requests\` Form Request classes for validation — never validate inline in controllers.
-- Use named routes and the `route()` helper for all URL generation.
+- Use `php artisan make:` with `--no-interaction` for all new files.
+- Dedicated `App\Http\Requests\` Form Request classes for validation — never inline in controllers.
+- Named routes + `route()` helper for all URL generation.
 
 ### Configuration
-Never call `env()` outside of `config/` files. Always use `config('key')` in application code.
+Never call `env()` outside `config/` files. Use `config('key')` in app code.
 
 ### Middleware (Laravel 12)
-Middleware is configured in `bootstrap/app.php` via `Application::configure()->withMiddleware()`, not in a `Kernel.php`. Laravel 12 retains the same streamlined structure introduced in Laravel 11.
+Middleware configured in `bootstrap/app.php` via `Application::configure()->withMiddleware()`, not `Kernel.php`. Laravel 12 keeps streamlined structure from Laravel 11.
 
 ### Comments & PHPDoc
-Prefer PHPDoc blocks over inline comments. Add inline comments only when the logic would surprise a reader — never to describe what the code does. Use array shape annotations in PHPDoc when the structure is non-obvious.
+Prefer PHPDoc over inline comments. Inline only when logic surprises reader — never describe what code does. Array shape annotations in PHPDoc when structure non-obvious.
 
 ### Code Style
-- Always use curly braces for control structures, even for single-line bodies.
-- Run `./vendor/bin/pint --dirty` before finalizing any set of changes.
+- Curly braces on all control structures, even single-line.
+- Run `./vendor/bin/pint --dirty` before finalizing changes.
 
 ## Project Structure Notes
-- PSR-4: application code in `App\`, tests in `Tests\`
-- Jobs (async): `App\Jobs\` — PEC notifications, PDF generation, payment webhooks
-- `.env.example` uses SQLite + database-driver queue/cache for local dev; production uses MariaDB + Redis
-- EUPL-1.2 license; `publiccode.yml` must be kept up to date with any new dependencies or deployment requirements
+- PSR-4: app code in `App\`, tests in `Tests\`
+- Async jobs: `App\Jobs\` — PEC notifications, PDF generation, payment webhooks
+- `.env.example`: SQLite + database-driver queue/cache for local dev; prod uses MariaDB + Redis
+- EUPL-1.2 license; keep `publiccode.yml` current with new deps or deployment changes

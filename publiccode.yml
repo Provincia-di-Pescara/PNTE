@@ -2,8 +2,8 @@ publiccodeYmlVersion: '0.2'
 
 name: GTE-Abruzzo
 url: 'https://github.com/provincia-pescara/gte-abruzzo'
-softwareVersion: '1.0.0'
-releaseDate: '2026-04-23'
+softwareVersion: '0.1.0'
+releaseDate: '2026-04-24'
 
 platforms:
   - web
@@ -38,7 +38,7 @@ dependsOn:
     - name: PHP
       version: '8.4'
     - name: Laravel
-      version: '12.x'
+      version: '13.x'
     - name: MariaDB
       version: '11.4'
     - name: Redis

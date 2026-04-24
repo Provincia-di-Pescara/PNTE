@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────────────────────
 # Stage 1: Frontend assets (Vite build)
 # ─────────────────────────────────────────────────────────────
-FROM node:20-slim AS node_builder
+FROM node:22-slim AS node_builder
 WORKDIR /app
 
 COPY --link package.json package-lock.json ./
@@ -31,6 +31,7 @@ RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
 # Stage 3: Runtime (PHP-FPM + Nginx in the same container)
 # ─────────────────────────────────────────────────────────────
 FROM php:8.4-fpm-bookworm AS runtime
+# NOTE: update to php:8.5-fpm-bookworm once the official Docker image is published
 
 # System packages: Nginx, Supervisor, PHP extension deps, Chromium (for Browsershot)
 RUN apt-get update \
