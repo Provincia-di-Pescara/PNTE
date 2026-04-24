@@ -1,10 +1,10 @@
 # CLAUDE.md
 
-Guidance for Claude Code when working this repo.
+Guidance for Claude Code when working in this repo.
 
 ## Project Overview
 
-**GTE-Abruzzo** (Gestionale Trasporti Eccezionali) — multi-tenant SaaS by Provincia di Pescara. Digitize full lifecycle of exceptional vehicle transport authorizations in Abruzzo. Intended for reuse across Italian public admin via Developers Italia.
+**GTE-Abruzzo** (Gestionale Trasporti Eccezionali) — multi-tenant SaaS by Provincia di Pescara to digitize exceptional vehicle transport authorizations in Abruzzo. Intended for reuse across Italian public admin via Developers Italia.
 
 Must comply: Art. 10 D.Lgs 285/1992 (Codice della Strada), D.P.R. 495/1992 wear formulas, AgID guidelines, MIT bridge-safety directives.
 
@@ -36,7 +36,7 @@ php artisan test --compact --testsuite=Unit
 php artisan test --compact --testsuite=Feature
 ```
 
-Every change need test (new or updated). Run minimum tests to verify change.
+Every code change need test (new or updated). Run minimum tests to verify change.
 
 ## Production Deployment (Docker)
 
@@ -52,17 +52,17 @@ Prod stack: `app` (Laravel/PHP-FPM + Nginx + Chromium), `db` (MariaDB 11.4 LTS w
 
 ### Tech Stack
 - **Backend**: Laravel 13, PHP 8.4, Eloquent ORM
-- **Frontend**: Blade + Tailwind CSS v4 (zero-runtime) + Alpine.js, Vite 6
-- **Database**: MariaDB 11.4 LTS, native GIS/spatial index (required for route geometry)
-- **Queue/Cache**: Redis (async: PEC email, PDF generation, payment webhooks)
-- **GIS Routing**: Self-hosted OSRM, snap-to-road
+- **Frontend**: Blade templates + Tailwind CSS v4 (zero-runtime) + Alpine.js, bundled via Vite 6
+- **Database**: MariaDB 11.4 LTS with native GIS/spatial index support (required for route geometry)
+- **Queue/Cache**: Redis (async jobs for PEC email, PDF generation, payment webhooks)
+- **GIS Routing**: Self-hosted OSRM for snap-to-road route calculation
 - **PDF Generation**: Browsershot (Headless Chrome)
 - **Auth**: SPID/CIE via `laravel/socialite` + `socialiteproviders/manager`
-- **Payments**: PagoPA (planned)
+- **Payments**: PagoPA integration (planned)
 
 ### Core Domain Model
 
-Central entity: **application** (transport authorization request). Rigid state machine:
+Central entity: **application** (transport authorization request), moves through rigid state machine:
 
 ```
 draft → submitted → waiting_clearances → waiting_payment → approved
@@ -71,7 +71,7 @@ draft → submitted → waiting_clearances → waiting_payment → approved
 Key Eloquent models (planned, not yet implemented):
 - `users` — natural persons with fiscal identity (SPID/CIE data)
 - `companies` — companies/agencies with delegations via `company_user` pivot
-- `vehicles` — tractor units and trailers with axle/weight configs (`vehicle_axles`)
+- `vehicles` — tractor units and trailers with axle/weight configurations (`vehicle_axles`)
 - `entities` — municipalities, provinces, ANAS, motorways with GIS polygons and PEC addresses
 - `applications` — transport authorization request and its state
 - `routes` — LineString geometry of authorized route with per-entity km breakdown
@@ -82,26 +82,26 @@ Key Eloquent models (planned, not yet implemented):
 ### RBAC Roles
 - `super-admin` — Provincia di Pescara operators (full access)
 - `operator` — other province operators
-- `third-party` — municipalities, ANAS (clearance dashboard + roadworks management)
+- `third-party` — municipalities, ANAS (limited to clearance dashboard and roadworks management)
 - `citizen` — transport companies/agencies submitting requests
-- `law-enforcement` — Forze dell'Ordine (read-only: approved transports, active roadworks, QR verification)
+- `law-enforcement` — Forze dell'Ordine (read-only: approved transports, active roadworks, QR code verification)
 
 ### Planned Services
-- **`WearCalculationService`** — road wear indemnity via per-axle weight × km × tariff coefficients (D.P.R. 495/1992)
-- **GIS spatial queries** — `ST_Intersection` + `ST_Length` against entity polygon table; extract entities a route traverses + km per entity
-- **AINOP integration** — via PDND API, verify bridge/infrastructure capacity along route (`codice_univoco_ainop` on infrastructure records)
-- **PagoPA clearing** — single IUV from `WearCalculationService` output; RT webhook unlocks application; proceeds split among entities
+- **`WearCalculationService`** — road wear indemnity: per-axle weight × km × tariff coefficients (D.P.R. 495/1992)
+- **GIS spatial queries** — `ST_Intersection` + `ST_Length` on entity polygon table → which entities route traverses + km per entity
+- **AINOP integration** — via PDND API, verify bridge/infra capacity on route (`codice_univoco_ainop` on infra records)
+- **PagoPA clearing** — IUV from `WearCalculationService` output; RT webhook unlock application; split proceeds among entities
 
 ### Geographic/GIS Layer
-MariaDB spatial fields (`POLYGON`, `MULTIPOLYGON`, `LINESTRING`) store entity boundaries + route geometries. Spatial indices required. OSRM container must pre-load regional road graph. Frontend: Leaflet for interactive map.
+MariaDB spatial fields (`POLYGON`, `MULTIPOLYGON`, `LINESTRING`) store entity boundaries + route geometries. Spatial indices required. OSRM pre-loaded with regional road graph. Frontend uses Leaflet.
 
 ### Architecture Docs
-`.ai/` dir (to be created): deep-dive docs on complex subsystems — `STATE_MACHINE.md`, `GIS_ROUTING.md`, `WEAR_CALCULATION.md`, `PAGOPA.md`. Read before working on relevant domain.
+`.ai/` dir (to be created) — deep-dive docs on complex subsystems: `STATE_MACHINE.md`, `GIS_ROUTING.md`, `WEAR_CALCULATION.md`, `PAGOPA.md`. Read before working on relevant domain.
 
 ## PHP & Laravel Conventions
 
 ### Strict Typing
-Every PHP file begin with `declare(strict_types=1);`. Explicit return types on all methods/functions. PHP 8 type hints on all params.
+Every PHP file begin with `declare(strict_types=1);`. Explicit return types on all methods/functions. PHP 8 type hints for all params.
 
 ```php
 declare(strict_types=1);
@@ -117,56 +117,56 @@ public function __construct(
 ```
 
 ### Service Classes
-Services in `App\Services\` must be `final`. Constructor property promotion with `private readonly` for injected deps.
+Services in `App\Services\` must be `final`. Constructor property promotion with `private readonly` for deps.
 
 ### Enums
-All enums in `App\Enums\`. Case names TitleCase (e.g., `WaitingClearances`, `Approved`). Backed enums (`string` or `int`) for DB-stored values.
+Enums in `App\Enums\`. Case names TitleCase (e.g., `WaitingClearances`, `Approved`). Backed enums (`string` or `int`) for DB values.
 
 ### Eloquent
-- Eager load always — prevent N+1.
+- Always eager load (prevent N+1).
 - Prefer `Model::query()->...` over `DB::` raw queries.
 - Define casts in `casts()` method, not `$casts` property.
-- Eloquent relationship methods must have return type hints.
+- Always use Eloquent relationship methods with return type hints.
 
 ### Controllers & Validation
-- Use `php artisan make:` with `--no-interaction` for all new files.
+- Use `php artisan make:` commands with `--no-interaction` to generate all new files (models, migrations, controllers, jobs, etc.).
 - Dedicated `App\Http\Requests\` Form Request classes for validation — never inline in controllers.
-- Named routes + `route()` helper for all URL generation.
+- Use named routes and `route()` helper for all URL generation.
 
 ### Configuration
 Never call `env()` outside `config/` files. Use `config('key')` in app code.
 
 ### .env — bootstrap and network topology only
-`.env` contains exactly: `APP_KEY`, `APP_ENV`, `APP_URL`, DB credentials, Redis credentials, `OSRM_BASE_URL`, `CHROMIUM_PATH`. Nothing else.
+`.env` contains only bootstrap + network topology vars: `APP_KEY`, `APP_ENV`, `APP_URL`, DB credentials, Redis credentials, `OSRM_BASE_URL`, `CHROMIUM_PATH`. Nothing else.
 
-Everything else goes to the **database** and is managed via **admin UI**:
+All else → **database**, managed via **admin UI**:
 - App behaviour: debug mode, timezone, locale/i18n, maintenance mode
 - Mail/SMTP server and credentials
 - Integration credentials: SPID SP metadata, PagoPA station IDs, PDND client keys, Firma Remota endpoints, etc.
 
-`APP_VERSION*` are Docker build ARGs injected by CI/CD — not runtime env vars.
+`APP_VERSION*` are Docker build ARGs from CI/CD — not runtime env vars, must not appear in `.env`.
 
 ### Database — always MariaDB
-MariaDB 11.4 LTS is the only supported database, including local development. No SQLite fallback. Local dev uses `docker compose up` with the `db` service.
+MariaDB 11.4 LTS only. No SQLite fallback. Local dev must use `docker compose up` with `db` service.
 
 ### Production deployment — Portainer, no shell access
-Production runs on Portainer (Docker stack). There is no shell access to running containers. Consequences:
-- Migrations run automatically on container startup via `entrypoint.sh` (`php artisan migrate --force`).
-- Seeders for required bootstrap data (roles, permissions, default settings) must run via a dedicated idempotent seeder called by the entrypoint, not manually.
-- One-off operations must be implemented as Artisan commands triggerable via a Portainer exec or a dedicated admin UI action — never assume shell availability.
+Prod runs on Portainer (Docker stack). No shell access to containers. Consequences:
+- Migrations auto-run on container startup via `entrypoint.sh` (`php artisan migrate --force`).
+- Bootstrap seeders (roles, permissions, default settings) via dedicated idempotent seeder called by entrypoint — not manually.
+- One-off ops: Artisan commands via Portainer exec or admin UI action — never assume shell.
 
 ### Middleware (Laravel 13)
-Middleware configured in `bootstrap/app.php` via `Application::configure()->withMiddleware()`, not `Kernel.php`. Laravel 13 keeps streamlined structure from Laravel 11.
+Middleware in `bootstrap/app.php` via `Application::configure()->withMiddleware()`, not `Kernel.php`. Laravel 13 streamlined structure from Laravel 11.
 
 ### Comments & PHPDoc
-Prefer PHPDoc over inline comments. Inline only when logic surprises reader — never describe what code does. Array shape annotations in PHPDoc when structure non-obvious.
+Prefer PHPDoc over inline comments. Inline only when logic would surprise — never to describe what code does. Array shape annotations in PHPDoc when structure non-obvious.
 
 ### Code Style
-- Curly braces on all control structures, even single-line.
-- Run `./vendor/bin/pint --dirty` before finalizing changes.
+- Always curly braces for control structures, even single-line.
+- Run `./vendor/bin/pint --dirty` before finalizing any set of changes.
 
 ## Project Structure Notes
-- PSR-4: app code in `App\`, tests in `Tests\`
-- Async jobs: `App\Jobs\` — PEC notifications, PDF generation, payment webhooks
-- `.env.example`: SQLite + database-driver queue/cache for local dev; prod uses MariaDB + Redis
-- EUPL-1.2 license; keep `publiccode.yml` current with new deps or deployment changes
+- PSR-4: application code in `App\`, tests in `Tests\`
+- Jobs (async): `App\Jobs\` — PEC notifications, PDF generation, payment webhooks
+- `.env.example` covers only bootstrap/network vars; production uses MariaDB + Redis
+- EUPL-1.2 license; `publiccode.yml` keep current with new deps or deployment requirements

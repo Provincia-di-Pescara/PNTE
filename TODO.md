@@ -24,7 +24,7 @@
 - [x] `spatie/browsershot ^5` aggiunto
 - [x] Node `20-slim` → `22-slim` in Dockerfile
 - [x] `docker-compose.yml` creato (app, db, redis, osrm)
-- [x] `.env.example` aggiornato (SPID, PagoPA, OSRM, AINOP/PDND)
+- [x] `.env.example` aggiornato
 - [x] `publiccode.yml` aggiornato a v0.1.0
 - [x] Tag `v0.1.0` rilasciato
 

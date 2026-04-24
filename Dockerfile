@@ -56,6 +56,7 @@ RUN apt-get update \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
         intl \
+        mbstring \
         pdo_mysql \
         zip \
         bcmath \
@@ -85,6 +86,7 @@ COPY --link docker/entrypoint.sh               /entrypoint.sh
 
 # Set ownership and permissions in a single layer
 RUN chown -R www-data:www-data /var/www/html \
+    && sed -i 's/\r$//' /entrypoint.sh \
     && chmod +x /entrypoint.sh \
     && chmod -R 775 storage bootstrap/cache
 
