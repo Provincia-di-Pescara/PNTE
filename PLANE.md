@@ -15,6 +15,31 @@ Prima di implementare il codice, è fondamentale avere chiaro il ciclo di vita d
 
 ---
 
+## Cantieri e Percorsi Alternativi
+
+Il sistema gestisce i cantieri stradali come vincoli spazio-temporali sul grafo di routing. La logica è:
+
+1. **Segnalazione:** Gli enti gestori di competenza (Comuni, ANAS, Autostrade) inseriscono i cantieri nella propria Scrivania con geometria (tratto stradale), periodo di validità (`valid_from` / `valid_to`) e severità.
+2. **Controllo automatico:** Al momento del tracciamento percorso, prima della sottomissione, il backend verifica `ST_Intersects(route.geometry, cantiere.geometry)` in AND con la finestra temporale della domanda. Se c'è sovrapposizione, la pratica non può essere sottomessa con quel percorso/data.
+3. **Percorsi alternativi:** In caso di conflitto, il sistema interroga OSRM richiedendo route alternative (parametro `alternatives=true`) con i tratti bloccati esclusi, e le propone all'utente sulla mappa prima della sottomissione.
+4. **Modello dati:** tabella `roadworks` — `entity_id`, `geometry` (LINESTRING/POLYGON), `valid_from`, `valid_to`, `description`, `severity` (advisory/restricted/closed), `status` (planned/active/closed).
+
+Questo modulo si inserisce nel WebGIS (Milestone 3) e richiede che gli enti terzi abbiano un pannello di gestione cantieri nella loro Scrivania (Milestone 4).
+
+---
+
+## Forze dell'Ordine
+
+Ruolo `law-enforcement` con accesso in sola lettura a:
+- **Verifica sul campo:** ricerca per targa o scansione QR Code del PDF → dettaglio completo della pratica approvata (convoglio, percorso, periodo di validità, ente emittente).
+- **Mappa cantieri attivi:** layer WebGIS con i cantieri attivi nel giorno corrente, filtrabili per tratta.
+- **Trasporti in transito oggi:** lista delle autorizzazioni attive nella giornata con mappa del percorso.
+- **Vista ottimizzata mobile:** layout responsive per utilizzo da dispositivo mobile su strada.
+
+Il ruolo `law-enforcement` non ha accesso alle pratiche in stato `draft`/`submitted` né ai dati fiscali degli utenti oltre quanto strettamente necessario all'identificazione del convoglio autorizzato.
+
+---
+
 ## Adeguamento Strategico MIT: "National-Ready" (Proroga al 2027)
 
 La proroga delle linee guida MIT non indica un ripensamento normativo, ma una criticità operativa: i dati infrastrutturali locali non sono ancora digitalizzati in modo completo (ponti, viadotti, portate).

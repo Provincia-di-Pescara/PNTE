@@ -34,7 +34,7 @@
 
 - [ ] **[1.1]** Migration `users` — identità fiscale SPID/CIE (codice fiscale, dati IDP)
 - [ ] **[1.1]** Integrazione SPID/CIE via Socialite + `socialiteproviders/spid`
-- [ ] **[1.2]** Setup Spatie Permission — seed ruoli: `super-admin`, `operator`, `third-party`, `citizen`
+- [ ] **[1.2]** Setup Spatie Permission — seed ruoli: `super-admin`, `operator`, `third-party`, `citizen`, `law-enforcement`
 - [ ] **[1.3]** Migration `companies` + pivot `company_user` (deleghe/procure)
 - [ ] **[1.3]** UI: richiesta e approvazione deleghe aziendali
 - [ ] **[1.4]** Migration `entities` — Comuni, Province, ANAS, Autostrade (GIS `MULTIPOLYGON`, PEC, ISTAT)
@@ -61,6 +61,9 @@
 - [ ] **[3.3]** Query `ST_Intersection` + `ST_Length` → km per ente estratti automaticamente
 - [ ] **[3.4]** Stub AINOP/PDND: campo `codice_univoco_ainop` su tabella infrastrutture
 - [ ] **[3.4]** Evidenziazione WebGIS corridoi nazionali MIT idonei
+- [ ] **[3.5]** Migration `roadworks` — `entity_id`, `geometry` (LINESTRING/POLYGON), `valid_from`, `valid_to`, `severity` (advisory/restricted/closed), `status` (planned/active/closed)
+- [ ] **[3.5]** Controllo cantieri al submit: `ST_Intersects(route, roadwork)` + overlap date range → blocco con indicazione tratto
+- [ ] **[3.5]** Percorsi alternativi OSRM (`alternatives=true`) quando il percorso confligge con un cantiere attivo
 
 ---
 
@@ -71,6 +74,7 @@
 - [ ] **[4.2]** State machine: transizioni `draft → submitted → waiting_clearances`
 - [ ] **[4.3]** Scrivania Enti Terzi — dashboard ruolo `third-party` (tratta di competenza + Approva/Rifiuta)
 - [ ] **[4.3]** Migration `clearances` — Nulla Osta per ente per pratica
+- [ ] **[4.3]** Gestione cantieri nella Scrivania Enti Terzi — CRUD `roadworks` per l'ente di competenza
 - [ ] **[4.4]** `App\Jobs\SendClearanceNotification` — PEC asincrono via Redis queue
 - [ ] **[4.4]** Listener ricezione esiti PEC
 
@@ -85,6 +89,8 @@
 - [ ] **[5.3]** Client API Protocollo Informatico della Provincia
 - [ ] **[5.3]** Firma PAdES remota (Aruba/InfoCert API) apposta dal dirigente
 - [ ] **[5.4]** Dashboard Ragioneria — export CSV/Excel riparto fondi per ente
+- [ ] **[5.5]** Dashboard Forze dell'Ordine (`law-enforcement`) — verifica per targa, scansione QR, mappa cantieri attivi, trasporti in transito oggi
+- [ ] **[5.5]** Vista mobile-first per utilizzo su strada
 
 ---
 

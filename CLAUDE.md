@@ -77,12 +77,14 @@ Key Eloquent models (planned, not yet implemented):
 - `routes` — LineString geometry of authorized route with per-entity km breakdown
 - `clearances` — third-party approvals (Nulla Osta) per entity per application
 - `tariffs` — historically-versioned wear coefficients used by `WearCalculationService`
+- `roadworks` — construction sites reported by owning entity: geometry (LINESTRING/POLYGON), `valid_from`/`valid_to`, severity (advisory/restricted/closed), status (planned/active/closed)
 
 ### RBAC Roles
 - `super-admin` — Provincia di Pescara operators (full access)
 - `operator` — other province operators
-- `third-party` — municipalities, ANAS (limited to their clearance dashboard)
+- `third-party` — municipalities, ANAS (clearance dashboard + roadworks management)
 - `citizen` — transport companies/agencies submitting requests
+- `law-enforcement` — Forze dell'Ordine (read-only: approved transports, active roadworks, QR verification)
 
 ### Planned Services
 - **`WearCalculationService`** — road wear indemnity via per-axle weight × km × tariff coefficients (D.P.R. 495/1992)

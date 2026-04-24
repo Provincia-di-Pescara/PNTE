@@ -92,7 +92,25 @@ Le linee guida MIT per la sicurezza dei ponti e la gestione dei trasporti eccezi
 
 ---
 
-### 8. Interoperabilità e Servizi PA
+### 8. Gestione Cantieri e Percorsi Alternativi
+
+Gli enti gestori di competenza (Comuni, ANAS, Autostrade) segnalano i cantieri stradali direttamente dalla propria Scrivania. Ogni cantiere è definito da una geometria GIS (tratto stradale), un periodo di validità e un livello di severità (informativo / limitato / chiuso).
+
+Al momento del tracciamento del percorso, prima della sottomissione, il sistema verifica automaticamente la sovrapposizione spaziale e temporale (`ST_Intersects` + date range) tra il percorso richiesto e i cantieri attivi. In caso di conflitto:
+
+- La sottomissione viene bloccata con indicazione del tratto incompatibile.
+- Vengono proposti sulla mappa **percorsi alternativi** calcolati da OSRM escludendo i tratti interessati.
+
+Le **Forze dell'Ordine** (`law-enforcement`) accedono in sola lettura a:
+
+- Verifica sul campo tramite targa o scansione QR Code → dettaglio completo della pratica approvata (convoglio, percorso, ente emittente, periodo di validità).
+- Mappa dei cantieri attivi nel giorno corrente con filtro per tratta.
+- Lista dei trasporti eccezionali in transito nella giornata corrente con visualizzazione del percorso.
+- Vista ottimizzata per dispositivi mobili, per utilizzo diretto su strada.
+
+---
+
+### 9. Interoperabilità e Servizi PA
 
 - **Autenticazione:** Integrazione con **SPID/CIE** tramite il layer Socialite. Gestione deleghe per agenzie di pratiche auto.
 - **Pagamenti:** Integrazione nativa con **PagoPA**. Gestione del flusso "Incasso Unico + Clearing" per la ripartizione fondi tra enti.
@@ -101,7 +119,7 @@ Le linee guida MIT per la sicurezza dei ponti e la gestione dei trasporti eccezi
 
 ---
 
-### 9. Modello Dati (Entità Principali)
+### 10. Modello Dati (Entità Principali)
 
 | Entità | Descrizione |
 | :--- | :--- |
@@ -112,6 +130,7 @@ Le linee guida MIT per la sicurezza dei ponti e la gestione dei trasporti eccezi
 | `routes` | Geometrie del percorso e metadati chilometrici per ente |
 | `clearances` | Workflow dei Nulla Osta richiesti agli enti terzi |
 | `tariffs` | Coefficienti d'usura storicizzati per il motore di calcolo |
+| `roadworks` | Cantieri segnalati dagli enti gestori: geometria GIS, periodo di validità, severità, stato |
 
 ---
 
@@ -120,11 +139,11 @@ Le linee guida MIT per la sicurezza dei ponti e la gestione dei trasporti eccezi
 | Versione | Milestone | Obiettivo | Stato |
 | :--- | :--- | :--- | :--- |
 | **v0.1.x** | Stack | Laravel 13 / PHP 8.4 / Tailwind v4 / Alpine.js / Docker Compose | ✅ Completato |
-| **v0.2.x** | M1 — Foundation | Auth SPID/CIE, RBAC (Spatie), anagrafiche `users`/`companies`/`entities` | 🔜 In sviluppo |
+| **v0.2.x** | M1 — Foundation | Auth SPID/CIE, RBAC (Spatie + `law-enforcement`), anagrafiche `users`/`companies`/`entities` | 🔜 In sviluppo |
 | **v0.3.x** | M2 — Garage & Calcolo | Anagrafica mezzi, assi, `WearCalculationService` (D.P.R. 495/1992) | ⏳ Pianificato |
-| **v0.4.x** | M3 — WebGIS | Confini GIS, Leaflet, OSRM snap-to-road, intersezione spaziale | ⏳ Pianificato |
-| **v0.5.x** | M4 — Workflow | State machine, Scrivania Enti Terzi, job PEC asincroni | ⏳ Pianificato |
-| **v0.6.x** | M5 — Compliance | PagoPA, PDF Browsershot, Protocollo Informatico, Firma PAdES | ⏳ Pianificato |
+| **v0.4.x** | M3 — WebGIS | Confini GIS, Leaflet, OSRM, cantieri + percorsi alternativi, intersezione spaziale | ⏳ Pianificato |
+| **v0.5.x** | M4 — Workflow | State machine, Scrivania Enti Terzi (+ gestione cantieri), job PEC asincroni | ⏳ Pianificato |
+| **v0.6.x** | M5 — Compliance | PagoPA, PDF Browsershot, Protocollo Informatico, Firma PAdES, dashboard FF.OO. | ⏳ Pianificato |
 | **v1.0.0** | GA | AINOP/PDND integration, security audit, AgID compliance | ⏳ Pianificato |
 
 ---
