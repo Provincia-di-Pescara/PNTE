@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             EnsureSetupComplete::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            '/auth/callback',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

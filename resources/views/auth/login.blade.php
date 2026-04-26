@@ -47,6 +47,24 @@
             </div>
             @endif
 
+            @if(config('services.oidc.base_url'))
+            <div class="mb-6">
+                <a href="{{ route('auth.oidc.redirect') }}"
+                   class="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <rect width="24" height="24" rx="4" fill="#0066CC"/>
+                        <text x="12" y="16" text-anchor="middle" fill="white" font-size="10" font-family="sans-serif" font-weight="bold">ID</text>
+                    </svg>
+                    Accedi con SPID / CIE
+                </a>
+            </div>
+
+            <div class="relative mb-6">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+                <div class="relative flex justify-center text-xs"><span class="bg-white px-3 text-slate-400">oppure</span></div>
+            </div>
+            @endif
+
             <form method="POST" action="{{ route('login.post') }}" class="space-y-5">
                 @csrf
 

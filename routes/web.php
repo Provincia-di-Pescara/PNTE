@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\EntityController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Setup\SetupController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,10 +22,14 @@ Route::prefix('setup')->name('setup.')->group(function () {
     Route::post('/complete', [SetupController::class, 'complete'])->name('complete');
 });
 
-// Authentication
+// Authentication — local (operators/admins)
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Authentication — SPID/CIE via external OIDC proxy
+Route::get('/auth/redirect', [OidcController::class, 'redirect'])->name('auth.oidc.redirect');
+Route::get('/auth/callback', [OidcController::class, 'callback'])->name('auth.oidc.callback');
 
 // Protected area
 Route::middleware('auth')->group(function () {
