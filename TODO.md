@@ -14,6 +14,18 @@
 
 ---
 
+## BUGFIXING 
+
+- [ ] Tasto invia mail nel setup, non vengono memorizzati i parametri
+
+---
+
+## Missing Feature
+
+- [ ] Menu sistema e impostazioni per il branding e la configurazione, da pianificare
+
+---
+
 ## v0.1.x — Stack Alignment ✅
 
 - [x] Laravel `^11` → `^13.0` (v13.6.0)
@@ -41,17 +53,16 @@
 - [x] **[1.4]** CRUD entità amministrative (solo `super-admin`)
 - [x] **[1.5]** Pagina impostazioni admin — sezione Mail: modifica SMTP + tasto "Invia email di test"
 - [x] **[1.6]** Setup step 3: tasto "Invia email di test"
-
 ---
 
 ## v0.3.x — M2: Garage Virtuale + Tariffario
 
-- [ ] **[2.1]** Migration `vehicles` — trattori, rimorchi, mezzi d'opera (targa, telaio, massa, dimensioni)
-- [ ] **[2.2]** Migration `vehicle_axles` — interassi e carico per asse
-- [ ] **[2.2]** UI: configuratore assi (Alpine.js dinamico)
-- [ ] **[2.3]** Migration `tariffs` — coefficienti d'usura storicizzati (valid_from / valid_to)
-- [ ] **[2.3]** `App\Services\WearCalculationService` — formula D.P.R. 495/1992 (peso × km × coeff. per asse)
-- [ ] **[2.3]** Admin tariffario: CRUD coefficienti con storico versioni
+- [x] **[2.1]** Migration `vehicles` — trattori, rimorchi, mezzi d'opera (targa, telaio, massa, dimensioni)
+- [x] **[2.2]** Migration `vehicle_axles` — interassi e carico per asse
+- [x] **[2.2]** UI: configuratore assi (Alpine.js dinamico)
+- [x] **[2.3]** Migration `tariffs` — coefficienti d'usura storicizzati (valid_from / valid_to)
+- [x] **[2.3]** `App\Services\WearCalculationService` — formula D.P.R. 495/1992 (peso × km × coeff. per asse)
+- [x] **[2.3]** Admin tariffario: CRUD coefficienti con storico versioni
 
 ---
 
