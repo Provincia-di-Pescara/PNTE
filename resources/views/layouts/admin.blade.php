@@ -32,6 +32,12 @@
                            class="px-3 py-1.5 rounded-md text-sm font-medium {{ request()->routeIs('admin.entities*') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }} transition-colors">
                             Enti
                         </a>
+                        @if(auth()->user()->hasRole(\App\Enums\UserRole::SuperAdmin->value) || auth()->user()->hasRole(\App\Enums\UserRole::Operator->value))
+                        <a href="{{ route('admin.tariffs.index') }}"
+                           class="px-3 py-1.5 rounded-md text-sm font-medium {{ request()->routeIs('admin.tariffs*') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }} transition-colors">
+                            Tariffario
+                        </a>
+                        @endif
                         @if(auth()->user()->hasRole(\App\Enums\UserRole::SuperAdmin->value))
                         <a href="{{ route('admin.settings.mail') }}"
                            class="px-3 py-1.5 rounded-md text-sm font-medium {{ request()->routeIs('admin.settings*') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }} transition-colors">

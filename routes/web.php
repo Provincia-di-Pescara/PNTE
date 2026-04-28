@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\EntityController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\TariffController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Citizen\DelegationController;
@@ -61,6 +62,9 @@ Route::middleware('auth')->group(function () {
             ->name('companies.delegation.action');
 
         Route::resource('entities', EntityController::class);
+
+        Route::resource('tariffs', TariffController::class)
+            ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::get('mail', [SettingController::class, 'showMail'])->name('mail');
