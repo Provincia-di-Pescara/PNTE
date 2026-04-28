@@ -9,7 +9,8 @@ use App\Enums\UserRole;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Socialite\Contracts\Factory as SocialiteFactory;
+use Laravel\Socialite\Contracts\Provider as SocialiteProvider;
+use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Mockery;
 use Spatie\Permission\Models\Role;
@@ -58,13 +59,10 @@ final class OidcCallbackTest extends TestCase
 
     private function mockOidcDriver(SocialiteUser $socialiteUser): void
     {
-        $provider = Mockery::mock('Laravel\Socialite\Two\AbstractProvider');
+        $provider = Mockery::mock(SocialiteProvider::class);
         $provider->shouldReceive('user')->andReturn($socialiteUser);
 
-        $socialite = Mockery::mock(SocialiteFactory::class);
-        $socialite->shouldReceive('driver')->with('oidc')->andReturn($provider);
-
-        $this->app->instance(SocialiteFactory::class, $socialite);
+        Socialite::shouldReceive('driver')->with('oidc')->andReturn($provider);
     }
 
     public function test_callback_creates_new_citizen_and_logs_in(): void

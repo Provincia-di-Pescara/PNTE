@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureSetupComplete;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             '/auth/callback',
         ]);
+        $middleware->prependToPriorityList(
+            AuthenticatesRequests::class,
+            EnsureSetupComplete::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
