@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\EntityController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OidcController;
+use App\Http\Controllers\Citizen\DelegationController;
 use App\Http\Controllers\Setup\SetupController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // Citizen: deleghe aziendali
+    Route::prefix('my')->name('my.')->group(function () {
+        Route::post('delegations/lookup', [DelegationController::class, 'lookup'])->name('delegations.lookup');
+        Route::resource('delegations', DelegationController::class)->only(['index', 'create', 'store']);
+    });
 
     // Admin: companies
     Route::prefix('admin')->name('admin.')->group(function () {

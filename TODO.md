@@ -32,15 +32,15 @@
 
 ## v0.2.x — M1: Identity, RBAC, Anagrafiche
 
-- [ ] **[1.1]** Migration `users` — identità fiscale SPID/CIE (codice fiscale, dati IDP)
-- [ ] **[1.1]** Integrazione SPID/CIE via Socialite + `socialiteproviders/spid`
+- [x] **[1.1]** Migration `users` — identità fiscale SPID/CIE (codice fiscale, dati IDP)
+- [x] **[1.1]** Integrazione SPID/CIE via Socialite + proxy OIDC esterno
 - [x] **[1.2]** Setup Spatie Permission — seed ruoli: `super-admin`, `operator`, `third-party`, `citizen`, `law-enforcement`
-- [ ] **[1.3]** Migration `companies` + pivot `company_user` (deleghe/procure)
-- [ ] **[1.3]** UI: richiesta e approvazione deleghe aziendali
-- [ ] **[1.4]** Migration `entities` — Comuni, Province, ANAS, Autostrade (GIS `MULTIPOLYGON`, PEC, ISTAT)
-- [ ] **[1.4]** CRUD entità amministrative (solo `super-admin`)
+- [x] **[1.3]** Migration `companies` + pivot `company_user` (deleghe/procure)
+- [ ] **[1.3]** UI: richiesta delega aziendale (citizen) + approvazione (operator)
+- [x] **[1.4]** Migration `entities` — Comuni, Province, ANAS, Autostrade (GIS `MULTIPOLYGON`, PEC, ISTAT)
+- [x] **[1.4]** CRUD entità amministrative (solo `super-admin`)
 - [ ] **[1.5]** Pagina impostazioni admin — sezione Mail: modifica SMTP + tasto "Invia email di test"
-- [ ] **[1.6]** Setup: tasto "Invia email di test"
+- [ ] **[1.6]** Setup step 3: tasto "Invia email di test"
 
 ---
 
