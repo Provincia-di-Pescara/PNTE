@@ -8,6 +8,7 @@ use App\Enums\AuthProvider;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -30,6 +31,7 @@ class User extends Authenticatable
         'data_nascita',
         'luogo_nascita',
         'sesso',
+        'entity_id',
     ];
 
     protected $hidden = [
@@ -45,6 +47,12 @@ class User extends Authenticatable
             'auth_provider' => AuthProvider::class,
             'data_nascita' => 'date',
         ];
+    }
+
+    /** @return BelongsTo<Entity, $this> */
+    public function entity(): BelongsTo
+    {
+        return $this->belongsTo(Entity::class);
     }
 
     /** @return BelongsToMany<Company, $this> */
@@ -64,5 +72,10 @@ class User extends Authenticatable
     {
         return $this->hasRole(UserRole::Operator->value)
             || $this->hasRole(UserRole::SuperAdmin->value);
+    }
+
+    public function isThirdParty(): bool
+    {
+        return $this->hasRole(UserRole::ThirdParty->value);
     }
 }

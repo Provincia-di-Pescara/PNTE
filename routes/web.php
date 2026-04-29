@@ -13,6 +13,7 @@ use App\Http\Controllers\Citizen\DelegationController;
 use App\Http\Controllers\Citizen\RouteBuilderController;
 use App\Http\Controllers\Citizen\VehicleController;
 use App\Http\Controllers\Setup\SetupController;
+use App\Http\Controllers\ThirdParty\RoadworkController;
 use Illuminate\Support\Facades\Route;
 
 // Setup wizard (exempt from EnsureSetupComplete via middleware logic)
@@ -63,6 +64,11 @@ Route::middleware('auth')->group(function () {
     Route::prefix('api')->name('api.')->group(function () {
         Route::post('routing/snap', [RoutingController::class, 'snap'])->name('routing.snap');
         Route::post('routing/alternatives', [RoutingController::class, 'alternatives'])->name('routing.alternatives');
+    });
+
+    // Third-party: roadworks management
+    Route::prefix('third-party')->name('third-party.')->group(function () {
+        Route::resource('roadworks', RoadworkController::class);
     });
 
     // Admin

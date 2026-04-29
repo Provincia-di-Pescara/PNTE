@@ -26,6 +26,7 @@ final class EntityFactory extends Factory
             'indirizzo' => $this->faker->streetAddress(),
             'codice_fisc_piva' => null,
             'codice_sdi' => null,
+            'codice_univoco_ainop' => null,
         ];
     }
 }

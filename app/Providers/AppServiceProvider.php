@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Contracts\OsrmServiceInterface;
+use App\Models\Roadwork;
 use App\Models\Route;
 use App\Models\Tariff;
 use App\Models\Vehicle;
+use App\Policies\RoadworkPolicy;
 use App\Policies\RoutePolicy;
 use App\Policies\TariffPolicy;
 use App\Policies\VehiclePolicy;
@@ -36,5 +38,6 @@ final class AppServiceProvider extends ServiceProvider
         Gate::policy(Vehicle::class, VehiclePolicy::class);
         Gate::policy(Tariff::class, TariffPolicy::class);
         Gate::policy(Route::class, RoutePolicy::class);
+        Gate::policy(Roadwork::class, RoadworkPolicy::class);
     }
 }

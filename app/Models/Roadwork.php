@@ -9,6 +9,7 @@ use App\Enums\RoadworkStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 final class Roadwork extends Model
 {
@@ -38,5 +39,14 @@ final class Roadwork extends Model
     public function entity(): BelongsTo
     {
         return $this->belongsTo(Entity::class);
+    }
+
+    public function getRawWkt(): ?string
+    {
+        if (! $this->exists) {
+            return null;
+        }
+
+        return DB::scalar('SELECT ST_AsText(geometry) FROM roadworks WHERE id = ?', [$this->id]);
     }
 }
