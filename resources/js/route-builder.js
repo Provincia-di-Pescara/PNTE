@@ -15,8 +15,8 @@ let routeLayer = null;
 map.on('click', async (e) => {
     const { lat, lng } = e.latlng;
     waypoints.push({ lat, lng });
-    L.marker([lat, lng]).addTo(map);
-    waypointMarkers.push({ lat, lng });
+    const marker = L.marker([lat, lng]).addTo(map);
+    waypointMarkers.push(marker);
 
     if (waypoints.length >= 2) {
         await fetchAndDisplayRoute();
@@ -30,7 +30,12 @@ async function fetchAndDisplayRoute() {
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
         body: JSON.stringify({ waypoints }),
     });
-    if (!res.ok) return;
+    if (!res.ok) {
+        document.getElementById('input-geometry').value = '';
+        document.getElementById('input-waypoints').value = '';
+        document.getElementById('input-distance-km').value = '';
+        return;
+    }
     const data = await res.json();
 
     if (routeLayer) map.removeLayer(routeLayer);

@@ -6,6 +6,7 @@ namespace Tests\Feature\Citizen;
 
 use App\Contracts\OsrmServiceInterface;
 use App\Enums\UserRole;
+use App\Models\Route;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -53,7 +54,8 @@ final class RouteBuilderTest extends TestCase
             'geometry' => $wkt,
             'distance_km' => 15.0,
         ]);
-        $response->assertRedirect();
+        $route = Route::query()->where('user_id', $this->citizen->id)->sole();
+        $response->assertRedirect(route('my.routes.show', $route));
         $this->assertDatabaseHas('routes', ['user_id' => $this->citizen->id, 'distance_km' => 15.0]);
     }
 
