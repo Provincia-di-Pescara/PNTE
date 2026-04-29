@@ -29,7 +29,7 @@ final class RouteFactory extends Factory
                 ['lat' => $lat1, 'lng' => $lng1],
                 ['lat' => $lat2, 'lng' => $lng2],
             ],
-            'geometry' => DB::raw("ST_GeomFromText('{$wkt}')"),
+            'geometry' => DB::raw("ST_GeomFromText('{$wkt}', 4326)"),
             'distance_km' => $this->faker->randomFloat(3, 1.0, 200.0),
             'entity_breakdown' => null,
         ];

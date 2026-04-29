@@ -11,19 +11,23 @@ final class RouteIntersectionService
 {
     /**
      * Returns entity_id → km breakdown for the given route.
-     * ST_Length on SRID 4326 returns degrees; 1° ≈ 111.32 km for Abruzzo (error < 2%).
+     *
+     * MariaDB 11.4 ST_Length on SRID 4326 geometry returns degrees (not meters).
+     * ST_Length(g, 'kilometre') is NOT supported by MariaDB (ERROR 1582).
+     * Conversion: 1° ≈ 111.32 km for Abruzzo latitude (error < 2%).
      *
      * @return array<int, float> entity_id → km
      */
     public function breakdown(RouteModel $route): array
     {
+        $wkt = $route->getRawGeometry();
         $rows = DB::select(
             'SELECT e.id,
-                    ST_Length(ST_Intersection(ST_GeomFromText(?), e.geom)) * 111.32 AS km
+                    ST_Length(ST_Intersection(ST_GeomFromText(?, 4326), e.geom)) * 111.32 AS km
              FROM entities e
              WHERE e.geom IS NOT NULL
-               AND ST_Intersects(ST_GeomFromText(?), e.geom)',
-            [$route->getRawGeometry(), $route->getRawGeometry()]
+               AND ST_Intersects(ST_GeomFromText(?, 4326), e.geom)',
+            [$wkt, $wkt]
         );
 
         return collect($rows)

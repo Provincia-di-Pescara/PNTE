@@ -33,13 +33,13 @@ final class RouteIntersectionServiceTest extends TestCase
     {
         $entity = Entity::factory()->create();
         DB::statement(
-            "UPDATE entities SET geom = ST_GeomFromText('MULTIPOLYGON(((13.0 42.0, 14.0 42.0, 14.0 43.0, 13.0 43.0, 13.0 42.0)))') WHERE id = ?",
+            "UPDATE entities SET geom = ST_GeomFromText('MULTIPOLYGON(((13.0 42.0, 14.0 42.0, 14.0 43.0, 13.0 43.0, 13.0 42.0)))', 4326) WHERE id = ?",
             [$entity->id]
         );
 
         $route = Route::factory()->create();
         DB::statement(
-            "UPDATE routes SET geometry = ST_GeomFromText('LINESTRING(13.5 42.5, 13.6 42.6)') WHERE id = ?",
+            "UPDATE routes SET geometry = ST_GeomFromText('LINESTRING(13.5 42.5, 13.6 42.6)', 4326) WHERE id = ?",
             [$route->id]
         );
 
@@ -54,13 +54,13 @@ final class RouteIntersectionServiceTest extends TestCase
     {
         $entity = Entity::factory()->create();
         DB::statement(
-            "UPDATE entities SET geom = ST_GeomFromText('MULTIPOLYGON(((13.0 42.0, 14.0 42.0, 14.0 43.0, 13.0 43.0, 13.0 42.0)))') WHERE id = ?",
+            "UPDATE entities SET geom = ST_GeomFromText('MULTIPOLYGON(((13.0 42.0, 14.0 42.0, 14.0 43.0, 13.0 43.0, 13.0 42.0)))', 4326) WHERE id = ?",
             [$entity->id]
         );
 
         $route = Route::factory()->create();
         DB::statement(
-            "UPDATE routes SET geometry = ST_GeomFromText('LINESTRING(13.5 42.5, 13.6 42.6)') WHERE id = ?",
+            "UPDATE routes SET geometry = ST_GeomFromText('LINESTRING(13.5 42.5, 13.6 42.6)', 4326) WHERE id = ?",
             [$route->id]
         );
 
@@ -75,7 +75,7 @@ final class RouteIntersectionServiceTest extends TestCase
     {
         $entityWithGeom = Entity::factory()->create();
         DB::statement(
-            "UPDATE entities SET geom = ST_GeomFromText('MULTIPOLYGON(((13.0 42.0, 14.0 42.0, 14.0 43.0, 13.0 43.0, 13.0 42.0)))') WHERE id = ?",
+            "UPDATE entities SET geom = ST_GeomFromText('MULTIPOLYGON(((13.0 42.0, 14.0 42.0, 14.0 43.0, 13.0 43.0, 13.0 42.0)))', 4326) WHERE id = ?",
             [$entityWithGeom->id]
         );
 
@@ -84,7 +84,7 @@ final class RouteIntersectionServiceTest extends TestCase
 
         $route = Route::factory()->create();
         DB::statement(
-            "UPDATE routes SET geometry = ST_GeomFromText('LINESTRING(13.5 42.5, 13.6 42.6)') WHERE id = ?",
+            "UPDATE routes SET geometry = ST_GeomFromText('LINESTRING(13.5 42.5, 13.6 42.6)', 4326) WHERE id = ?",
             [$route->id]
         );
 

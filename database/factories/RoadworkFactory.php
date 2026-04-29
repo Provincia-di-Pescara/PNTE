@@ -28,7 +28,7 @@ final class RoadworkFactory extends Factory
         return [
             'entity_id' => Entity::factory(),
             'title' => 'Cantiere '.$this->faker->streetName(),
-            'geometry' => DB::raw("ST_GeomFromText('{$wkt}')"),
+            'geometry' => DB::raw("ST_GeomFromText('{$wkt}', 4326)"),
             'valid_from' => $this->faker->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
             'valid_to' => $this->faker->optional()->dateTimeBetween('now', '+6 months')?->format('Y-m-d'),
             'severity' => $this->faker->randomElement(RoadworkSeverity::cases())->value,

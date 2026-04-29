@@ -39,6 +39,11 @@ final class Route extends Model
 
     public function getRawGeometry(): string
     {
-        return (string) DB::scalar('SELECT ST_AsText(geometry) FROM routes WHERE id = ?', [$this->id]);
+        $wkt = DB::scalar('SELECT ST_AsText(geometry) FROM routes WHERE id = ?', [$this->id]);
+        if ($wkt === null) {
+            throw new \RuntimeException("Route #{$this->id} has no geometry.");
+        }
+
+        return $wkt;
     }
 }
