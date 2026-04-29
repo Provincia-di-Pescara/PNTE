@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Citizen;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Citizen\StoreRouteRequest;
 use App\Models\Route as RouteModel;
+use App\Services\RouteIntersectionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -38,6 +39,9 @@ final class RouteBuilderController extends Controller
 
         $id = (int) DB::getPdo()->lastInsertId();
         $route = RouteModel::query()->findOrFail($id);
+
+        $breakdown = app(RouteIntersectionService::class)->breakdown($route);
+        $route->update(['entity_breakdown' => $breakdown]);
 
         return redirect()->route('my.routes.show', $route)
             ->with('success', 'Percorso salvato.');

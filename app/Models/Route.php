@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 final class Route extends Model
 {
@@ -34,5 +35,10 @@ final class Route extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getRawGeometry(): string
+    {
+        return (string) DB::scalar('SELECT ST_AsText(geometry) FROM routes WHERE id = ?', [$this->id]);
     }
 }
