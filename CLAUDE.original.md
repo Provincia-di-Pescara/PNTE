@@ -11,6 +11,9 @@ The application must comply with: Art. 10 D.Lgs 285/1992 (Codice della Strada), 
 ## Development Commands
 
 ```bash
+# Local dev — write code locally, run tests inside the container
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec app php artisan test --compact
+
 # Start all services concurrently (PHP server, queue, log viewer, Vite HMR)
 composer run dev
 
@@ -48,11 +51,26 @@ docker-compose exec app php artisan migrate --seed
 
 The production stack runs: `app` (Laravel/PHP-FPM + Nginx + Chromium), `db` (MariaDB 11.4 LTS with spatial extensions), `redis:7`, `osrm` (self-hosted routing engine, `--profile gis`).
 
+## Milestone Status
+
+| Branch | Status | Scope |
+|--------|--------|-------|
+| `v0.2.x` | ✅ Done | Identity & RBAC — SPID/CIE OIDC, users, companies, entities, setup wizard |
+| `v0.3.x` | ✅ Done | Garage Virtuale — vehicles, axles, WearCalculationService, admin tariffario |
+| `v0.4.x` | ✅ Done | WebGIS & Routing — Leaflet, OSRM, routes, roadworks, RouteIntersectionService |
+| `v0.5.x` | 🔜 Next | State Machine — application wizard, clearances (Nulla Osta), PEC notifications |
+| `v0.6.x` | Planned | PagoPA & PDF — payments, PAdES signature, protocollo |
+| `v1.0.0` | Planned | AINOP/PDND — national infrastructure integration |
+
+## Missing Features (to plan)
+
+- [ ] Menu sistema e impostazioni per il branding e la configurazione (admin UI, to be planned in v0.5.x or dedicated milestone)
+
 ## Architecture
 
 ### Tech Stack
 - **Backend**: Laravel 13, PHP 8.4, Eloquent ORM
-- **Frontend**: Blade templates + Tailwind CSS v4 (zero-runtime) + Alpine.js, bundled via Vite 6
+- **Frontend**: Blade templates + Tailwind CSS v4 (zero-runtime) + Alpine.js + Leaflet, bundled via Vite 6
 - **Database**: MariaDB 11.4 LTS with native GIS/spatial index support (required for route geometry)
 - **Queue/Cache**: Redis (async jobs for PEC email, PDF generation, payment webhooks)
 - **GIS Routing**: Self-hosted OSRM for snap-to-road route calculation
@@ -68,32 +86,44 @@ The central entity is the **application** (transport authorization request), whi
 draft → submitted → waiting_clearances → waiting_payment → approved
 ```
 
-Key Eloquent models (planned, not yet implemented):
-- `users` — natural persons with fiscal identity (SPID/CIE data)
-- `companies` — companies/agencies with delegations via `company_user` pivot
-- `vehicles` — tractor units and trailers with axle/weight configurations (`vehicle_axles`)
-- `entities` — municipalities, provinces, ANAS, motorways with GIS polygons and PEC addresses
-- `applications` — the transport authorization request and its state
-- `routes` — LineString geometry of the authorized route with per-entity km breakdown
-- `clearances` — third-party approvals (Nulla Osta) per entity per application
-- `tariffs` — historically-versioned wear coefficients used by `WearCalculationService`
-- `roadworks` — construction sites reported by the owning entity: geometry (LINESTRING/POLYGON), `valid_from`/`valid_to`, severity (advisory/restricted/closed), status (planned/active/closed)
+Eloquent models — implemented (✅) or planned (🔜):
+- ✅ `users` — natural persons with fiscal identity (SPID/CIE data), `entity_id` FK for third-party role
+- ✅ `companies` — companies/agencies with delegations via `company_user` pivot
+- ✅ `vehicles` — tractor units and trailers with axle/weight configurations (`vehicle_axles`)
+- ✅ `entities` — municipalities, provinces, ANAS, motorways with GIS polygons (`geom`), PEC, AINOP stub
+- ✅ `tariffs` — historically-versioned wear coefficients used by `WearCalculationService`
+- ✅ `routes` — LineString geometry of the authorized route with per-entity km breakdown (`entity_breakdown`)
+- ✅ `roadworks` — construction sites: geometry (LINESTRING/POLYGON), `valid_from`/`valid_to`, severity, status
+- 🔜 `applications` — the transport authorization request and its state
+- 🔜 `clearances` — third-party approvals (Nulla Osta) per entity per application
 
 ### RBAC Roles
 - `super-admin` — Provincia di Pescara operators (full access)
 - `operator` — other province operators
-- `third-party` — municipalities, ANAS (limited to their clearance dashboard and roadworks management)
+- `third-party` — municipalities, ANAS (limited to their clearance dashboard and roadworks management; scoped to own `entity_id`)
 - `citizen` — transport companies/agencies submitting requests
 - `law-enforcement` — Forze dell'Ordine (read-only access: approved transports, active roadworks, QR code verification)
 
-### Planned Services
+### Implemented Services
 - **`WearCalculationService`** — computes road wear indemnity using per-axle weight × km × tariff coefficients (formula from D.P.R. 495/1992)
-- **GIS spatial queries** — `ST_Intersection` + `ST_Length` against entity polygon table to extract which entities a route traverses and how many km per entity
+- **`OsrmService`** — HTTP client for self-hosted OSRM: `snapToRoad()`, `alternatives()`; WKT via `ST_AsText(ST_GeomFromGeoJSON(?))`
+- **`RouteIntersectionService`** — `ST_Intersects` + `ST_Length × 111.32` → entity_id → km breakdown
+- **`RoadworkConflictService`** — `ST_Intersects` + date overlap + status filter → active conflicts on a route
+
+### Planned Services
 - **AINOP integration** — via PDND API to verify bridge/infrastructure capacity along a route (field `codice_univoco_ainop` on infrastructure records)
 - **PagoPA clearing** — single IUV generated from `WearCalculationService` output; RT webhook unlocks the application; proceeds split among entities
 
 ### Geographic/GIS Layer
 MariaDB spatial fields (`POLYGON`, `MULTIPOLYGON`, `LINESTRING`) store entity boundaries and route geometries. Spatial indices are required. The OSRM container must be pre-loaded with the regional road graph. The frontend uses Leaflet for the interactive map.
+
+- Geometries stored with SRID 4326 via `ST_GeomFromText(?, 4326)`
+- `ST_Length` on SRID 4326 returns degrees; converted to km with `× 111.32` (< 2% error at 41–42°N)
+- WKT extracted for service queries via `ST_AsText(geometry)`
+- Spatial columns added via `DB::statement('ALTER TABLE ... ADD COLUMN geometry LINESTRING NOT NULL')` and `CREATE SPATIAL INDEX`
+
+### GIS Import
+`php artisan gte:import-geo {file}` — imports GeoJSON FeatureCollection into `entities.geom`. Matches by `codice_istat` property. Source shapefiles converted via `ogr2ogr -f GeoJSON output.geojson input.shp`.
 
 ### Architecture Docs
 The `.ai/` directory (to be created) contains deep-dive documentation on complex subsystems: `STATE_MACHINE.md`, `GIS_ROUTING.md`, `WEAR_CALCULATION.md`, `PAGOPA.md`. Read these before working on the relevant domain.
@@ -161,6 +191,14 @@ Middleware is configured in `bootstrap/app.php` via `Application::configure()->w
 ### Comments & PHPDoc
 Prefer PHPDoc blocks over inline comments. Add inline comments only when the logic would surprise a reader — never to describe what the code does. Use array shape annotations in PHPDoc when the structure is non-obvious.
 
+### Naming: App\Models\Route vs Facade
+`App\Models\Route` conflicts with `Illuminate\Support\Facades\Route`. In files that import both, alias the facade:
+```php
+use Illuminate\Support\Facades\Route as RouteFacade;
+use App\Models\Route;
+```
+The model has `protected $table = 'routes'` explicitly set.
+
 ### Code Style
 - Always use curly braces for control structures, even for single-line bodies.
 - Run `./vendor/bin/pint --dirty` before finalizing any set of changes.
@@ -170,3 +208,4 @@ Prefer PHPDoc blocks over inline comments. Add inline comments only when the log
 - Jobs (async): `App\Jobs\` — PEC notifications, PDF generation, payment webhooks
 - `.env.example` covers only bootstrap/network vars; production uses MariaDB + Redis
 - EUPL-1.2 license; `publiccode.yml` must be kept up to date with any new dependencies or deployment requirements
+- `docker-compose.dev.yml` (gitignored) — local dev override with volume mount; use alongside `docker-compose.yml`

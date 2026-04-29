@@ -16,13 +16,18 @@
 
 ## BUGFIXING 
 
-- [ ] Tasto invia mail nel setup, non vengono memorizzati i parametri
 
 ---
 
 ## Missing Feature
 
 - [ ] Menu sistema e impostazioni per il branding e la configurazione, da pianificare
+
+---
+
+## UI
+Fetch this design file, read its readme, and implement the relevant aspects of the design. https://api.anthropic.com/v1/design/h/tD08D-qLpTIhU8271cIKBw?open_file=GTE-Abruzzo.html
+Implement: GTE-Abruzzo.html
 
 ---
 
