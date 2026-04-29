@@ -12,12 +12,22 @@ final class RoadworkPolicy
 {
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->hasAnyRole([
+            UserRole::SuperAdmin->value,
+            UserRole::Operator->value,
+            UserRole::ThirdParty->value,
+            UserRole::LawEnforcement->value,
+        ]);
     }
 
     public function view(User $user, Roadwork $roadwork): bool
     {
-        return true;
+        return $user->hasAnyRole([
+            UserRole::SuperAdmin->value,
+            UserRole::Operator->value,
+            UserRole::ThirdParty->value,
+            UserRole::LawEnforcement->value,
+        ]);
     }
 
     public function create(User $user): bool

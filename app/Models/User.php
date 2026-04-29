@@ -46,6 +46,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'auth_provider' => AuthProvider::class,
             'data_nascita' => 'date',
+            'entity_id' => 'integer',
         ];
     }
 

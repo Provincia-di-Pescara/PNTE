@@ -107,6 +107,11 @@ final class RoadworkController extends Controller
         $data = $request->validated();
         $wkt = $data['geometry'];
 
+        $user = auth()->user();
+        if ($user->isThirdParty() && (int) $data['entity_id'] !== $user->entity_id) {
+            abort(403);
+        }
+
         DB::statement(
             'UPDATE roadworks SET entity_id = ?, title = ?, geometry = ST_GeomFromText(?, 4326), valid_from = ?, valid_to = ?, severity = ?, status = ?, note = ?, updated_at = NOW() WHERE id = ?',
             [

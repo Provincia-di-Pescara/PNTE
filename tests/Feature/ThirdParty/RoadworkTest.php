@@ -110,8 +110,36 @@ final class RoadworkTest extends TestCase
     public function test_citizen_cannot_access_roadworks(): void
     {
         $this->actingAs($this->citizen)
+            ->get(route('third-party.roadworks.index'))
+            ->assertForbidden();
+
+        $this->actingAs($this->citizen)
             ->get(route('third-party.roadworks.create'))
             ->assertForbidden();
+    }
+
+    public function test_third_party_cannot_reassign_roadwork_to_foreign_entity(): void
+    {
+        // Create a roadwork belonging to the third-party's entity
+        $roadwork = Roadwork::factory()->create([
+            'entity_id' => $this->entity->id,
+            'status' => RoadworkStatus::Planned->value,
+            'severity' => RoadworkSeverity::Advisory->value,
+        ]);
+        DB::statement('UPDATE roadworks SET geometry = ST_GeomFromText(?, 4326) WHERE id = ?',
+            ['LINESTRING(13.5 42.3, 13.6 42.4)', $roadwork->id]);
+
+        $foreignEntity = Entity::factory()->create();
+
+        // Try to reassign it to a foreign entity
+        $response = $this->actingAs($this->thirdParty)
+            ->put(route('third-party.roadworks.update', $roadwork), array_merge(
+                $this->validPayload($foreignEntity->id),
+            ));
+
+        $response->assertForbidden();
+        // Verify entity_id was not changed
+        $this->assertDatabaseHas('roadworks', ['id' => $roadwork->id, 'entity_id' => $this->entity->id]);
     }
 
     public function test_conflict_service_detects_active_roadwork_on_route(): void

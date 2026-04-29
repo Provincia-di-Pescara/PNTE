@@ -29,6 +29,7 @@ final class Roadwork extends Model
     protected function casts(): array
     {
         return [
+            'entity_id' => 'integer',
             'valid_from' => 'date',
             'valid_to' => 'date',
             'severity' => RoadworkSeverity::class,
