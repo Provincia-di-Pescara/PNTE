@@ -113,6 +113,7 @@ Le **Forze dell'Ordine** (`law-enforcement`) accedono in sola lettura a:
 ### 9. Interoperabilità e Servizi PA
 
 - **Autenticazione:** Integrazione con **SPID/CIE** tramite il layer Socialite. Gestione deleghe per agenzie di pratiche auto.
+- **Principio "Once Only" (Zero Data-Entry):** Popolamento e validazione anagrafiche automatizzata. Sincronizzazione Enti (PEC incluse) via **API IPA (Indice PA)** e validazione Aziende via **InfoCamere / INI-PEC tramite PDND**.
 - **Pagamenti:** Integrazione nativa con **PagoPA**. Gestione del flusso "Incasso Unico + Clearing" per la ripartizione fondi tra enti.
 - **Documentale:** Integrazione via API con il **Protocollo Informatico** dell'ente rilasciante.
 - **Legalità:** Firma PAdES automatica tramite **Firma Remota** (Aruba/InfoCert API) e verifica pubblica tramite **QR-Code**.
@@ -134,21 +135,22 @@ Le **Forze dell'Ordine** (`law-enforcement`) accedono in sola lettura a:
 
 ---
 
-### 10. Roadmap di Sviluppo
+### 11. Roadmap di Sviluppo
 
 | Versione | Milestone | Obiettivo | Stato |
 | :--- | :--- | :--- | :--- |
 | **v0.1.x** | Stack | Laravel 13 / PHP 8.4 / Tailwind v4 / Alpine.js / Docker Compose | ✅ Completato |
-| **v0.2.x** | M1 — Foundation | Auth SPID/CIE, RBAC (Spatie + `law-enforcement`), anagrafiche `users`/`companies`/`entities` | 🔜 In sviluppo |
+| **v0.2.x** | M1 — Foundation | Auth SPID/CIE, API IPA (Enti), API InfoCamere/PDND (Aziende), RBAC, anagrafiche | 🔜 In sviluppo |
 | **v0.3.x** | M2 — Garage & Calcolo | Anagrafica mezzi, assi, `WearCalculationService` (D.P.R. 495/1992) | ⏳ Pianificato |
-| **v0.4.x** | M3 — WebGIS | Confini GIS, Leaflet, OSRM, cantieri + percorsi alternativi, intersezione spaziale | ⏳ Pianificato |
-| **v0.5.x** | M4 — Workflow | State machine, Scrivania Enti Terzi (+ gestione cantieri), job PEC asincroni | ⏳ Pianificato |
-| **v0.6.x** | M5 — Compliance | PagoPA, PDF Browsershot, Protocollo Informatico, Firma PAdES, dashboard FF.OO. | ⏳ Pianificato |
+| **v0.4.x** | M3 — WebGIS | WebGIS, OSRM, ARS (Archivio Regionale Strade), Intersezione Spaziale | ⏳ Pianificato |
+| **v0.5.x** | M4 — Workflow | State Machine, Scrivania Enti, Tipo Istanza, Radar Forze dell'Ordine | ⏳ Pianificato |
+| **v0.6.x** | M5 — Compliance | PagoPA, PDF Browsershot, Protocollo, Firma PAdES, Allerta Meteo | ⏳ Pianificato |
+| **v0.7.x** | M6 — Open Data | Open Data Portal, Mappa Pubblica Cantieri, Statistiche, GeoJSON/KML | ⏳ Pianificato |
 | **v1.0.0** | GA | AINOP/PDND integration, security audit, AgID compliance | ⏳ Pianificato |
 
 ---
 
-### 11. Installazione Rapida
+### 12. Installazione Rapida
 
 **Prerequisiti:** Docker Engine 24+, Docker Compose v2.
 
@@ -174,7 +176,7 @@ docker compose exec app php artisan migrate --seed
 
 ---
 
-### 12. Contribuire
+### 13. Contribuire
 
 Il progetto è sviluppato in aperto e accetta contributi nel rispetto delle [linee guida per i contributori di Developers Italia](https://developers.italia.it/it/come-contribuire). Per segnalare bug o proporre funzionalità aprire una issue sul repository GitHub.
 
