@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GTE-Abruzzo · Design exploration</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="styles/tokens.css" />
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+html, body, #root { height: 100%; }
+body { margin: 0; }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#f4ede0"/>
+  <g transform="translate(200,200)" fill="none" stroke="#b87333" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M -90 30 Q -30 -60 30 0 T 90 -30"/>
+    <circle cx="-90" cy="30" r="10" fill="#b87333"/>
+    <circle cx="90" cy="-30" r="10" fill="#b87333"/>
+  </g>
+  <text x="200" y="340" text-anchor="middle" font-family="system-ui, sans-serif" font-size="26" font-weight="600" fill="#2a2520">GTE · Abruzzo</text>
+</svg>
+</template>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="components/primitives.jsx"></script>
+<script type="text/babel" src="components/map.jsx"></script>
+<script type="text/babel" src="components/shell.jsx"></script>
+<script type="text/babel" src="components/screen-wizard.jsx"></script>
+<script type="text/babel" src="components/screen-operator.jsx"></script>
+<script type="text/babel" src="components/screen-third-party.jsx"></script>
+<script type="text/babel" src="components/screen-law.jsx"></script>
+<script type="text/babel" src="components/screen-citizen.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+</body>
+</html>

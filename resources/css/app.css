@@ -1,1 +1,25 @@
 @import "tailwindcss";
+@import "./design-tokens.css";
+
+@theme {
+  --font-sans: "DM Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --color-ink:        var(--ink);
+  --color-ink-2:      var(--ink-2);
+  --color-ink-3:      var(--ink-3);
+  --color-bg:         var(--bg);
+  --color-surface:    var(--surface);
+  --color-surface-2:  var(--surface-2);
+  --color-surface-3:  var(--surface-3);
+  --color-accent:     var(--accent);
+  --color-accent-bg:  var(--accent-bg);
+  --color-accent-ink: var(--accent-ink);
+  --color-success:    var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-danger:     var(--danger);
+  --color-danger-bg:  var(--danger-bg);
+  --color-info:       var(--info);
+  --color-info-bg:    var(--info-bg);
+  --color-line:       var(--line);
+  --color-line-2:     var(--line-2);
+}

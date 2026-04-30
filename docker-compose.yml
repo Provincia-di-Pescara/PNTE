@@ -66,6 +66,8 @@ services:
     command: osrm-routed --algorithm mld /data/abruzzo-latest.osrm
     volumes:
       - ./osrm-data:/data:ro
+    ports:
+      - "5000:5000"
     profiles:
       - gis
     networks:

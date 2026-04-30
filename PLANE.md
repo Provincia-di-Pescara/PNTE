@@ -90,6 +90,16 @@ Il lavoro è suddiviso in 5 blocchi operativi (Sprint/Milestone), progettati per
 * **[Task 1.4] Anagrafica Enti Territoriali:**
   * *Migrations* per la tabella `entities` (Comuni, Province, Anas, Autostrade).
   * Inserimento campi operativi: indirizzi PEC, codici ISTAT e tipologia ente.
+* **[Task 1.5] Impostazioni di Sistema (Mail):**
+  * Pagina impostazioni admin per la modifica SMTP in tempo reale.
+* **[Task 1.6] Sincronizzazione Enti via API IPA (Once Only):**
+  * Sviluppo di un Service per l'interrogazione dell'Open Data IPA.
+  * Automazione notturna (Scheduler) per l'aggiornamento automatico delle PEC di Comuni, Province e Forze dell'Ordine.
+* **[Task 1.7] Validazione Aziende via InfoCamere / INI-PEC tramite PDND (Once Only):**
+  * Integrazione API per autocompilazione e validazione dei dati camerali inserendo la P.IVA.
+  * Blocco campi sensibili (Ragione Sociale, PEC legale) in modalità read-only per gli utenti.
+* **[Task 1.8] Setup step 3 - Invio Mail:**
+  * Tasto "Invia email di test" per verifica connettività SMTP.
 
 ### 🚩 Milestone 2: Il Garage Virtuale e il Motore di Calcolo
 **Obiettivo:** Strutturare l'inserimento dei dati tecnici dei mezzi e la logica matematica dei tariffari.
@@ -118,6 +128,12 @@ Il lavoro è suddiviso in 5 blocchi operativi (Sprint/Milestone), progettati per
   * Sviluppo del modulo per consumare le API AINOP non appena disponibili via PDND.
   * Workflow di allineamento: quando un Comune inserisce un ponte/opera d'arte nel gestionale, il sistema tenta il collegamento automatico all'opera AINOP tramite coordinate geografiche e/o identificativi univoci.
   * Esposizione in WebGIS e nei controlli di istruttoria dello stato di corrispondenza con AINOP e delle informazioni di idoneità disponibili.
+* **[Task 3.5] Gestione Cantieri e Intersezione Temporale:**
+  * Modello `roadworks` e blocco sottomissione in caso di overlap geometrico e temporale.
+* **[Task 3.6] Archivio Regionale Strade (ARS):**
+  * Migrazione standard routes, limitazioni sagoma/massa e Controller/View per la gestione enti.
+* **[Task 3.7] Overlay ARS su WebGIS:**
+  * Web service e script mappa (`route-builder.js`) per visualizzare limitazioni (verde/rosso).
 
 ### 🚩 Milestone 4: La Macchina a Stati e il Flusso Burocratico
 **Obiettivo:** Compilazione della pratica, validazione e gestione asincrona dei Nulla Osta.
@@ -133,6 +149,12 @@ Il lavoro è suddiviso in 5 blocchi operativi (Sprint/Milestone), progettati per
 * **[Task 4.4] Job Asincroni PEC:**
   * Setup delle code (`Redis`) per l'invio massivo e in background delle email/PEC di richiesta parere.
   * Listener per la registrazione automatica degli esiti transitori.
+* **[Task 4.5] Gestione `tipo_istanza` e Validazione Condizionale:**
+  * Enum e logiche di sottomissione variate per autorizzazioni singole, multiple o periodiche.
+* **[Task 4.6] Modulo Viaggi (Trips) e Autista:**
+  * Tracking stato viaggi (`TripStatus`), UI check-in mobile autista e middleware blocco transito.
+* **[Task 4.7] Radar Forze dell'Ordine:**
+  * Mappa Leaflet real-time (polling 30s) per tracciare i convogli in transito oggi.
 
 ### 🚩 Milestone 5: Chiusura Legale, Pagamenti e Rilascio
 **Obiettivo:** Riscossione oneri, protocollazione e generazione del documento legale valido.
@@ -149,3 +171,15 @@ Il lavoro è suddiviso in 5 blocchi operativi (Sprint/Milestone), progettati per
   * Generazione QR Code dinamico impresso sul PDF per la verifica pubblica da parte delle Forze dell'Ordine.
 * **[Task 5.4] Modulo di Rendicontazione (Clearing):**
   * Dashboard Ragioneria: vista per l'esportazione mensile (Excel/CSV) del riparto fondi incassati, con evidenza della quota Provincia vs. quote Enti Terzi.
+* **[Task 5.5] Modulo Allerta Meteo:**
+  * Scheduler per il fetch degli Open Data DPC e sospensione automatica pratiche in caso di allerta arancione/rossa.
+
+### 🚩 Milestone 6: Open Data Portal
+**Obiettivo:** Condivisione pubblica delle informazioni su infrastruttura e trasporti.
+
+* **[Task 6.1] Mappa Cantieri Pubblica:**
+  * Endpoint `GET /mappa-cantieri` (no auth) per visualizzare i cantieri pubblici.
+* **[Task 6.2] API Pubbliche e Download:**
+  * Esportazione dati in formato GeoJSON / KML dei lavori stradali (`GET /api/public/roadworks`).
+* **[Task 6.3] Dashboard Statistiche Pubbliche:**
+  * Chart JS e Heatmap per trasporti per Comune, frequenza percorsi e tempi medi di nulla osta.
