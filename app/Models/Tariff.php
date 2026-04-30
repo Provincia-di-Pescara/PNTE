@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\AxleType;
+use App\Enums\TipoApplicazioneTariff;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ final class Tariff extends Model
 
     protected $fillable = [
         'tipo_asse',
+        'tipo_applicazione',
         'coefficiente',
         'valid_from',
         'valid_to',
@@ -26,6 +28,7 @@ final class Tariff extends Model
     {
         return [
             'tipo_asse' => AxleType::class,
+            'tipo_applicazione' => TipoApplicazioneTariff::class,
             'coefficiente' => 'decimal:6',
             'valid_from' => 'date',
             'valid_to' => 'date',
@@ -48,5 +51,18 @@ final class Tariff extends Model
                 $q->whereNull('valid_to')
                     ->orWhere('valid_to', '>=', $today);
             });
+    }
+
+    /**
+     * Scope: tariffe per tipo di applicazione.
+     *
+     * @param  Builder<Tariff>  $query
+     * @return Builder<Tariff>
+     */
+    public function scopeByTipoApplicazione(Builder $query, string|TipoApplicazioneTariff $tipo): Builder
+    {
+        $value = $tipo instanceof TipoApplicazioneTariff ? $tipo->value : $tipo;
+
+        return $query->where('tipo_applicazione', $value);
     }
 }

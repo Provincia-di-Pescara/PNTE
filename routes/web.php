@@ -17,6 +17,7 @@ use App\Http\Controllers\Citizen\VehicleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Setup\SetupController;
 use App\Http\Controllers\ThirdParty\RoadworkController;
+use App\Http\Controllers\ThirdParty\StandardRouteController;
 use Illuminate\Support\Facades\Route;
 
 // Setup wizard (exempt from EnsureSetupComplete via middleware logic)
@@ -70,6 +71,7 @@ Route::middleware('auth')->group(function () {
     // Third-party: roadworks management
     Route::prefix('third-party')->name('third-party.')->group(function () {
         Route::resource('roadworks', RoadworkController::class);
+        Route::resource('standard-routes', StandardRouteController::class);
     });
 
     // Admin

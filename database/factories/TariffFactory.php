@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\AxleType;
+use App\Enums\TipoApplicazioneTariff;
 use App\Models\Tariff;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -18,6 +19,7 @@ final class TariffFactory extends Factory
     {
         return [
             'tipo_asse' => $this->faker->randomElement(AxleType::cases()),
+            'tipo_applicazione' => TipoApplicazioneTariff::AnaliticaKm,
             'coefficiente' => $this->faker->randomFloat(6, 0.0001, 0.001),
             'valid_from' => Carbon::today()->subYear()->toDateString(),
             'valid_to' => null,

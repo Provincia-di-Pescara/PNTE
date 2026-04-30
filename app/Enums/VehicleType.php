@@ -10,6 +10,10 @@ enum VehicleType: string
     case Rimorchio = 'rimorchio';
     case Semirimorchio = 'semirimorchio';
     case MezzoDopera = 'mezzo_dopera';
+    case TratticeAgricola = 'trattrice_agricola';
+    case Mietitrebbia = 'mietitrebbia';
+    case MacchinaOperatrice = 'macchina_operatrice';
+    case RimorchioAgricolo = 'rimorchio_agricolo';
 
     public function label(): string
     {
@@ -18,6 +22,21 @@ enum VehicleType: string
             self::Rimorchio => 'Rimorchio',
             self::Semirimorchio => 'Semirimorchio',
             self::MezzoDopera => "Mezzo d'opera",
+            self::TratticeAgricola => 'Trattrice Agricola',
+            self::Mietitrebbia => 'Mietitrebbia / Raccoglitrice',
+            self::MacchinaOperatrice => 'Macchina Operatrice',
+            self::RimorchioAgricolo => 'Rimorchio Agricolo',
+        };
+    }
+
+    public function isAgricultural(): bool
+    {
+        return match ($this) {
+            self::TratticeAgricola,
+            self::Mietitrebbia,
+            self::MacchinaOperatrice,
+            self::RimorchioAgricolo => true,
+            default => false,
         };
     }
 }
