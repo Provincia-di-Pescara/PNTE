@@ -7,9 +7,10 @@
 | **v0.1.x** | Stack | Aggiornamento dipendenze, Docker, tooling |
 | **v0.2.x** | M1 | Identity (SPID/CIE), RBAC, Anagrafiche |
 | **v0.3.x** | M2 | Garage Virtuale + WearCalculationService |
-| **v0.4.x** | M3 | WebGIS + OSRM + Intersezione Spaziale |
-| **v0.5.x** | M4 | State Machine + Scrivania Enti Terzi + PEC async |
-| **v0.6.x** | M5 | PagoPA + PDF + Firma PAdES + Protocollo |
+| **v0.4.x** | M3 | WebGIS + OSRM + ARS (Archivio Regionale Strade) + Intersezione Spaziale |
+| **v0.5.x** | M4 | State Machine + tipo_istanza + Check-in Viaggio + Radar Forze dell'Ordine |
+| **v0.6.x** | M5 | PagoPA + PDF + Firma PAdES + Allerta Meteo + RipartoService |
+| **v0.7.x** | M6 | Open Data Portal — mappa pubblica cantieri + statistiche + GeoJSON/KML |
 | **v1.0.0** | GA | AINOP/PDND, security audit, AgID compliance |
 
 ---
@@ -21,7 +22,7 @@
 
 ## Missing Feature
 
-- [ ] Menu sistema e impostazioni per il branding e la configurazione, da pianificare
+- [x] Menu sistema e impostazioni per il branding e la configurazione — implementato in v0.4.x (impersonazione + pannello impostazioni + design system)
 
 ---
 
@@ -71,44 +72,71 @@ Implement: GTE-Abruzzo.html
 
 ---
 
-## v0.4.x — M3: WebGIS + OSRM + Intersezione Spaziale
+## v0.4.x — M3: WebGIS + OSRM + ARS + Intersezione Spaziale
 
-- [ ] **[3.1]** Import shapefile/GeoJSON confini comunali e provinciali Abruzzo → `entities.geom`
-- [ ] **[3.2]** Frontend Leaflet — mappa interattiva per tracciamento percorso
-- [ ] **[3.2]** Integrazione API OSRM snap-to-road → salvataggio `LineString` in `routes.geometry`
-- [ ] **[3.3]** Query `ST_Intersection` + `ST_Length` → km per ente estratti automaticamente
-- [ ] **[3.4]** Stub AINOP/PDND: campo `codice_univoco_ainop` su tabella infrastrutture
-- [ ] **[3.4]** Evidenziazione WebGIS corridoi nazionali MIT idonei
-- [ ] **[3.5]** Migration `roadworks` — `entity_id`, `geometry` (LINESTRING/POLYGON), `valid_from`, `valid_to`, `severity` (advisory/restricted/closed), `status` (planned/active/closed)
-- [ ] **[3.5]** Controllo cantieri al submit: `ST_Intersects(route, roadwork)` + overlap date range → blocco con indicazione tratto
-- [ ] **[3.5]** Percorsi alternativi OSRM (`alternatives=true`) quando il percorso confligge con un cantiere attivo
+- [x] **[3.1]** Import shapefile/GeoJSON confini comunali e provinciali Abruzzo → `entities.geom`
+- [x] **[3.2]** Frontend Leaflet — mappa interattiva per tracciamento percorso
+- [x] **[3.2]** Integrazione API OSRM snap-to-road → salvataggio `LineString` in `routes.geometry`
+- [x] **[3.3]** Query `ST_Intersection` + `ST_Length` → km per ente estratti automaticamente
+- [x] **[3.4]** Stub AINOP/PDND: campo `codice_univoco_ainop` su tabella infrastrutture
+- [ ] **[3.4]** Evidenziazione WebGIS corridoi nazionali MIT idonei — rinviato a v1.0.0 (AINOP/PDND)
+- [x] **[3.5]** Migration `roadworks` — `entity_id`, `geometry` (LINESTRING/POLYGON), `valid_from`, `valid_to`, `severity` (advisory/restricted/closed), `status` (planned/active/closed)
+- [x] **[3.5]** Controllo cantieri al submit: `ST_Intersects(route, roadwork)` + overlap date range → blocco con indicazione tratto
+- [ ] **[3.5]** Percorsi alternativi OSRM (`alternatives=true`) quando cantiere attivo — backend pronto, frontend da cablare in v0.5.x wizard
+- [ ] **[3.6]** Migrazioni ARS: `standard_routes` (LINESTRING + limiti sagoma/massa) + `tipo_applicazione` su `tariffs` + `tipo_asse` nullable
+- [ ] **[3.7]** `StandardRoute` model + `StandardRoutePolicy` + CRUD `ThirdParty\StandardRouteController` + Blade views
+- [ ] **[3.8]** `StandardRouteOverlayService`: `analyze()` + `segmentCoverage()` con `ST_Buffer` (≈11m) sul percorso
+- [ ] **[3.9]** `ArsOverlayController` `POST /api/routing/ars-overlay` + `EntityGeoJsonController` `GET /api/entities/geojson`
+- [ ] **[3.10]** `route-builder.js`: layer verde/rosso ARS (singola/multipla) + modalità selezione poligoni ISTAT (periodica)
+- [ ] **[3.11]** `gte:import-standard-routes {file} {entity_id}` — import GeoJSON strade standard
+- [ ] **[3.12]** `VehicleType` enum: +4 tipi agricoli + `isAgricultural()` helper
+- [ ] **[3.13]** `TipoApplicazioneTariff` enum + `Tariff::scopeByTipo()` + `WearCalculationService::calculateForApplication(WearContext)`
 
 ---
 
-## v0.5.x — M4: State Machine + Workflow
+## v0.5.x — M4: State Machine + tipo_istanza + Check-in + Radar
 
 - [ ] **[4.1]** Wizard compilazione domanda multi-step: Azienda → Convoglio → Percorso → Riepilogo
-- [ ] **[4.1]** Migration `applications` + `routes` — salvataggio pratica in stato `draft`
-- [ ] **[4.2]** State machine: transizioni `draft → submitted → waiting_clearances`
+- [ ] **[4.1]** Migration `applications` — stato `draft`, `tipo_istanza`, `numero_viaggi`, `valida_da`, `valida_fino`, `selected_entity_ids`, `viaggi_effettuati`, `sospesa_fino`
+- [ ] **[4.2]** State machine: transizioni `draft → submitted → waiting_clearances → waiting_payment → approved`
 - [ ] **[4.3]** Scrivania Enti Terzi — dashboard ruolo `third-party` (tratta di competenza + Approva/Rifiuta)
-- [ ] **[4.3]** Migration `clearances` — Nulla Osta per ente per pratica
-- [ ] **[4.3]** Gestione cantieri nella Scrivania Enti Terzi — CRUD `roadworks` per l'ente di competenza
+- [ ] **[4.3]** Migration `clearances` — Nulla Osta per ente per pratica (`ClearanceStatus` incl. `pre_cleared`)
+- [ ] **[4.3]** Gestione cantieri nella Scrivania Enti Terzi — CRUD `roadworks` per l'ente di competenza ✅ (già fatto in v0.4.x)
 - [ ] **[4.4]** `App\Jobs\SendClearanceNotification` — PEC asincrono via Redis queue
 - [ ] **[4.4]** Listener ricezione esiti PEC
+- [ ] **[4.5]** `TipoIstanza` enum + `WearContext` value object
+- [ ] **[4.6]** `ClearanceStatus` enum con `PreCleared` + `ClearanceDispatchService` (ARS fast-track + PEC dispatch + skip `waiting_clearances`)
+- [ ] **[4.7]** `StoreApplicationRequest`: validazione condizionale per `tipo_istanza` (numero_viaggi, valida_da/fino, selected_entity_ids)
+- [ ] **[4.8]** `TripStatus` enum + migration `trips` (application_id, driver_user_id, status, started_at, ended_at, geometry_snapshot)
+- [ ] **[4.9]** `Trip` model + `TripPolicy` + `CitizenTripController` (start/end/cancel) + middleware anti-sospensione
+- [ ] **[4.10]** UI mobile-friendly autista: dashboard autorizzazioni attive + pulsante "INIZIA/CONCLUDI VIAGGIO" + banner sospensione allerta meteo
+- [ ] **[4.11]** `RadarController` (`law-enforcement`) + `GET /api/law-enforcement/active-trips`
+- [ ] **[4.12]** Leaflet Radar: mappa real-time convogli in transito, polling 30s, popup targa/tipo/ora
 
 ---
 
-## v0.6.x — M5: Pagamenti + Rilascio Legale
+## v0.6.x — M5: Pagamenti + Rilascio Legale + Allerta Meteo
 
-- [ ] **[5.1]** PagoPA — generazione IUV da output `WearCalculationService`
+- [ ] **[5.1]** PagoPA — generazione IUV da `WearCalculationService::calculateForApplication()` (differenziato per `tipo_applicazione`: analitico / forfettario)
 - [ ] **[5.1]** Webhook RT (Ricevuta Telematica) → transizione `waiting_payment → approved`
 - [ ] **[5.2]** Vista Blade layout ufficiale autorizzazione (mini-mappa + tabelle tecniche)
 - [ ] **[5.2]** `App\Jobs\GenerateAuthorizationPdf` — Browsershot PDF con QR Code
 - [ ] **[5.3]** Client API Protocollo Informatico della Provincia
 - [ ] **[5.3]** Firma PAdES remota (Aruba/InfoCert API) apposta dal dirigente
-- [ ] **[5.4]** Dashboard Ragioneria — export CSV/Excel riparto fondi per ente
-- [ ] **[5.5]** Dashboard Forze dell'Ordine (`law-enforcement`) — verifica per targa, scansione QR, mappa cantieri attivi, trasporti in transito oggi
-- [ ] **[5.5]** Vista mobile-first per utilizzo su strada
+- [ ] **[5.4]** `RipartoService` — riparto forfettario periodici proporzionale per area ISTAT (`ST_Area` proxy)
+- [ ] **[5.4]** Dashboard Ragioneria — export CSV/Excel riparto fondi per ente (usa `RipartoService`)
+- [ ] **[5.5]** `roadworks`: +`is_public` boolean + checkbox "Visibile mappa pubblica" nel form CRUD
+- [ ] **[5.6]** `CheckWeatherAlertsJob` schedulato ogni ora — fetch Open Data DPC, sospensione automatica pratiche + `SendWeatherSuspensionNotification`
+- [ ] **[5.6]** `alert_zones` — import geometrie zone allerta Abruzzo A/B/C per intersect spaziale
+
+---
+
+## v0.7.x — M6: Open Data Portal
+
+- [ ] **[6.1]** `GET /mappa-cantieri` pubblica (no auth) — Leaflet CartoDB Positron, filtro `is_public=true`, legenda cromatica per severity
+- [ ] **[6.2]** `GET /api/public/roadworks` GeoJSON FeatureCollection (no auth, throttle 60/min)
+- [ ] **[6.2]** `GET /api/public/roadworks.geojson` + `.kml` — download file (header `Content-Disposition: attachment`)
+- [ ] **[6.3]** `GET /statistiche` pubblica — trasporti per Comune per anno, heatmap strade più usate, tempi medi nulla osta (Chart.js + Leaflet.heat)
 
 ---
 

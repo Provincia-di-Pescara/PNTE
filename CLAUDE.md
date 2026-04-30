@@ -57,9 +57,10 @@ Prod stack: `app` (Laravel/PHP-FPM + Nginx + Chromium), `db` (MariaDB 11.4 LTS w
 |--------|--------|-------|
 | `v0.2.x` | ✅ Done | Identity & RBAC — SPID/CIE OIDC, users, companies, entities, setup wizard |
 | `v0.3.x` | ✅ Done | Garage Virtuale — vehicles, axles, WearCalculationService, admin tariffario |
-| `v0.4.x` | ✅ Done | WebGIS & Routing — Leaflet, OSRM, routes, roadworks, RouteIntersectionService, impersonazione, pannello impostazioni |
-| `v0.5.x` | 🔜 Next | State Machine — application wizard, clearances (Nulla Osta), PEC notifications |
-| `v0.6.x` | Planned | PagoPA & PDF — payments, PAdES signature, protocollo |
+| `v0.4.x` | 🔜 Next | WebGIS & ARS — Leaflet, OSRM, routes, roadworks, ARS (Archivio Regionale Strade), veicoli agricoli, WearCalculationService esteso |
+| `v0.5.x` | Planned | State Machine — application wizard, tipo_istanza, clearances ARS fast-track, check-in viaggio, Radar law-enforcement |
+| `v0.6.x` | Planned | PagoPA & PDF — payments, PAdES, protocollo, RipartoService, allerta meteo Protezione Civile |
+| `v0.7.x` | Planned | Open Data Portal — mappa pubblica cantieri, statistiche aggregate, export GeoJSON/KML |
 | `v1.0.0` | Planned | AINOP/PDND — national infrastructure integration |
 
 ## Missing Features (to plan)
