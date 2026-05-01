@@ -46,9 +46,8 @@ final class ImpersonateTest extends TestCase
         $this->actingAs($this->superAdmin)
             ->post(route('admin.users.impersonate', $this->citizen))
             ->assertRedirect(route('dashboard'))
-            ->assertSessionHas('info');
-
-        $this->assertSame($this->citizen->id, auth()->id());
+            ->assertSessionHas('info')
+            ->assertSessionHas('impersonated_by', $this->superAdmin->id);
     }
 
     public function test_impersonation_creates_log_entry(): void

@@ -16,8 +16,20 @@
     <input type="hidden" name="waypoints" id="input-waypoints">
     <input type="hidden" name="geometry" id="input-geometry">
     <input type="hidden" name="distance_km" id="input-distance-km">
+    <input type="hidden" name="entity_ids" id="input-entity-ids">
 
     <div class="card overflow-hidden">
+        <div class="flex items-center gap-2 px-4 py-2 border-b border-surface-3 bg-surface-1 text-xs">
+            <button type="button" id="btn-toggle-entities" class="btn btn-sm">
+                Confini enti
+            </button>
+            <button type="button" id="btn-toggle-ars" class="btn btn-sm">
+                Copertura ARS
+            </button>
+            <span id="ars-status" class="text-ink-3 ml-auto hidden">
+                Analisi ARS in corso…
+            </span>
+        </div>
         <div id="map" class="w-full bg-surface-2" style="height: 500px;"></div>
     </div>
 
