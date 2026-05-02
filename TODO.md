@@ -58,8 +58,8 @@ Implement: GTE-Abruzzo.html
 - [x] **[1.4]** Migration `entities` — Comuni, Province, ANAS, Autostrade (GIS `MULTIPOLYGON`, PEC, ISTAT)
 - [x] **[1.4]** CRUD entità amministrative (solo `super-admin`)
 - [x] **[1.5]** Pagina impostazioni admin — sezione Mail: modifica SMTP + tasto "Invia email di test"
-- [ ] **[1.6]** Sincronizzazione Enti via API IPA: Sviluppo Service Open Data IPA e automazione notturna per aggiornamento PEC (Comuni, Province, Forze dell'Ordine)
-- [ ] **[1.7]** Validazione Aziende via InfoCamere / INI-PEC (PDND): Integrazione API per autocompilazione da P.IVA e campi sensibili in read-only
+- [x] **[1.6]** Sincronizzazione Enti via API IPA: Sviluppo Service Open Data IPA e automazione notturna per aggiornamento PEC (Comuni, Province, Forze dell'Ordine)
+- [x] **[1.7]** Validazione Aziende via InfoCamere / INI-PEC (PDND): Integrazione API per autocompilazione da P.IVA e campi sensibili in read-only
 - [x] **[1.8]** Setup step 3: tasto "Invia email di test"
 ---
 
