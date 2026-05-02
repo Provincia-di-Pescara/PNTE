@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\InfoCamereServiceInterface;
 use App\Contracts\OsrmServiceInterface;
 use App\Models\Roadwork;
 use App\Models\Route;
@@ -15,6 +16,7 @@ use App\Policies\RoutePolicy;
 use App\Policies\StandardRoutePolicy;
 use App\Policies\TariffPolicy;
 use App\Policies\VehiclePolicy;
+use App\Services\InfoCamereService;
 use App\Services\OsrmService;
 use App\Socialite\OidcProvider;
 use Illuminate\Support\Facades\Gate;
@@ -26,6 +28,7 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(OsrmServiceInterface::class, OsrmService::class);
+        $this->app->bind(InfoCamereServiceInterface::class, InfoCamereService::class);
     }
 
     public function boot(): void

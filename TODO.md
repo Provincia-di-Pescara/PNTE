@@ -89,10 +89,10 @@ Implement: GTE-Abruzzo.html
 - [x] **[3.5]** Migration `roadworks` + controllo cantieri al submit: `ST_Intersects(route, roadwork)` + overlap date range → blocco con indicazione tratto
 - [x] **[3.6]** Migrazioni ARS: `standard_routes` (LINESTRING + limiti sagoma/massa) + `tipo_applicazione` su `tariffs` + `tipo_asse` nullable
 - [x] **[3.7]** `StandardRoute` model + `StandardRoutePolicy` + CRUD `ThirdParty\StandardRouteController` + Blade views
-- [ ] **[3.8]** `StandardRouteOverlayService`: `analyze()` + `segmentCoverage()` con `ST_Buffer` (≈11m) sul percorso
-- [ ] **[3.9]** `ArsOverlayController` `POST /api/routing/ars-overlay` + `EntityGeoJsonController` `GET /api/entities/geojson`
-- [ ] **[3.10]** `route-builder.js`: layer verde/rosso ARS (singola/multipla) + modalità selezione poligoni ISTAT (periodica)
-- [ ] **[3.11]** `gte:import-standard-routes {file} {entity_id}` — import GeoJSON strade standard
+- [x] **[3.8]** `StandardRouteOverlayService`: `analyze()` + `segmentCoverage()` con `ST_Buffer` (≈11m) sul percorso
+- [x] **[3.9]** `ArsOverlayController` `POST /api/routing/ars-overlay` + `EntityGeoJsonController` `GET /api/entities/geojson`
+- [x] **[3.10]** `route-builder.js`: layer verde/rosso ARS (singola/multipla) + modalità selezione poligoni ISTAT (periodica)
+- [x] **[3.11]** `gte:import-standard-routes {file} {entity_id}` — import GeoJSON strade standard
 - [x] **[3.12]** `VehicleType` enum: +4 tipi agricoli + `isAgricultural()` helper
 - [x] **[3.13]** `TipoApplicazioneTariff` enum + `Tariff::scopeByTipoApplicazione()` + `TariffFactory` aggiornata — `WearCalculationService::calculateForApplication(WearContext)` rinviato a v0.5.x (dipende da `TipoIstanza`)
 

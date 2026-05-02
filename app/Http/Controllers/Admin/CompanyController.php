@@ -36,7 +36,15 @@ final class CompanyController extends Controller
 
     public function store(StoreCompanyRequest $request): RedirectResponse
     {
-        Company::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->boolean('infocamere_verified')) {
+            $data['infocamere_verified_at'] = now();
+        }
+
+        unset($data['infocamere_verified']);
+
+        Company::create($data);
 
         return redirect()->route('admin.companies.index')
             ->with('success', 'Azienda creata con successo.');
@@ -60,7 +68,15 @@ final class CompanyController extends Controller
 
     public function update(UpdateCompanyRequest $request, Company $company): RedirectResponse
     {
-        $company->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->boolean('infocamere_verified')) {
+            $data['infocamere_verified_at'] = $company->infocamere_verified_at ?? now();
+        }
+
+        unset($data['infocamere_verified']);
+
+        $company->update($data);
 
         return redirect()->route('admin.companies.show', $company)
             ->with('success', 'Azienda aggiornata.');

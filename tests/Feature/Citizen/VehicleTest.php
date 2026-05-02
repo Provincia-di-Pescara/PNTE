@@ -21,9 +21,13 @@ final class VehicleTest extends TestCase
     use RefreshDatabase;
 
     private User $superAdmin;
+
     private User $operator;
+
     private User $citizen;
+
     private User $citizenNoDelegate;
+
     private Company $company;
 
     protected function setUp(): void
@@ -52,9 +56,9 @@ final class VehicleTest extends TestCase
 
         // Attach citizen with approved delegation
         $this->company->users()->attach($this->citizen->id, [
-            'role'       => 'delegato',
+            'role' => 'delegato',
             'valid_from' => today()->toDateString(),
-            'valid_to'   => null,
+            'valid_to' => null,
             'approved_at' => now(),
         ]);
     }
@@ -63,19 +67,19 @@ final class VehicleTest extends TestCase
     private function validVehiclePayload(?int $companyId = null): array
     {
         return [
-            'company_id'            => $companyId ?? $this->company->id,
-            'tipo'                  => VehicleType::Trattore->value,
-            'targa'                 => 'AB123CD',
-            'numero_telaio'         => null,
-            'marca'                 => 'Volvo',
-            'modello'               => 'FH500',
+            'company_id' => $companyId ?? $this->company->id,
+            'tipo' => VehicleType::Trattore->value,
+            'targa' => 'AB123CD',
+            'numero_telaio' => null,
+            'marca' => 'Volvo',
+            'modello' => 'FH500',
             'anno_immatricolazione' => 2020,
-            'massa_vuoto'           => 10000,
-            'massa_complessiva'     => 44000,
-            'lunghezza'             => 16500,
-            'larghezza'             => 2550,
-            'altezza'               => 4000,
-            'axles'                 => [
+            'massa_vuoto' => 10000,
+            'massa_complessiva' => 44000,
+            'lunghezza' => 16500,
+            'larghezza' => 2550,
+            'altezza' => 4000,
+            'axles' => [
                 ['posizione' => 1, 'tipo' => AxleType::Singolo->value, 'interasse' => null, 'carico_tecnico' => 8000],
                 ['posizione' => 2, 'tipo' => AxleType::Tandem->value, 'interasse' => 1350, 'carico_tecnico' => 16000],
             ],
@@ -149,25 +153,25 @@ final class VehicleTest extends TestCase
             ->assertSessionHas('success');
 
         $this->assertDatabaseHas('vehicles', [
-            'company_id'  => $this->company->id,
-            'targa'       => 'AB123CD',
+            'company_id' => $this->company->id,
+            'targa' => 'AB123CD',
             'numero_assi' => 2,
         ]);
 
         $vehicle = Vehicle::where('targa', 'AB123CD')->firstOrFail();
 
         $this->assertDatabaseHas('vehicle_axles', [
-            'vehicle_id'     => $vehicle->id,
-            'posizione'      => 1,
-            'tipo'           => AxleType::Singolo->value,
+            'vehicle_id' => $vehicle->id,
+            'posizione' => 1,
+            'tipo' => AxleType::Singolo->value,
             'carico_tecnico' => 8000,
         ]);
 
         $this->assertDatabaseHas('vehicle_axles', [
-            'vehicle_id'     => $vehicle->id,
-            'posizione'      => 2,
-            'tipo'           => AxleType::Tandem->value,
-            'interasse'      => 1350,
+            'vehicle_id' => $vehicle->id,
+            'posizione' => 2,
+            'tipo' => AxleType::Tandem->value,
+            'interasse' => 1350,
             'carico_tecnico' => 16000,
         ]);
 
@@ -178,7 +182,7 @@ final class VehicleTest extends TestCase
     {
         Vehicle::factory()->create([
             'company_id' => $this->company->id,
-            'targa'      => 'AB123CD',
+            'targa' => 'AB123CD',
         ]);
 
         $this->actingAs($this->citizen)
@@ -200,7 +204,7 @@ final class VehicleTest extends TestCase
 
     public function test_store_validates_axle_carico_tecnico_required(): void
     {
-        $payload          = $this->validVehiclePayload();
+        $payload = $this->validVehiclePayload();
         $payload['axles'] = [
             ['posizione' => 1, 'tipo' => AxleType::Singolo->value, 'interasse' => null],
         ];
@@ -224,7 +228,7 @@ final class VehicleTest extends TestCase
     public function test_citizen_cannot_view_vehicle_of_other_company(): void
     {
         $otherCompany = Company::factory()->create();
-        $vehicle      = Vehicle::factory()->create(['company_id' => $otherCompany->id]);
+        $vehicle = Vehicle::factory()->create(['company_id' => $otherCompany->id]);
 
         $this->actingAs($this->citizen)
             ->get(route('my.vehicles.show', $vehicle))
@@ -241,17 +245,17 @@ final class VehicleTest extends TestCase
         ]);
 
         $payload = [
-            'tipo'                  => VehicleType::Rimorchio->value,
-            'targa'                 => $vehicle->targa,
-            'marca'                 => 'Schmitz',
-            'modello'               => 'S.CS',
+            'tipo' => VehicleType::Rimorchio->value,
+            'targa' => $vehicle->targa,
+            'marca' => 'Schmitz',
+            'modello' => 'S.CS',
             'anno_immatricolazione' => 2021,
-            'massa_vuoto'           => 7000,
-            'massa_complessiva'     => 35000,
-            'lunghezza'             => 13600,
-            'larghezza'             => 2550,
-            'altezza'               => 3000,
-            'axles'                 => [
+            'massa_vuoto' => 7000,
+            'massa_complessiva' => 35000,
+            'lunghezza' => 13600,
+            'larghezza' => 2550,
+            'altezza' => 3000,
+            'axles' => [
                 ['posizione' => 1, 'tipo' => AxleType::Tridem->value, 'interasse' => 1310, 'carico_tecnico' => 27000],
             ],
         ];
@@ -267,8 +271,8 @@ final class VehicleTest extends TestCase
         $this->assertSame(1, $vehicle->numero_assi);
         $this->assertSame(1, $vehicle->axles()->count());
         $this->assertDatabaseHas('vehicle_axles', [
-            'vehicle_id'     => $vehicle->id,
-            'tipo'           => AxleType::Tridem->value,
+            'vehicle_id' => $vehicle->id,
+            'tipo' => AxleType::Tridem->value,
             'carico_tecnico' => 27000,
         ]);
     }
@@ -289,7 +293,7 @@ final class VehicleTest extends TestCase
     public function test_citizen_cannot_delete_vehicle_of_other_company(): void
     {
         $otherCompany = Company::factory()->create();
-        $vehicle      = Vehicle::factory()->create(['company_id' => $otherCompany->id]);
+        $vehicle = Vehicle::factory()->create(['company_id' => $otherCompany->id]);
 
         $this->actingAs($this->citizen)
             ->withoutMiddleware(PreventRequestForgery::class)

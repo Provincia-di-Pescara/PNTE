@@ -3,11 +3,14 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\CompanyLookupController;
 use App\Http\Controllers\Admin\EntityController;
 use App\Http\Controllers\Admin\ImpersonateController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TariffController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Api\ArsOverlayController;
+use App\Http\Controllers\Api\EntityGeoJsonController;
 use App\Http\Controllers\Api\RoutingController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OidcController;
@@ -43,6 +46,9 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/auth/redirect', [OidcController::class, 'redirect'])->name('auth.oidc.redirect');
 Route::get('/auth/callback', [OidcController::class, 'callback'])->name('auth.oidc.callback');
 
+// Public-geometry API (no auth required — geographic boundary data)
+Route::get('/api/entities/geojson', [EntityGeoJsonController::class, 'index'])->name('api.entities.geojson');
+
 // Protected area
 Route::middleware('auth')->group(function () {
     Route::get('/', function () {
@@ -66,6 +72,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('api')->name('api.')->group(function () {
         Route::post('routing/snap', [RoutingController::class, 'snap'])->name('routing.snap');
         Route::post('routing/alternatives', [RoutingController::class, 'alternatives'])->name('routing.alternatives');
+        Route::post('routing/ars-overlay', [ArsOverlayController::class, 'index'])->name('routing.ars-overlay');
+        Route::post('admin/companies/lookup', CompanyLookupController::class)->name('admin.companies.lookup');
     });
 
     // Third-party: roadworks management
@@ -102,6 +110,22 @@ Route::middleware('auth')->group(function () {
 
             Route::get('branding', [SettingController::class, 'showBranding'])->name('branding');
             Route::put('branding', [SettingController::class, 'updateBranding'])->name('branding.update');
+
+            Route::get('gis', [SettingController::class, 'showGis'])->name('gis');
+            Route::put('gis', [SettingController::class, 'updateGis'])->name('gis.update');
+            Route::post('gis/fetch-boundaries', [SettingController::class, 'fetchBoundaries'])->name('gis.fetch-boundaries');
+
+            Route::get('oidc', [SettingController::class, 'showOidc'])->name('oidc');
+            Route::put('oidc', [SettingController::class, 'updateOidc'])->name('oidc.update');
+
+            Route::get('pec', [SettingController::class, 'showPec'])->name('pec');
+            Route::put('pec', [SettingController::class, 'updatePec'])->name('pec.update');
+            Route::post('pec/test', [SettingController::class, 'testPec'])->name('pec.test');
+
+            Route::get('pdnd', [SettingController::class, 'showPdnd'])->name('pdnd');
+            Route::put('pdnd', [SettingController::class, 'updatePdnd'])->name('pdnd.update');
+            Route::post('pdnd/generate-dpop-key', [SettingController::class, 'generateDpopKey'])->name('pdnd.generate-dpop-key');
+            Route::post('pdnd/sync-ipa', [SettingController::class, 'syncIpa'])->name('pdnd.sync-ipa');
 
             Route::prefix('users')->name('users.')->group(function () {
                 Route::get('/', [UserController::class, 'index'])->name('index');
