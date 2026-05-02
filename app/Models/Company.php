@@ -25,7 +25,16 @@ final class Company extends Model
         'email',
         'pec',
         'telefono',
+        'infocamere_verified_at',
     ];
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'infocamere_verified_at' => 'datetime',
+        ];
+    }
 
     /** @return BelongsToMany<User, $this> */
     public function users(): BelongsToMany

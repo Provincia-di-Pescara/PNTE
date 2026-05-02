@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\CompanyLookupController;
 use App\Http\Controllers\Admin\EntityController;
 use App\Http\Controllers\Admin\ImpersonateController;
 use App\Http\Controllers\Admin\SettingController;
@@ -72,6 +73,7 @@ Route::middleware('auth')->group(function () {
         Route::post('routing/snap', [RoutingController::class, 'snap'])->name('routing.snap');
         Route::post('routing/alternatives', [RoutingController::class, 'alternatives'])->name('routing.alternatives');
         Route::post('routing/ars-overlay', [ArsOverlayController::class, 'index'])->name('routing.ars-overlay');
+        Route::post('admin/companies/lookup', CompanyLookupController::class)->name('admin.companies.lookup');
     });
 
     // Third-party: roadworks management
@@ -119,6 +121,11 @@ Route::middleware('auth')->group(function () {
             Route::get('pec', [SettingController::class, 'showPec'])->name('pec');
             Route::put('pec', [SettingController::class, 'updatePec'])->name('pec.update');
             Route::post('pec/test', [SettingController::class, 'testPec'])->name('pec.test');
+
+            Route::get('pdnd', [SettingController::class, 'showPdnd'])->name('pdnd');
+            Route::put('pdnd', [SettingController::class, 'updatePdnd'])->name('pdnd.update');
+            Route::post('pdnd/generate-dpop-key', [SettingController::class, 'generateDpopKey'])->name('pdnd.generate-dpop-key');
+            Route::post('pdnd/sync-ipa', [SettingController::class, 'syncIpa'])->name('pdnd.sync-ipa');
 
             Route::prefix('users')->name('users.')->group(function () {
                 Route::get('/', [UserController::class, 'index'])->name('index');

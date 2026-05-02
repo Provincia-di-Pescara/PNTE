@@ -28,6 +28,7 @@ final class StoreCompanyRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'pec' => ['nullable', 'email', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:50'],
+            'infocamere_verified' => ['nullable', 'boolean'],
         ];
     }
 }

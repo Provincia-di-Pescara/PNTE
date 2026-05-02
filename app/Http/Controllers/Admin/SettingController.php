@@ -11,9 +11,12 @@ use App\Http\Requests\Admin\UpdateGeneralSettingsRequest;
 use App\Http\Requests\Admin\UpdateGisSettingsRequest;
 use App\Http\Requests\Admin\UpdateMailSettingsRequest;
 use App\Http\Requests\Admin\UpdateOidcSettingsRequest;
+use App\Http\Requests\Admin\UpdatePdndSettingsRequest;
 use App\Http\Requests\Admin\UpdatePecSettingsRequest;
 use App\Mail\TestMail;
 use App\Models\Setting;
+use App\Services\IpaSyncService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -34,7 +37,7 @@ final class SettingController extends Controller
         ['key' => 'gis',        'label' => 'GIS / Mappe',     'icon' => 'map',     'route' => 'admin.settings.gis',     'status' => 'active',       'keywords' => ['gis', 'mappe', 'istat', 'confini', 'geometrie', 'geojson']],
         ['key' => 'oidc',       'label' => 'SPID / CIE',      'icon' => 'shield',  'route' => 'admin.settings.oidc',    'status' => 'active',       'keywords' => ['spid', 'cie', 'oidc', 'auth', 'identità']],
         ['key' => 'pec',        'label' => 'Server PEC',      'icon' => 'inbox',   'route' => 'admin.settings.pec',     'status' => 'active',       'keywords' => ['pec', 'posta certificata', 'notifiche']],
-        ['key' => 'ainop',      'label' => 'AINOP / PDND',    'icon' => 'bridge',  'route' => null,                     'status' => 'coming-soon', 'keywords' => ['ainop', 'pdnd', 'api', 'ponti', 'infrastrutture']],
+        ['key' => 'pdnd',       'label' => 'PDND / Interoperabilità', 'icon' => 'bridge', 'route' => 'admin.settings.pdnd', 'status' => 'active',       'keywords' => ['pdnd', 'interoperabilità', 'ainop', 'ipa', 'infocamere', 'registro imprese']],
         ['key' => 'protocol',   'label' => 'Protocollo',      'icon' => 'doc',     'route' => null,                     'status' => 'coming-soon', 'keywords' => ['protocollo', 'docway', 'documentale']],
         ['key' => 'signatures', 'label' => 'Firme remote',    'icon' => 'pen',     'route' => null,                     'status' => 'coming-soon', 'keywords' => ['firma', 'pades', 'cades', 'digitale']],
         ['key' => 'pagopa',     'label' => 'PagoPA',          'icon' => 'euro',    'route' => null,                     'status' => 'coming-soon', 'keywords' => ['pagopa', 'iuv', 'pagamento', 'bollo']],
@@ -304,6 +307,99 @@ final class SettingController extends Controller
         } catch (Throwable $e) {
             return redirect()->route('admin.settings.pec')
                 ->with('error', 'Test IMAP fallito: '.$e->getMessage());
+        }
+    }
+
+    public function showPdnd(): View
+    {
+        $this->denyUnlessSuper();
+
+        $settings = [
+            'pdnd_enabled' => Setting::get('pdnd_enabled', '0'),
+            'pdnd_client_id' => Setting::get('pdnd_client_id', ''),
+            'pdnd_token_endpoint' => Setting::get('pdnd_token_endpoint', ''),
+            'pdnd_private_key' => Setting::get('pdnd_private_key', ''),
+            'pdnd_dpop_private_key' => Setting::get('pdnd_dpop_private_key', ''),
+            'pdnd_ipa_url' => Setting::get('pdnd_ipa_url', ''),
+            'pdnd_infocamere_url' => Setting::get('pdnd_infocamere_url', ''),
+            'ipa_last_sync_at' => Setting::get('ipa.last_sync_at'),
+            'ipa_last_sync_result' => Setting::get('ipa.last_sync_result'),
+        ];
+
+        return view('admin.settings.pdnd', compact('settings'));
+    }
+
+    public function updatePdnd(UpdatePdndSettingsRequest $request): RedirectResponse
+    {
+        $this->denyUnlessSuper();
+
+        Setting::set('pdnd_enabled', $request->boolean('pdnd_enabled') ? '1' : '0', 'pdnd');
+        Setting::set('pdnd_client_id', (string) $request->input('pdnd_client_id', ''), 'pdnd');
+        Setting::set('pdnd_token_endpoint', (string) $request->input('pdnd_token_endpoint', ''), 'pdnd');
+        Setting::set('pdnd_ipa_url', (string) $request->input('pdnd_ipa_url', ''), 'pdnd');
+        Setting::set('pdnd_infocamere_url', (string) $request->input('pdnd_infocamere_url', ''), 'pdnd');
+
+        if ($request->filled('pdnd_private_key')) {
+            Setting::set('pdnd_private_key', (string) $request->input('pdnd_private_key'), 'pdnd');
+        }
+
+        if ($request->filled('pdnd_dpop_private_key')) {
+            Setting::set('pdnd_dpop_private_key', (string) $request->input('pdnd_dpop_private_key'), 'pdnd');
+        }
+
+        return redirect()->route('admin.settings.pdnd')
+            ->with('success', 'Impostazioni PDND salvate.');
+    }
+
+    public function generateDpopKey(): JsonResponse
+    {
+        $this->denyUnlessSuper();
+
+        $key = openssl_pkey_new([
+            'curve_name' => 'prime256v1',
+            'private_key_type' => OPENSSL_KEYTYPE_EC,
+        ]);
+
+        if ($key === false) {
+            return response()->json(['error' => 'Impossibile generare la chiave EC P-256.'], 500);
+        }
+
+        if (! openssl_pkey_export($key, $privatePem)) {
+            return response()->json(['error' => 'Impossibile esportare la chiave privata.'], 500);
+        }
+
+        $details = openssl_pkey_get_details($key);
+        $publicPem = $details['key'] ?? '';
+
+        Setting::set('pdnd_dpop_private_key', $privatePem, 'pdnd');
+
+        return response()->json([
+            'private_key' => $privatePem,
+            'public_key' => $publicPem,
+        ]);
+    }
+
+    public function syncIpa(IpaSyncService $ipa): RedirectResponse
+    {
+        $this->denyUnlessSuper();
+
+        try {
+            $result = $ipa->syncAll();
+
+            Setting::set('ipa.last_sync_at', now()->toIso8601String(), 'ipa');
+            Setting::set('ipa.last_sync_result', json_encode([
+                'updated' => $result['updated'],
+                'skipped' => $result['skipped'],
+                'errors' => $result['errors'],
+            ]), 'ipa');
+
+            $msg = "Sincronizzazione IPA completata: {$result['updated']} aggiornati, {$result['skipped']} invariati, {$result['errors']} errori.";
+
+            return redirect()->route('admin.settings.pdnd')
+                ->with('success', $msg);
+        } catch (Throwable $e) {
+            return redirect()->route('admin.settings.pdnd')
+                ->with('error', 'Sincronizzazione IPA fallita: '.$e->getMessage());
         }
     }
 
