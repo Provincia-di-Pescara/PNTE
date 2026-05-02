@@ -27,6 +27,7 @@ class StoreApplicationRequest extends FormRequest
 
         $rules = [
             'tipo_istanza' => ['required', Rule::enum(TipoIstanza::class)],
+            'company_id' => ['required', 'exists:companies,id'],
             'vehicle_id' => ['required', 'exists:vehicles,id'],
             'trailer_id' => ['nullable', 'exists:vehicles,id'],
             'valida_da' => ['required', 'date', 'after_or_equal:today'],

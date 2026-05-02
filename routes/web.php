@@ -14,11 +14,15 @@ use App\Http\Controllers\Api\EntityGeoJsonController;
 use App\Http\Controllers\Api\RoutingController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OidcController;
+use App\Http\Controllers\Citizen\ApplicationController;
 use App\Http\Controllers\Citizen\DelegationController;
 use App\Http\Controllers\Citizen\RouteBuilderController;
+use App\Http\Controllers\Citizen\TripController;
 use App\Http\Controllers\Citizen\VehicleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LawEnforcement\RadarController;
 use App\Http\Controllers\Setup\SetupController;
+use App\Http\Controllers\ThirdParty\ClearanceController;
 use App\Http\Controllers\ThirdParty\RoadworkController;
 use App\Http\Controllers\ThirdParty\StandardRouteController;
 use Illuminate\Support\Facades\Route;
@@ -66,6 +70,15 @@ Route::middleware('auth')->group(function () {
             ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
 
         Route::resource('routes', RouteBuilderController::class)->only(['create', 'store', 'show']);
+
+        Route::resource('applications', ApplicationController::class)
+            ->only(['index', 'create', 'store', 'show', 'edit', 'update']);
+
+        // Trip check-in
+        Route::post('applications/{application}/trips', [TripController::class, 'store'])
+            ->name('applications.trips.store');
+        Route::patch('trips/{trip}/end', [TripController::class, 'end'])
+            ->name('trips.end');
     });
 
     // API
@@ -80,6 +93,13 @@ Route::middleware('auth')->group(function () {
     Route::prefix('third-party')->name('third-party.')->group(function () {
         Route::resource('roadworks', RoadworkController::class);
         Route::resource('standard-routes', StandardRouteController::class);
+
+        // Clearance dashboard
+        Route::resource('clearances', ClearanceController::class)->only(['index', 'show']);
+        Route::post('clearances/{clearance}/approve', [ClearanceController::class, 'approve'])
+            ->name('clearances.approve');
+        Route::post('clearances/{clearance}/reject', [ClearanceController::class, 'reject'])
+            ->name('clearances.reject');
     });
 
     // Admin
@@ -134,5 +154,11 @@ Route::middleware('auth')->group(function () {
                 Route::patch('{user}/entity', [UserController::class, 'updateEntity'])->name('entity');
             });
         });
+    });
+
+    // Law enforcement: Radar
+    Route::prefix('law-enforcement')->name('law-enforcement.')->group(function () {
+        Route::get('radar', [RadarController::class, 'index'])->name('radar.index');
+        Route::get('radar/{application}', [RadarController::class, 'show'])->name('radar.show');
     });
 });

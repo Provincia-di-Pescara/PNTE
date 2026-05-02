@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\ApplicationServiceInterface;
 use App\Contracts\ClearanceDispatchServiceInterface;
 use App\Enums\ApplicationStatus;
 use App\Models\Application;
 use LogicException;
 
-final class ApplicationService
+final class ApplicationService implements ApplicationServiceInterface
 {
     public function __construct(
         private readonly ClearanceDispatchServiceInterface $clearanceDispatch,
