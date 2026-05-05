@@ -1,88 +1,259 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="space-y-6">
-    <div>
-        <h1 class="text-xl font-bold tracking-tight">Dashboard Operativa</h1>
-        <p class="text-sm text-ink-2 mt-1">Riepilogo sistema e stato elaborazioni</p>
+<div class="space-y-5"
+     x-data="{
+        selected: null,
+        applications: {{ Js::from($recentApplications ?? collect()) }},
+        get sel() { return this.selected !== null ? this.applications.find(a => a.id === this.selected) : null; },
+        states: [
+            { key: 'draft',              label: 'Bozza' },
+            { key: 'submitted',          label: 'Inviata' },
+            { key: 'waiting_clearances', label: 'Attesa nulla osta' },
+            { key: 'waiting_payment',    label: 'Attesa pagamento' },
+            { key: 'approved',           label: 'Autorizzata' },
+        ],
+        stateOrder: ['draft','submitted','waiting_clearances','waiting_payment','approved'],
+        stateIndex(s) { return this.stateOrder.indexOf(s); },
+     }">
+
+    <div class="flex items-end gap-4">
+        <div>
+            <div class="text-[10.5px] tracking-[0.1em] text-ink-3 uppercase">Scrivania · Provincia di Pescara</div>
+            <h1 class="text-[22px] font-semibold tracking-tight mt-1">Istruttoria pratiche</h1>
+        </div>
+        <div class="flex-1"></div>
+        <a href="{{ route('admin.entities.index') }}" class="btn">
+            <x-icon name="download" size="12" /> Esporta CSV
+        </a>
+        <a href="#" class="btn btn-primary">
+            <x-icon name="plus" size="12" /> Nuova pratica
+        </a>
     </div>
 
     @if(($entitiesWithoutGeom ?? 0) > 0)
-    <div class="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 p-4 flex gap-3 text-sm">
-        <x-icon name="warning" size="18" class="text-amber-500 shrink-0 mt-0.5" />
+    <div class="rounded-lg border border-line bg-accent-bg px-4 py-3 flex gap-3 text-sm text-accent-ink">
+        <x-icon name="alert" size="16" class="shrink-0 mt-0.5" />
         <div>
-            <span class="font-semibold text-amber-700 dark:text-amber-400">{{ $entitiesWithoutGeom }} {{ $entitiesWithoutGeom === 1 ? 'ente' : 'enti' }} senza geometria.</span>
-            <span class="text-amber-600 dark:text-amber-500"> Le coperture territoriali non saranno calcolate correttamente.</span>
-            <a href="{{ route('admin.entities.index') }}" class="underline font-medium ml-1">Gestisci enti →</a>
+            <span class="font-semibold">{{ $entitiesWithoutGeom }} {{ $entitiesWithoutGeom === 1 ? 'ente' : 'enti' }} senza geometria.</span>
+            Le coperture territoriali non saranno calcolate correttamente.
+            <a href="{{ route('admin.entities.index') }}" class="underline font-medium ml-1">Gestisci →</a>
         </div>
     </div>
     @endif
 
-    <!-- KPI Grid -->
-    <div class="grid grid-cols-3 gap-4 sm:grid-cols-6">
+    {{-- KPI Grid --}}
+    <div class="grid grid-cols-4 gap-3">
+        @php
+        $kpis = [
+            ['label' => 'Pratiche aperte',       'value' => $openCount ?? 0,                 'sub' => 'tutte le fasi attive',    'tone' => null],
+            ['label' => 'In attesa nulla osta',   'value' => $waitingClearancesCount ?? 0,    'sub' => 'enti coinvolti',           'tone' => 'amber'],
+            ['label' => 'In attesa pagamento',    'value' => $waitingPaymentCount ?? 0,       'sub' => 'pagamenti da ricevere',    'tone' => 'amber'],
+            ['label' => 'Approvate (mese)',        'value' => $approvedThisMonthCount ?? 0,   'sub' => now()->translatedFormat('F Y'), 'tone' => 'success'],
+        ];
+        @endphp
+        @foreach($kpis as $k)
         <div class="card p-4">
-            <div class="text-xs text-ink-2 font-medium">Utenti</div>
-            <div class="text-2xl font-bold mt-1 num">{{ $userCount ?? 0 }}</div>
+            <div class="text-[11px] text-ink-3 tracking-[0.08em] uppercase font-medium">{{ $k['label'] }}</div>
+            <div class="num text-[26px] font-semibold mt-1 {{ $k['tone'] === 'amber' ? 'text-accent-ink' : ($k['tone'] === 'success' ? 'text-success' : 'text-ink') }}">
+                {{ $k['value'] }}
+            </div>
+            <div class="text-[11.5px] text-ink-3 mt-0.5">{{ $k['sub'] }}</div>
         </div>
-        <div class="card p-4">
-            <div class="text-xs text-ink-2 font-medium">Enti registrati</div>
-            <div class="text-2xl font-bold mt-1 num">{{ $entityCount ?? 0 }}</div>
+        @endforeach
+    </div>
+
+    {{-- Table + Detail Panel --}}
+    <div class="grid grid-cols-[1.4fr_1fr] gap-4 min-h-[520px]">
+
+        {{-- Applications table --}}
+        <div class="card overflow-hidden flex flex-col">
+            <div class="px-4 py-2.5 border-b border-line flex items-center gap-2">
+                <div class="text-[13px] font-semibold">Pratiche · Ultime 30</div>
+                <x-chip>{{ ($recentApplications ?? collect())->count() }}</x-chip>
+                <div class="flex-1"></div>
+                <button class="btn btn-sm"><x-icon name="filter" size="12" /> Filtri</button>
+                <button class="btn btn-sm"><x-icon name="refresh" size="12" /></button>
+            </div>
+
+            @if(($recentApplications ?? collect())->isEmpty())
+            <div class="flex-1 flex flex-col items-center justify-center py-16 text-center">
+                <div class="w-12 h-12 bg-surface-2 rounded-full flex items-center justify-center text-ink-3 mb-3">
+                    <x-icon name="truck" size="22" stroke="1.5" />
+                </div>
+                <p class="text-sm font-semibold">Nessuna pratica registrata</p>
+                <p class="text-xs text-ink-2 mt-1">Le pratiche appariranno qui una volta inserite.</p>
+            </div>
+            @else
+            <div class="overflow-auto flex-1">
+                <table class="w-full border-collapse text-[12.5px]">
+                    <thead>
+                        <tr class="bg-surface-2 text-ink-3 text-[10.5px] uppercase tracking-[0.08em]">
+                            @foreach(['Pratica','Richiedente','Tratta','Stato','Data','Importo'] as $h)
+                            <th class="text-left px-3 py-2 font-medium border-b border-line">{{ $h }}</th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($recentApplications as $app)
+                        <tr class="row-hover cursor-pointer transition-colors"
+                            :class="selected === {{ $app->id }} ? 'bg-accent-bg border-l-[3px] border-accent' : 'border-l-[3px] border-transparent'"
+                            @click="selected = {{ $app->id }}">
+                            <td class="px-3 py-2.5 border-b border-line">
+                                <div class="mono text-[11.5px] font-semibold">{{ sprintf('GTE-%04d', $app->id) }}</div>
+                                <div class="text-[11px] text-ink-3">{{ $app->vehicle?->targa ?? '—' }}</div>
+                            </td>
+                            <td class="px-3 py-2.5 border-b border-line font-medium">
+                                {{ $app->company?->ragione_sociale ?? '—' }}
+                            </td>
+                            <td class="px-3 py-2.5 border-b border-line">
+                                @if($app->route)
+                                <div class="text-[12px]">
+                                    {{ number_format($app->route->distance_km ?? 0, 1) }} km
+                                </div>
+                                @else
+                                <span class="text-ink-3">—</span>
+                                @endif
+                            </td>
+                            <td class="px-3 py-2.5 border-b border-line">
+                                <x-status-pill :state="$app->stato->value" />
+                            </td>
+                            <td class="px-3 py-2.5 border-b border-line text-ink-2">
+                                {{ $app->created_at->format('d M Y') }}
+                            </td>
+                            <td class="px-3 py-2.5 border-b border-line text-right num">
+                                @if($app->wear_calculation && isset($app->wear_calculation['total']))
+                                    € {{ number_format($app->wear_calculation['total'], 2) }}
+                                @else
+                                    —
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
         </div>
-        <div class="card p-4">
-            <div class="text-xs text-ink-2 font-medium">Aziende</div>
-            <div class="text-2xl font-bold mt-1 num">{{ $companyCount ?? 0 }}</div>
-        </div>
-        <div class="card p-4">
-            <div class="text-xs text-ink-2 font-medium">Percorsi</div>
-            <div class="text-2xl font-bold mt-1 num">{{ $routeCount ?? 0 }}</div>
-        </div>
-        <div class="card p-4">
-            <div class="text-xs text-ink-2 font-medium">Cantieri</div>
-            <div class="text-2xl font-bold mt-1 num">{{ $roadworkCount ?? 0 }}</div>
-        </div>
-        <div class="card p-4">
-            <div class="text-xs text-ink-2 font-medium">Tariffe attive</div>
-            <div class="text-2xl font-bold mt-1 num">{{ $tariffCount ?? 0 }}</div>
+
+        {{-- Detail panel --}}
+        <div class="card flex flex-col overflow-hidden">
+            <template x-if="sel === null">
+                <div class="flex-1 flex flex-col items-center justify-center text-center p-8 text-ink-3">
+                    <x-icon name="doc" size="28" stroke="1.3" />
+                    <p class="text-sm mt-3">Seleziona una pratica</p>
+                    <p class="text-xs text-ink-3 mt-1">Clicca su una riga per vedere i dettagli e la timeline di stato.</p>
+                </div>
+            </template>
+
+            <template x-if="sel !== null">
+                <div class="flex flex-col h-full">
+                    {{-- Header --}}
+                    <div class="px-4 py-3 border-b border-line flex items-center gap-3">
+                        <div class="flex-1 min-w-0">
+                            <div class="mono text-[11px] text-ink-3" x-text="'GTE-' + String(sel.id).padStart(4, '0')"></div>
+                            <div class="font-semibold text-[14px] truncate" x-text="sel.company?.ragione_sociale ?? '—'"></div>
+                        </div>
+                        <span class="chip"
+                              :class="{
+                                  'chip-success': sel.stato === 'approved',
+                                  'chip-danger':  sel.stato === 'rejected',
+                                  'chip-amber':   sel.stato === 'waiting_clearances' || sel.stato === 'waiting_payment',
+                                  'chip-info':    sel.stato === 'submitted',
+                              }"
+                              x-text="{draft:'Bozza',submitted:'Inviata',waiting_clearances:'Attesa nulla osta',waiting_payment:'Attesa pagamento',approved:'Autorizzata',rejected:'Respinta'}[sel.stato] ?? sel.stato">
+                        </span>
+                    </div>
+
+                    {{-- Metadata --}}
+                    <div class="px-4 py-3 grid grid-cols-3 gap-3 text-[12px] border-b border-line">
+                        <div>
+                            <div class="text-[10px] text-ink-3 uppercase tracking-[0.08em]">Tratta</div>
+                            <div x-text="sel.route ? (sel.route.distance_km ? Number(sel.route.distance_km).toFixed(1) + ' km' : '—') : '—'"></div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-ink-3 uppercase tracking-[0.08em]">Veicolo</div>
+                            <div class="mono" x-text="sel.vehicle?.targa ?? '—'"></div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-ink-3 uppercase tracking-[0.08em]">Data</div>
+                            <div x-text="sel.created_at ? new Date(sel.created_at).toLocaleDateString('it-IT') : '—'"></div>
+                        </div>
+                    </div>
+
+                    {{-- Nulla osta progress --}}
+                    <div class="px-4 py-3 border-b border-line" x-show="sel.stato === 'waiting_clearances'">
+                        <div class="flex items-center gap-2 text-[12px]">
+                            <x-icon name="clock" size="13" />
+                            <span class="text-ink-3">Nulla osta:</span>
+                            <span class="font-semibold num" x-text="sel.clearances?.filter(c => c.stato !== 'pending').length + ' di ' + sel.clearances?.length + ' ricevuti'"></span>
+                        </div>
+                    </div>
+
+                    {{-- State machine timeline --}}
+                    <div class="px-4 py-3 flex-1 overflow-auto">
+                        <div class="text-[11px] text-ink-3 tracking-[0.08em] uppercase mb-3">Macchina a stati</div>
+                        <div class="relative pl-5">
+                            <div class="absolute left-[9px] top-1 bottom-1 w-px bg-line"></div>
+                            <template x-for="(s, idx) in states" :key="s.key">
+                                <div class="relative mb-3.5 last:mb-0">
+                                    <div class="absolute -left-5 top-0.5 w-3 h-3 rounded-full transition-all"
+                                         :class="{
+                                            'bg-ink': stateIndex(sel.stato) > idx,
+                                            'bg-accent ring-4 ring-accent-bg': stateIndex(sel.stato) === idx,
+                                            'bg-surface-2 border border-line-2': stateIndex(sel.stato) < idx,
+                                         }"></div>
+                                    <div class="flex items-baseline gap-2">
+                                        <div class="text-[13px]"
+                                             :class="{
+                                                'font-semibold text-ink': stateIndex(sel.stato) === idx,
+                                                'text-ink-2 font-medium': stateIndex(sel.stato) > idx,
+                                                'text-ink-3 font-medium': stateIndex(sel.stato) < idx,
+                                             }"
+                                             x-text="s.label"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    {{-- Actions --}}
+                    <div class="p-3 border-t border-line flex gap-2">
+                        <a :href="'#'" class="btn flex-1 text-center justify-center">Apri PDF</a>
+                        <a :href="'#'" class="btn btn-primary flex-[1.4] text-center justify-center">Sollecita enti</a>
+                    </div>
+                </div>
+            </template>
         </div>
     </div>
 
-    <div class="grid grid-cols-3 gap-6">
-        <!-- Left column -->
-        <div class="col-span-2 space-y-6">
-            <!-- Chart.js role distribution -->
-            <div class="card p-5">
-                <h3 class="text-sm font-semibold mb-4">Distribuzione utenti per ruolo</h3>
-                <div class="flex items-center gap-6">
-                    <div class="w-40 h-40 shrink-0">
-                        <canvas id="roleChart"></canvas>
-                    </div>
-                    <div class="space-y-2 flex-1">
-                        @php
-                            $roleLabels = [
-                                'super-admin' => 'Super Admin',
-                                'operator' => 'Operatore',
-                                'citizen' => 'Cittadino/Azienda',
-                                'third-party' => 'Ente Terzo',
-                                'law-enforcement' => 'Forze dell\'Ordine',
-                            ];
-                            $roleColors = ['#6366f1','#22c55e','#f59e0b','#3b82f6','#ef4444'];
-                            $idx = 0;
-                        @endphp
-                        @foreach($usersByRole ?? [] as $role => $count)
-                        <div class="flex items-center gap-2 text-xs">
-                            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:{{ $roleColors[$idx % 5] }}"></span>
-                            <span class="text-ink-2 flex-1">{{ $roleLabels[$role] ?? $role }}</span>
-                            <span class="font-semibold num">{{ $count }}</span>
-                        </div>
-                        @php $idx++ @endphp
-                        @endforeach
-                    </div>
+    {{-- System stats (collapsed below fold) --}}
+    <details class="card overflow-hidden">
+        <summary class="px-5 py-3 cursor-pointer text-[13px] font-semibold flex items-center gap-2 select-none list-none">
+            <x-icon name="layers" size="14" />
+            Riepilogo sistema
+            <x-chip class="ml-2">{{ $userCount ?? 0 }} utenti</x-chip>
+        </summary>
+        <div class="border-t border-line">
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-0">
+                @foreach([
+                    ['Utenti', $userCount ?? 0],
+                    ['Enti', $entityCount ?? 0],
+                    ['Aziende', $companyCount ?? 0],
+                    ['Percorsi', $routeCount ?? 0],
+                    ['Cantieri', $roadworkCount ?? 0],
+                    ['Tariffe', $tariffCount ?? 0],
+                ] as $i => [$label, $value])
+                <div class="p-4 {{ $i < 5 ? 'border-r border-line' : '' }}">
+                    <div class="text-xs text-ink-2 font-medium">{{ $label }}</div>
+                    <div class="text-2xl font-bold mt-1 num">{{ $value }}</div>
                 </div>
+                @endforeach
             </div>
 
-            <!-- Impersonation log -->
+            {{-- Impersonation log --}}
             @if(($recentImpersonations ?? collect())->isNotEmpty())
-            <div class="card p-5">
+            <div class="border-t border-line p-5">
                 <h3 class="text-sm font-semibold mb-3">Ultime impersonazioni</h3>
                 <table class="w-full text-xs">
                     <thead>
@@ -95,7 +266,7 @@
                     </thead>
                     <tbody class="divide-y divide-line">
                         @foreach($recentImpersonations as $log)
-                        <tr class="py-1">
+                        <tr>
                             <td class="py-2 font-medium">{{ $log->impersonator?->name ?? '–' }}</td>
                             <td class="py-2 text-ink-2">{{ $log->impersonated?->name ?? '–' }}</td>
                             <td class="py-2 text-ink-3">{{ $log->started_at?->format('d/m H:i') }}</td>
@@ -107,71 +278,21 @@
             </div>
             @endif
 
-            <!-- Applications placeholder -->
-            <div class="card p-6 border border-dashed border-line-2 bg-surface flex flex-col items-center justify-center text-center py-12">
-                <div class="w-12 h-12 bg-surface-2 rounded-full flex items-center justify-center text-ink-3 mb-4">
-                    <x-icon name="truck" size="24" stroke="1.5" />
-                </div>
-                <h3 class="text-sm font-semibold">Pratiche · In arrivo con v0.5.x</h3>
-                <p class="text-xs text-ink-2 mt-1 max-w-sm">La gestione del flusso documentale e la state machine delle pratiche saranno disponibili a breve.</p>
-            </div>
-        </div>
-
-        <!-- Right column -->
-        <div class="col-span-1 space-y-6">
-            <!-- Quick links -->
-            <div class="card p-5">
-                <h3 class="text-sm font-semibold mb-4">Accesso rapido</h3>
-                <div class="space-y-2">
-                    <a href="{{ route('admin.entities.index') }}" class="flex items-center gap-3 p-2.5 rounded-lg border border-line hover:border-accent transition-colors bg-surface-2 group">
-                        <div class="w-8 h-8 rounded bg-surface flex items-center justify-center text-ink-2 group-hover:text-accent">
-                            <x-icon name="bridge" />
-                        </div>
-                        <div>
-                            <div class="text-xs font-semibold">Enti territoriali</div>
-                            <div class="text-[10px] text-ink-2">Gestione Comuni e Province</div>
-                        </div>
-                    </a>
-                    <a href="{{ route('admin.tariffs.index') }}" class="flex items-center gap-3 p-2.5 rounded-lg border border-line hover:border-accent transition-colors bg-surface-2 group">
-                        <div class="w-8 h-8 rounded bg-surface flex items-center justify-center text-ink-2 group-hover:text-accent">
-                            <x-icon name="euro" />
-                        </div>
-                        <div>
-                            <div class="text-xs font-semibold">Tariffario</div>
-                            <div class="text-[10px] text-ink-2">Coefficienti di usura</div>
-                        </div>
-                    </a>
-                    <a href="{{ route('admin.settings.users.index') }}" class="flex items-center gap-3 p-2.5 rounded-lg border border-line hover:border-accent transition-colors bg-surface-2 group">
-                        <div class="w-8 h-8 rounded bg-surface flex items-center justify-center text-ink-2 group-hover:text-accent">
-                            <x-icon name="user" />
-                        </div>
-                        <div>
-                            <div class="text-xs font-semibold">Gestione utenti</div>
-                            <div class="text-[10px] text-ink-2">Ruoli e impersonazione</div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Impersonation quick panel -->
+            {{-- Impersonation quick panel --}}
             @if(($allUsers ?? collect())->isNotEmpty())
-            <div class="card p-5">
+            <div class="border-t border-line p-5">
                 <h3 class="text-sm font-semibold mb-3">Ambienti di test</h3>
-                <p class="text-[10px] text-ink-3 mb-3">Accedi come un altro utente per testare il sistema.</p>
-                <div class="space-y-1.5">
+                <div class="grid grid-cols-2 gap-2">
                     @foreach(($allUsers ?? collect())->take(8) as $targetUser)
                     @if($targetUser->id !== auth()->id() && $targetUser->canBeImpersonated())
                     <form method="POST" action="{{ route('admin.users.impersonate', $targetUser) }}">
                         @csrf
                         <button type="submit" class="w-full flex items-center gap-2.5 p-2 rounded-lg border border-line hover:border-accent transition-colors bg-surface-2 text-left group">
-                            <div class="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center text-accent text-[10px] font-bold shrink-0">
-                                {{ strtoupper(substr($targetUser->name, 0, 1)) }}
-                            </div>
+                            <x-avatar :name="$targetUser->name" tone="amber" />
                             <div class="min-w-0 flex-1">
                                 <div class="text-xs font-medium truncate">{{ $targetUser->name }}</div>
                                 <div class="text-[10px] text-ink-3 truncate">{{ $targetUser->roles->first()?->name ?? 'nessun ruolo' }}</div>
                             </div>
-                            <x-icon name="arrow-right" size="12" class="text-ink-3 group-hover:text-accent shrink-0" />
                         </button>
                     </form>
                     @endif
@@ -180,40 +301,6 @@
             </div>
             @endif
         </div>
-    </div>
+    </details>
 </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const ctx = document.getElementById('roleChart');
-    if (ctx && window.Chart) {
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: {!! json_encode(array_map(fn($r) => match($r) {
-                    'super-admin' => 'Super Admin',
-                    'operator' => 'Operatore',
-                    'citizen' => 'Cittadino',
-                    'third-party' => 'Ente Terzo',
-                    'law-enforcement' => 'Forze Ordine',
-                    default => $r,
-                }, array_keys($usersByRole ?? []))) !!},
-                datasets: [{
-                    data: {!! json_encode(array_values($usersByRole ?? [])) !!},
-                    backgroundColor: ['#6366f1','#22c55e','#f59e0b','#3b82f6','#ef4444'],
-                    borderWidth: 1,
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                cutout: '65%',
-            }
-        });
-    }
-});
-</script>
-@endpush
 @endsection
-

@@ -12,6 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        DB::statement('CREATE EXTENSION IF NOT EXISTS postgis');
+
         Schema::create('entities', function (Blueprint $table) {
             $table->id();
             $table->string('nome');
@@ -26,7 +28,8 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement('ALTER TABLE entities ADD COLUMN geom MULTIPOLYGON NULL');
+        DB::statement('ALTER TABLE entities ADD COLUMN geom geometry(MULTIPOLYGON, 4326)');
+        DB::statement('CREATE INDEX entities_geom_gix ON entities USING GIST (geom)');
     }
 
     /**

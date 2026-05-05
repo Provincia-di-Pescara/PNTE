@@ -58,6 +58,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         intl \
         mbstring \
         pdo_mysql \
+        pdo_pgsql \
         zip \
         bcmath \
         gd \

@@ -25,8 +25,8 @@ return new class extends Migration
             $table->index(['entity_id', 'active']);
         });
 
-        DB::statement('ALTER TABLE standard_routes ADD COLUMN geometry LINESTRING NOT NULL AFTER nome');
-        DB::statement('CREATE SPATIAL INDEX standard_routes_geometry_idx ON standard_routes (geometry)');
+        DB::statement('ALTER TABLE standard_routes ADD COLUMN geometry geometry(LINESTRING, 4326) NOT NULL');
+        DB::statement('CREATE INDEX standard_routes_geometry_gix ON standard_routes USING GIST (geometry)');
     }
 
     public function down(): void

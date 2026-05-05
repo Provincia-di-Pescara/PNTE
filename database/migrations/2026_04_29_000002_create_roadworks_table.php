@@ -21,8 +21,8 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement('ALTER TABLE roadworks ADD COLUMN geometry LINESTRING NOT NULL AFTER title');
-        DB::statement('CREATE SPATIAL INDEX roadworks_geometry_idx ON roadworks (geometry)');
+        DB::statement('ALTER TABLE roadworks ADD COLUMN geometry geometry(LINESTRING, 4326) NOT NULL');
+        DB::statement('CREATE INDEX roadworks_geometry_gix ON roadworks USING GIST (geometry)');
     }
 
     public function down(): void

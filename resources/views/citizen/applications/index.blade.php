@@ -46,7 +46,7 @@
                 <td class="px-5 py-3 font-mono text-ink-2">{{ $app->valida_da->format('d/m/Y') }}</td>
                 <td class="px-5 py-3 font-mono text-ink-2">{{ $app->valida_fino->format('d/m/Y') }}</td>
                 <td class="px-5 py-3 text-center">
-                    <span class="badge badge-{{ $app->stato->color() }}">{{ $app->stato->label() }}</span>
+                    <x-status-pill :state="$app->stato->value" />
                 </td>
                 <td class="px-5 py-3 text-right">
                     <a href="{{ route('my.applications.show', $app) }}" class="btn btn-sm btn-ghost">Dettaglio</a>

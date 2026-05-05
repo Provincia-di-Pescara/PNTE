@@ -7,7 +7,7 @@
         <p class="text-sm text-ink-2 mt-1">{{ $application->tipo_istanza->label() }}</p>
     </div>
     <div class="flex items-center gap-3">
-        <span class="badge badge-{{ $application->stato->color() }} text-sm px-3 py-1">{{ $application->stato->label() }}</span>
+        <x-status-pill :state="$application->stato->value" />
         @if($application->stato === \App\Enums\ApplicationStatus::Draft)
         <a href="{{ route('my.applications.edit', $application) }}" class="btn btn-ghost">Modifica</a>
         @endif
@@ -75,7 +75,11 @@
                     <tr>
                         <td class="px-5 py-3">{{ $clearance->entity->nome }}</td>
                         <td class="px-5 py-3 text-center">
-                            <span class="badge badge-{{ $clearance->stato->color() }}">{{ $clearance->stato->label() }}</span>
+                            <x-chip :tone="match($clearance->stato->value) {
+                                'approved','pre_cleared' => 'success',
+                                'rejected' => 'danger',
+                                default => 'amber',
+                            }" :dot="true">{{ $clearance->stato->label() }}</x-chip>
                         </td>
                         <td class="px-5 py-3 text-ink-2">{{ $clearance->note ?? '—' }}</td>
                     </tr>
@@ -108,9 +112,9 @@
                         <td class="px-5 py-3 font-mono">{{ $trip->started_at?->format('d/m/Y H:i') ?? '—' }}</td>
                         <td class="px-5 py-3 font-mono text-ink-2">{{ $trip->ended_at?->format('d/m/Y H:i') ?? '—' }}</td>
                         <td class="px-5 py-3 text-center">
-                            <span class="badge badge-{{ $trip->stato === \App\Enums\TripStatus::Active ? 'green' : 'default' }}">
+                            <x-chip :tone="$trip->stato === \App\Enums\TripStatus::Active ? 'success' : 'default'" :dot="true">
                                 {{ $trip->stato->label() }}
-                            </span>
+                            </x-chip>
                         </td>
                         <td class="px-5 py-3 text-right">
                             @if($trip->isActive())
@@ -130,12 +134,21 @@
 
     <div class="space-y-4">
         <div class="card p-5">
-            <h3 class="text-sm font-semibold mb-3">Stato istanza</h3>
-            <div class="space-y-2 text-sm">
-                @foreach(\App\Enums\ApplicationStatus::cases() as $s)
-                <div class="flex items-center gap-2 {{ $application->stato === $s ? 'font-semibold text-ink' : 'text-ink-3' }}">
-                    <div class="w-2 h-2 rounded-full {{ $application->stato === $s ? 'bg-primary' : 'bg-line' }}"></div>
-                    {{ $s->label() }}
+            <h3 class="text-[11px] text-ink-3 tracking-[0.08em] uppercase mb-3">Macchina a stati</h3>
+            @php
+            $stateOrder = ['draft','submitted','waiting_clearances','waiting_payment','approved','rejected'];
+            $currentIdx = array_search($application->stato->value, $stateOrder);
+            @endphp
+            <div class="relative pl-5 space-y-3">
+                <div class="absolute left-[9px] top-1 bottom-1 w-px bg-line"></div>
+                @foreach(\App\Enums\ApplicationStatus::cases() as $i => $s)
+                @php $sIdx = array_search($s->value, $stateOrder); @endphp
+                <div class="relative">
+                    <div class="absolute -left-5 top-1 w-3 h-3 rounded-full
+                        {{ $application->stato === $s ? 'bg-accent ring-4 ring-accent-bg' : ($sIdx < $currentIdx ? 'bg-ink' : 'bg-surface-2 border border-line-2') }}"></div>
+                    <div class="text-[13px] {{ $application->stato === $s ? 'font-semibold text-ink' : ($sIdx < $currentIdx ? 'text-ink-2 font-medium' : 'text-ink-3 font-medium') }}">
+                        {{ $s->label() }}
+                    </div>
                 </div>
                 @endforeach
             </div>

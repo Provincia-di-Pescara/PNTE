@@ -1,14 +1,9 @@
-@extends('layouts.admin')
+@extends('layouts.settings')
 
-@section('content')
-<div class="mb-6 flex items-center gap-3">
-    <a href="{{ route('admin.settings.index') }}" class="text-ink-3 hover:text-ink transition-colors">
-        <x-icon name="chevron" size="14" class="rotate-180" />
-    </a>
-    <div>
-        <h1 class="text-xl font-bold tracking-tight">Server PEC</h1>
-        <p class="text-sm text-ink-2 mt-0.5">Configurazione casella PEC per ricezione e invio comunicazioni ufficiali.</p>
-    </div>
+@section('settings-content')
+<div class="mb-6">
+    <h1 class="text-xl font-bold tracking-tight">Server PEC</h1>
+    <p class="text-sm text-ink-2 mt-0.5">Configurazione casella PEC per ricezione e invio comunicazioni ufficiali.</p>
 </div>
 
 @if(session('success'))

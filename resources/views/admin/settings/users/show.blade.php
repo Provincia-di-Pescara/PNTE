@@ -1,6 +1,6 @@
-@extends('layouts.admin')
+@extends('layouts.settings')
 
-@section('content')
+@section('settings-content')
 <div class="mb-6 flex items-center gap-3">
     <a href="{{ route('admin.settings.users.index') }}" class="text-ink-3 hover:text-ink transition-colors">
         <x-icon name="chevron" size="14" class="rotate-180" />

@@ -1,7 +1,7 @@
 /* global React, GTE, GTEMap, GTEShell, GTEScreens */
 const { Icon: Icm, I: IIm } = window.GTE;
 const { TopBar, SideNav } = window.GTEShell;
-const { WizardScreen, OperatorScreen, ThirdPartyScreen, LawScreen, CitizenScreen, VehicleAddScreen } = window.GTEScreens;
+const { WizardScreen, OperatorScreen, ThirdPartyScreen, LawScreen, CitizenScreen, VehicleAddScreen, OperatorSettingsScreen } = window.GTEScreens;
 
 // Wraps a screen in a fake "app" frame: top bar + side nav.
 function AppFrame({ palette = "civic", role, roleLabel, navItems, navActive, children }) {
@@ -42,6 +42,7 @@ const NAV = {
     { key: "ainop", icon: "bridge", label: "AINOP / PDND" },
     { key: "rendi", icon: "doc", label: "Ragioneria" },
     { key: "audit", icon: "clock", label: "Audit log" },
+    { key: "settings", icon: "filter", label: "Impostazioni" },
   ],
   third: [
     { key: "home", icon: "doc", label: "Pareri", badge: "3", badgeTone: "amber" },
@@ -194,6 +195,13 @@ function App() {
             <AppFrame palette={palette} role="citizen / azienda"
                       roleLabel="Marco Ferraris" navItems={NAV.citizen} navActive="garage">
               <VehicleAddScreen />
+            </AppFrame>
+          </DCArtboard>
+
+          <DCArtboard id="op-settings" label="Operatore · Impostazioni (super-admin)" width={1440} height={920}>
+            <AppFrame palette={palette} role="super-admin · Provincia di Pescara"
+                      roleLabel="Marta Cipriani" navItems={NAV.operator} navActive="settings">
+              <OperatorSettingsScreen />
             </AppFrame>
           </DCArtboard>
         </DCSection>
