@@ -1,14 +1,9 @@
-@extends('layouts.admin')
+@extends('layouts.settings')
 
-@section('content')
-<div class="mb-6 flex items-center gap-3">
-    <a href="{{ route('admin.settings.index') }}" class="text-ink-3 hover:text-ink transition-colors">
-        <x-icon name="chevron" size="14" class="rotate-180" />
-    </a>
-    <div>
-        <h1 class="text-xl font-bold tracking-tight">SPID / CIE (OIDC)</h1>
-        <p class="text-sm text-ink-2 mt-0.5">Configurazione del provider di identità per accesso con SPID e Carta d'Identità Elettronica.</p>
-    </div>
+@section('settings-content')
+<div class="mb-6">
+    <h1 class="text-xl font-bold tracking-tight">SPID / CIE (OIDC)</h1>
+    <p class="text-sm text-ink-2 mt-0.5">Configurazione del provider di identità per accesso con SPID e Carta d'Identità Elettronica.</p>
 </div>
 
 @if(session('success'))

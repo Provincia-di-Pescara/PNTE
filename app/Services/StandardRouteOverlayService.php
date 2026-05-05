@@ -46,7 +46,7 @@ final class StandardRouteOverlayService
                     sr.max_altezza_mm,
                     ST_AsGeoJSON(sr.geometry) AS geojson
              FROM standard_routes sr
-             WHERE sr.active = 1
+                         WHERE sr.active = true
                AND ST_Intersects(ST_Buffer(ST_GeomFromText(?, 4326), 0.0001), sr.geometry)',
             [$wkt]
         );
@@ -74,9 +74,8 @@ final class StandardRouteOverlayService
      * emitted: the frontend renders the base route line in red and paints green ARS
      * segments on top, achieving the same visual effect without aggregate SQL.
      *
-     * Note: MariaDB 11.4 does not support ST_Union as an aggregate function in
-     * subqueries. The uncovered-area calculation (ST_Difference + aggregate ST_Union)
-     * is therefore omitted; coverage is communicated via presence/absence of features.
+     * Note: coverage is communicated via presence/absence of features. This keeps
+     * the payload compact and avoids expensive aggregate geometry operations.
      *
      * @param  string  $wkt  WKT LINESTRING of the user's route (SRID 4326)
      * @return array<string, mixed> GeoJSON FeatureCollection
@@ -93,7 +92,7 @@ final class StandardRouteOverlayService
                         )
                     ) AS intersection_geojson
              FROM standard_routes sr
-             WHERE sr.active = 1
+                         WHERE sr.active = true
                AND ST_Intersects(ST_Buffer(ST_GeomFromText(?, 4326), 0.0001), sr.geometry)
                AND NOT ST_IsEmpty(
                        ST_Intersection(

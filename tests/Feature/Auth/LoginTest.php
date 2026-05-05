@@ -39,7 +39,7 @@ final class LoginTest extends TestCase
             'email' => 'admin@test.it',
             'password' => 'password-sicura-123',
         ]);
-        $user->assignRole(UserRole::SuperAdmin->value);
+        $user->assignRole(UserRole::AdminCapofila->value);
 
         $this->post(route('login.post'), [
             'email' => 'admin@test.it',
@@ -83,7 +83,7 @@ final class LoginTest extends TestCase
     public function test_logout_clears_session_and_redirects_to_login(): void
     {
         $user = User::factory()->create();
-        $user->assignRole(UserRole::SuperAdmin->value);
+        $user->assignRole(UserRole::AdminCapofila->value);
 
         $this->actingAs($user)
             ->post(route('logout'))
@@ -101,7 +101,7 @@ final class LoginTest extends TestCase
     public function test_dashboard_accessible_when_authenticated(): void
     {
         $user = User::factory()->create();
-        $user->assignRole(UserRole::SuperAdmin->value);
+        $user->assignRole(UserRole::AdminCapofila->value);
 
         $this->actingAs($user)
             ->get(route('dashboard'))

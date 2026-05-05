@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# Ensure storage directories exist (required on first run with a fresh volume)
+mkdir -p storage/framework/views storage/framework/cache storage/logs bootstrap/cache
+
 # Rimuove cache di configurazione/route eventualmente prodotta dall'immagine prod,
 # così le env var del container dev hanno sempre la precedenza.
 php artisan config:clear 2>/dev/null || true

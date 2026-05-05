@@ -16,7 +16,7 @@ final class CompanyTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $superAdmin;
+    private User $adminCapofila;
 
     private User $operator;
 
@@ -31,8 +31,8 @@ final class CompanyTest extends TestCase
         }
         Setting::set('setup_completed', '1');
 
-        $this->superAdmin = User::factory()->create();
-        $this->superAdmin->assignRole(UserRole::SuperAdmin->value);
+        $this->adminCapofila = User::factory()->create();
+        $this->adminCapofila->assignRole(UserRole::AdminCapofila->value);
 
         $this->operator = User::factory()->create();
         $this->operator->assignRole(UserRole::Operator->value);
@@ -43,7 +43,7 @@ final class CompanyTest extends TestCase
 
     public function test_index_accessible_by_super_admin(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->get(route('admin.companies.index'))
             ->assertOk()
             ->assertViewIs('admin.companies.index');
@@ -118,7 +118,7 @@ final class CompanyTest extends TestCase
     {
         $company = Company::factory()->create();
 
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->get(route('admin.companies.show', $company))
             ->assertOk()
             ->assertViewIs('admin.companies.show');
@@ -152,7 +152,7 @@ final class CompanyTest extends TestCase
     {
         $company = Company::factory()->create();
 
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->delete(route('admin.companies.destroy', $company))
             ->assertRedirect(route('admin.companies.index'));
 
@@ -170,7 +170,7 @@ final class CompanyTest extends TestCase
             'valid_from' => today(),
         ]);
 
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->post(route('admin.companies.delegation.action', [$company, $user]), [
                 'action' => 'approve',
             ])->assertRedirect(route('admin.companies.show', $company));
@@ -190,7 +190,7 @@ final class CompanyTest extends TestCase
         $user = User::factory()->create();
         $company->users()->attach($user->id, ['role' => 'delegato', 'valid_from' => today()]);
 
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->post(route('admin.companies.delegation.action', [$company, $user]), [
                 'action' => 'reject',
             ])->assertRedirect(route('admin.companies.show', $company));

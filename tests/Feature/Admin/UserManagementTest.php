@@ -16,7 +16,7 @@ final class UserManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $superAdmin;
+    private User $adminCapofila;
 
     private User $citizen;
 
@@ -29,8 +29,8 @@ final class UserManagementTest extends TestCase
         }
         Setting::set('setup_completed', '1');
 
-        $this->superAdmin = User::factory()->create();
-        $this->superAdmin->assignRole(UserRole::SuperAdmin->value);
+        $this->adminCapofila = User::factory()->create();
+        $this->adminCapofila->assignRole(UserRole::AdminCapofila->value);
 
         $this->citizen = User::factory()->create();
         $this->citizen->assignRole(UserRole::Citizen->value);
@@ -38,7 +38,7 @@ final class UserManagementTest extends TestCase
 
     public function test_super_admin_can_list_users(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->get(route('admin.settings.users.index'))
             ->assertOk()
             ->assertViewIs('admin.settings.users.index');
@@ -46,7 +46,7 @@ final class UserManagementTest extends TestCase
 
     public function test_super_admin_can_view_user_detail(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->get(route('admin.settings.users.show', $this->citizen))
             ->assertOk()
             ->assertViewIs('admin.settings.users.show');
@@ -54,7 +54,7 @@ final class UserManagementTest extends TestCase
 
     public function test_super_admin_can_update_user_role(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->patch(route('admin.settings.users.role', $this->citizen), [
                 'role' => UserRole::Operator->value,
             ])
@@ -64,13 +64,13 @@ final class UserManagementTest extends TestCase
         $this->assertTrue($this->citizen->fresh()->hasRole(UserRole::Operator->value));
     }
 
-    public function test_cannot_change_role_of_super_admin(): void
+    public function test_cannot_change_role_of_system_admin(): void
     {
-        $anotherAdmin = User::factory()->create();
-        $anotherAdmin->assignRole(UserRole::SuperAdmin->value);
+        $systemAdmin = User::factory()->create();
+        $systemAdmin->assignRole(UserRole::SystemAdmin->value);
 
-        $this->actingAs($this->superAdmin)
-            ->patch(route('admin.settings.users.role', $anotherAdmin), [
+        $this->actingAs($this->adminCapofila)
+            ->patch(route('admin.settings.users.role', $systemAdmin), [
                 'role' => UserRole::Citizen->value,
             ])
             ->assertForbidden();
@@ -80,7 +80,7 @@ final class UserManagementTest extends TestCase
     {
         $entity = Entity::factory()->create();
 
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->patch(route('admin.settings.users.entity', $this->citizen), [
                 'entity_id' => $entity->id,
             ])

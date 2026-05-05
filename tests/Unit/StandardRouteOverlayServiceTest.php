@@ -39,7 +39,7 @@ final class StandardRouteOverlayServiceTest extends TestCase
         DB::statement(
             'INSERT INTO standard_routes (entity_id, nome, geometry, vehicle_types, active, created_at, updated_at)
              VALUES (?, ?, ST_GeomFromText(?, 4326), ?, ?, NOW(), NOW())',
-            [$entityId, $nome, $wkt, '[]', $active ? 1 : 0]
+            [$entityId, $nome, $wkt, '[]', $active ? 'true' : 'false']
         );
 
         return (int) DB::getPdo()->lastInsertId();
@@ -87,7 +87,7 @@ final class StandardRouteOverlayServiceTest extends TestCase
         DB::statement(
             'INSERT INTO standard_routes
                  (entity_id, nome, geometry, vehicle_types, max_massa_kg, max_lunghezza_mm, active, created_at, updated_at)
-             VALUES (?, ?, ST_GeomFromText(?, 4326), ?, ?, ?, 1, NOW(), NOW())',
+             VALUES (?, ?, ST_GeomFromText(?, 4326), ?, ?, ?, true, NOW(), NOW())',
             [$entity->id, 'SR Limits', 'LINESTRING(13.5 42.5, 13.6 42.6)', '[]', 44000, 18750]
         );
 

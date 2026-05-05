@@ -12,7 +12,7 @@ final class UpdateUserRoleRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->hasRole(UserRole::SuperAdmin->value);
+        return $this->user()->isEnteManager();
     }
 
     /** @return array<string, mixed> */

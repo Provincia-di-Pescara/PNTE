@@ -18,8 +18,8 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement('ALTER TABLE routes ADD COLUMN geometry LINESTRING NOT NULL AFTER waypoints');
-        DB::statement('CREATE SPATIAL INDEX routes_geometry_idx ON routes (geometry)');
+        DB::statement('ALTER TABLE routes ADD COLUMN geometry geometry(LINESTRING, 4326) NOT NULL');
+        DB::statement('CREATE INDEX routes_geometry_gix ON routes USING GIST (geometry)');
     }
 
     public function down(): void

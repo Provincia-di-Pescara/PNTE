@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
-use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class UpdateBrandingSettingsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->hasRole(UserRole::SuperAdmin->value);
+        return $this->user()->isEnteManager();
     }
 
     /** @return array<string, mixed> */

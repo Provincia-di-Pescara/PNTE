@@ -127,13 +127,13 @@ final class SetupController extends Controller
             // Seed roles
             (new RoleSeeder)->run();
 
-            // Create super-admin user
+            // Create first system-admin user
             $user = User::create([
                 'name' => $admin['name'],
                 'email' => $admin['email'],
                 'password' => $admin['password'],
             ]);
-            $user->assignRole(UserRole::SuperAdmin->value);
+            $user->assignRole(UserRole::SystemAdmin->value);
 
             // Mark setup as done
             Setting::set('setup_completed', '1', 'app');

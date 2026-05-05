@@ -66,15 +66,29 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function isCitizen(): bool
+    public function isSystemAdmin(): bool
     {
-        return $this->hasRole(UserRole::Citizen->value);
+        return $this->hasRole(UserRole::SystemAdmin->value);
+    }
+
+    public function isAdminCapofila(): bool
+    {
+        return $this->hasRole(UserRole::AdminCapofila->value);
+    }
+
+    public function isAdminEnte(): bool
+    {
+        return $this->hasRole(UserRole::AdminEnte->value);
+    }
+
+    public function isAdminAzienda(): bool
+    {
+        return $this->hasRole(UserRole::AdminAzienda->value);
     }
 
     public function isOperator(): bool
     {
-        return $this->hasRole(UserRole::Operator->value)
-            || $this->hasRole(UserRole::SuperAdmin->value);
+        return $this->hasRole(UserRole::Operator->value);
     }
 
     public function isThirdParty(): bool
@@ -82,14 +96,41 @@ class User extends Authenticatable
         return $this->hasRole(UserRole::ThirdParty->value);
     }
 
+    public function isCitizen(): bool
+    {
+        return $this->hasRole(UserRole::Citizen->value);
+    }
+
+    public function isLawEnforcement(): bool
+    {
+        return $this->hasRole(UserRole::LawEnforcement->value);
+    }
+
+    /** Admin-capofila or admin-ente can manage entity-level business operations. */
+    public function isEnteManager(): bool
+    {
+        return $this->hasAnyRole([UserRole::AdminCapofila->value, UserRole::AdminEnte->value]);
+    }
+
+    /** Any entity-bound staff role (capofila, admin-ente, operator). */
+    public function isEntityBound(): bool
+    {
+        return $this->hasAnyRole([
+            UserRole::AdminCapofila->value,
+            UserRole::AdminEnte->value,
+            UserRole::Operator->value,
+            UserRole::ThirdParty->value,
+        ]);
+    }
+
     public function canImpersonate(): bool
     {
-        return $this->hasRole(UserRole::SuperAdmin->value);
+        return $this->hasRole(UserRole::SystemAdmin->value);
     }
 
     public function canBeImpersonated(): bool
     {
-        return ! $this->hasRole(UserRole::SuperAdmin->value);
+        return ! $this->hasRole(UserRole::SystemAdmin->value);
     }
 
     /** @return HasMany<ImpersonationLog, $this> */

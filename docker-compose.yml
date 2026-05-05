@@ -19,19 +19,18 @@ services:
     networks:
       - gte
 
-  # ── Database (MariaDB 11.4 LTS) ───────────────────────────────────────────
+  # ── Database (PostgreSQL 16 + PostGIS 3.4) ───────────────────────────────
   db:
-    image: mariadb:11.4
+    image: postgis/postgis:16-3.4
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-      MARIADB_DATABASE: "${DB_DATABASE:-gte_abruzzo}"
-      MARIADB_USER: "${DB_USERNAME:-gte}"
-      MARIADB_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "${DB_DATABASE:-gte_abruzzo}"
+      POSTGRES_USER: "${DB_USERNAME:-gte}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 5

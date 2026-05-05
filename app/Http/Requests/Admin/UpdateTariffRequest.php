@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\Admin;
 
 use App\Enums\AxleType;
-use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -13,7 +12,7 @@ final class UpdateTariffRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->hasRole([UserRole::SuperAdmin->value, UserRole::Operator->value]);
+        return $this->user()->isEnteManager() || $this->user()->isOperator();
     }
 
     /** @return array<string, mixed> */

@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────────────────────
 # Stage 1: Frontend assets (Vite build)
 # ─────────────────────────────────────────────────────────────
-FROM node:22-slim AS node_builder
+FROM node:25-trixie-slim AS node_builder
 WORKDIR /app
 
 COPY --link package.json package-lock.json ./
@@ -38,6 +38,7 @@ RUN apt-get update \
         nginx \
         supervisor \
         libicu-dev \
+        libpq-dev \
         libzip-dev \
         libpng-dev \
         libjpeg62-turbo-dev \
@@ -58,6 +59,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         intl \
         mbstring \
         pdo_mysql \
+        pdo_pgsql \
         zip \
         bcmath \
         gd \

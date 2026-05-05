@@ -1,6 +1,6 @@
-@extends('layouts.admin')
+@extends('layouts.settings')
 
-@section('content')
+@section('settings-content')
 <div class="mb-6">
     <h1 class="text-xl font-bold tracking-tight">Impostazioni email</h1>
     <p class="text-sm text-ink-2 mt-1">Configurazione server SMTP per notifiche e PEC.</p>

@@ -24,12 +24,18 @@ final class Entity extends Model
         'codice_fisc_piva',
         'codice_sdi',
         'codice_univoco_ainop',
+        'is_tenant',
+        'has_financial_delegation',
+        'is_capofila',
     ];
 
     protected function casts(): array
     {
         return [
             'tipo' => EntityType::class,
+            'is_tenant' => 'boolean',
+            'has_financial_delegation' => 'boolean',
+            'is_capofila' => 'boolean',
         ];
     }
 }

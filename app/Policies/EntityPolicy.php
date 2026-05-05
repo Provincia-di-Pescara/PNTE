@@ -12,26 +12,54 @@ final class EntityPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value]);
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        return $user->hasAnyRole([
+            UserRole::AdminCapofila->value,
+            UserRole::AdminEnte->value,
+            UserRole::Operator->value,
+        ]);
     }
 
     public function view(User $user, Entity $entity): bool
     {
-        return $user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value]);
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        return $user->hasAnyRole([
+            UserRole::AdminCapofila->value,
+            UserRole::AdminEnte->value,
+            UserRole::Operator->value,
+        ]);
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole(UserRole::SuperAdmin->value);
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        return $user->hasAnyRole([UserRole::AdminCapofila->value, UserRole::AdminEnte->value]);
     }
 
     public function update(User $user, Entity $entity): bool
     {
-        return $user->hasRole(UserRole::SuperAdmin->value);
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        return $user->hasAnyRole([UserRole::AdminCapofila->value, UserRole::AdminEnte->value]);
     }
 
     public function delete(User $user, Entity $entity): bool
     {
-        return $user->hasRole(UserRole::SuperAdmin->value);
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        return $user->hasRole(UserRole::AdminCapofila->value);
     }
 }

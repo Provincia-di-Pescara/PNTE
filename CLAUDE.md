@@ -49,7 +49,7 @@ docker-compose exec app composer install
 docker-compose exec app php artisan migrate --seed
 ```
 
-Prod stack: `app` (Laravel/PHP-FPM + Nginx + Chromium), `db` (MariaDB 11.4 LTS with spatial extensions), `redis:7`, `osrm` (self-hosted routing engine, `--profile gis`).
+Prod stack: `app` (Laravel/PHP-FPM + Nginx + Chromium), `db` (PostgreSQL 16 + PostGIS 3.4), `redis:7`, `osrm` (self-hosted routing engine, `--profile gis`).
 
 ## Milestone Status
 
@@ -72,7 +72,7 @@ Prod stack: `app` (Laravel/PHP-FPM + Nginx + Chromium), `db` (MariaDB 11.4 LTS w
 ### Tech Stack
 - **Backend**: Laravel 13, PHP 8.4, Eloquent ORM
 - **Frontend**: Blade templates + Tailwind CSS v4 (zero-runtime) + Alpine.js + Leaflet, bundled via Vite 6
-- **Database**: MariaDB 11.4 LTS with native GIS/spatial index support (required for route geometry)
+- **Database**: PostgreSQL 16 + PostGIS 3.4 (required for route geometry and advanced spatial analysis)
 - **Queue/Cache**: Redis (async jobs for PEC email, PDF generation, payment webhooks)
 - **GIS Routing**: Self-hosted OSRM for snap-to-road route calculation
 - **PDF Generation**: Browsershot (Headless Chrome)
@@ -88,20 +88,27 @@ draft → submitted → waiting_clearances → waiting_payment → approved
 ```
 
 Eloquent models — implemented (✅) or planned (🔜):
-- ✅ `users` — natural persons with fiscal identity (SPID/CIE data), `entity_id` FK for third-party role
-- ✅ `companies` — companies/agencies with delegations via `company_user` pivot
+- ✅ `users` — natural persons with fiscal identity (SPID/CIE data); powers derive either from runtime public-registry validation or from explicit internal delegations
+- ✅ `companies` — principals and agencies (`is_agency`) with official registry data and partner relationships
+- 🔜 `agency_mandates` — explicit Company -> Agency partner mandate with legal duration, signed document, scope rules, suspension/revocation, renewal workflow and audit metadata
+- 🔜 `delegations` — polymorphic authorization binding for individual users, subordinate to an active `agency_mandate` when operating on behalf of an agency
+- 🔜 `vehicle_documents` — registration booklets, load diagrams, homologation files attached to vehicles
 - ✅ `vehicles` — tractor units and trailers with axle/weight configurations (`vehicle_axles`)
-- ✅ `entities` — municipalities, provinces, ANAS, motorways with GIS polygons (`geom`), PEC, AINOP stub
+- ✅ `entities` — municipalities, provinces, ANAS, motorways with GIS polygons (`geom`), PEC, AINOP stub, `is_tenant` (bool), `has_financial_delegation` (bool), `is_capofila` (bool)
 - ✅ `tariffs` — historically-versioned wear coefficients used by `WearCalculationService`
 - ✅ `routes` — LineString geometry of authorized route with per-entity km breakdown (`entity_breakdown`)
 - ✅ `roadworks` — construction sites: geometry (LINESTRING/POLYGON), `valid_from`/`valid_to`, severity, status
 - 🔜 `applications` — transport authorization request and its state
-- 🔜 `clearances` — third-party approvals (Nulla Osta) per entity per application
+- ✅ `standard_routes` — ARS pre-approved routes (LINESTRING, sagoma/massa limits) for Fast-Track clearances
+- 🔜 `clearances` — third-party approvals (Nulla Osta) per entity per application; states: `pre_cleared`, `pending_review`, `approved`, `rejected`
 
 ### RBAC Roles
-- `super-admin` — Provincia di Pescara operators (full access)
-- `operator` — other province operators
-- `third-party` — municipalities, ANAS (clearance dashboard + roadworks management; scoped to own `entity_id`)
+- `system-admin` — platform/infrastructure operators; no entity/company binding; only `/system`; 403 on all business routes
+- `admin-ente` — entity-bound manager; handles operators, payments, clearances, reports; `is_capofila=true` unlocks governance powers
+- `operator` — entity-bound staff for own tenant/entity workflows
+- `admin-azienda` — company-bound manager for transport company or agency
+- `agency` — agency operators with multiple active `agency_mandates` and session-level partner context switcher
+- `third-party` — municipalities, ANAS (clearance dashboard + roadworks management; scoped via `delegations`)
 - `citizen` — transport companies/agencies submitting requests
 - `law-enforcement` — Forze dell'Ordine (read-only: approved transports, active roadworks, QR code verification)
 
@@ -110,24 +117,66 @@ Eloquent models — implemented (✅) or planned (🔜):
 - **`OsrmService`** — HTTP client for self-hosted OSRM: `snapToRoad()`, `alternatives()`; WKT via `ST_AsText(ST_GeomFromGeoJSON(?))`
 - **`RouteIntersectionService`** — `ST_Intersects` + `ST_Length * 111.32` → entity_id → km breakdown
 - **`RoadworkConflictService`** — `ST_Intersects` + date overlap + status filter → active conflicts on a route
+- **`GeoJsonExportService`** — RFC 7946 GeoJSON export for routes, entities, roadworks; SRID 4326 compliance; geometry simplification for frontend; metadata enrichment (entity breakdown, authority names, km totals)
+- **`SpatialQueryService`** — unified interface for `ST_Intersects()`, `ST_Length()`, `ST_Buffer()` operations; caches results in Redis (TTL 30 min); pre-computes `entity_breakdown` materialization; manages spatial index optimization
 
 ### Planned Services
+- **`AgencyDetectionService`** — queries PDND Infocamiere API by P.IVA; extracts `ateco_principale` and `descrizione_attivita`; filters by ATECO 82.99.11 + Legge 264/1991 compliance keywords; returns `['is_agency' => bool, 'ateco_code' => string, 'ateco_description' => string, 'compliance_verified' => bool]`; used in onboarding flow and monthly re-sync job
 - **AINOP integration** — via PDND API, verify bridge/infra capacity on route (`codice_univoco_ainop` on entities)
 - **PagoPA clearing** — IUV from `WearCalculationService` output; RT webhook unlock application; split proceeds among entities
+- **`PdfTemplateService`** — generates official PDFs (tenant-admin nomination, special mandate, authorization layouts) from Blade templates and public-registry data
+- **`P7mVerificationService`** — validates CAdES/PAdES files, checks integrity/revocation, extracts signer CF from certificate, matches against IPA/PDND registries
+- **`PartnerMandateLifecycleService`** — enforces `agency_mandates` expiry, T-30/T-7 reminders, simplified renewals, suspension/revocation and partner-scope checks
+- **`ResourceLockService`** — prevents duplicate applications for the same vehicle/date window and preserves the originating partner context for audit
 
 ### Geographic/GIS Layer
-MariaDB spatial fields (`POLYGON`, `MULTIPOLYGON`, `LINESTRING`) store entity boundaries + route geometries. Spatial indices required. OSRM pre-loaded with regional road graph. Frontend uses Leaflet.
+PostGIS spatial fields (`POLYGON`, `MULTIPOLYGON`, `LINESTRING`) store entity boundaries + route geometries. GiST indices required. OSRM pre-loaded with regional road graph. Frontend uses Leaflet.
 
 - Geometries stored with SRID 4326 via `ST_GeomFromText(?, 4326)`
 - `ST_Length` on SRID 4326 returns degrees; converted to km with `× 111.32` (< 2% error at 41–42°N)
 - WKT extracted for service queries via `ST_AsText(geometry)`
-- Spatial columns added via `DB::statement('ALTER TABLE ... ADD COLUMN geometry LINESTRING NOT NULL')` and `CREATE SPATIAL INDEX`
+- Spatial columns added via `DB::statement('ALTER TABLE ... ADD COLUMN geometry geometry(LINESTRING, 4326) NOT NULL')` and `CREATE INDEX ... USING GIST (...)`
 
 ### GIS Import
 `php artisan gte:import-geo {file}` — imports GeoJSON FeatureCollection into `entities.geom`. Matches by `codice_istat` property. Source shapefiles converted via `ogr2ogr -f GeoJSON output.geojson input.shp`.
 
 ### Architecture Docs
 `.ai/` dir (to be created) — deep-dive docs on complex subsystems: `STATE_MACHINE.md`, `GIS_ROUTING.md`, `WEAR_CALCULATION.md`, `PAGOPA.md`. Read before working on relevant domain.
+
+## AgID Compliance — Principi Vincolanti per lo Sviluppo
+
+Ogni contributo al codice deve rispettare i seguenti principi. Non sono linee guida opzionali: violazioni bloccano il merge.
+
+| Principio | Regola operativa |
+|---|---|
+| **Once-Only** | Se un dato è disponibile da SPID, IPA, InfoCamere o altro endpoint PDND: **non chiederlo all'utente**. Campo compilabile da API = campo read-only. Aggiungere un campo manuale dove esiste un'API pubblica è un bug. |
+| **Digital-by-Default** | Nessun processo con fallback cartaceo o "scarica il modulo". Ogni transizione di stato deve essere completabile interamente in piattaforma. |
+| **Privacy-by-Design** | Dato minimo necessario (art. 25 GDPR). Zero PII nei log applicativi (no `Log::info($user->codice_fiscale)`). `codice_fiscale` cifrato at-rest. Soft-delete con anonimizzazione pianificata. |
+| **Accessibilità (WCAG 2.1 AA)** | Seguire i pattern del Design System PA. Attributi `aria-*` su ogni componente interattivo Alpine.js. Contrasti minimi conformi. Non fare merge di UI senza test con screen reader. |
+| **Interoperabilità (EIF/ModI)** | Endpoint pubblici documentati con OpenAPI 3.0. Versionamento API in URL (`/api/v1/`). Output geografici in formato GeoJSON. Header `Content-Type: application/json` su tutti gli endpoint API. |
+| **Open-Source by Default** | Licenza EUPL-1.2. Prima di aggiungere un vendor privato, verificare su Developers Italia se esiste un'alternativa a riuso. `publiccode.yml` aggiornato a ogni milestone. |
+| **Cloud-Native / Stateless** | Nessun dato persistente nel container `app` (no file locali fuori da `storage/`). Storage via Laravel Filesystem driver configurabile. Le migration girano automaticamente all'avvio via `entrypoint.sh`. |
+| **Zero-Trust** | Policy Laravel su ogni Model: nessuna logica di autorizzazione inline nei controller. Rate-limiting su tutti gli endpoint pubblici e API. Validazione input esclusivamente via Form Request. |
+| **Tenant Guard** | Operazioni finanziarie (generazione IUV, Clearing House) possono essere avviate solo se la Provincia di partenza ha `is_tenant = true`. Verificare esplicitamente nei Service, non assumere dal contesto. |
+| **Riuso-prima-di-costruire** | Prima di implementare un'integrazione PA, verificare client ufficiali su Developers Italia o pacchetti AgID. |
+
+### Entity Flags: `is_tenant`, `has_financial_delegation`, `is_capofila`
+
+Tre boolean su `entities`, indipendenti e ortogonali:
+
+- **`is_tenant`** (default `false`): se `true`, l'ente ha una dashboard attiva; il sistema invia PEC di avviso e attende approvazione in piattaforma. Se `false`, PEC automatica e operatore Provincia sblocca manualmente.
+- **`has_financial_delegation`** (default `false`): se `true`, la quota usura dell'ente è inclusa nell'IUV PagoPA della Provincia e redistribuita via SEPA mensile. Se `false`, quota scorporata dall'IUV con avviso all'utente. Il flag può essere attivato/disattivato dall'ente dalla propria dashboard con grace period fino a mezzanotte.
+- **`is_capofila`** (default `false`): se `true`, l'ente abilita onboarding zero-touch del primo `admin-ente`, governance fallback, reportistica aggregata e coordinamento tenant.
+
+### System/Admin Isolation
+
+- `system-admin` users MUST NOT have active rows in `delegations` or `agency_mandates`.
+- Business routes (`/pratiche`, `/pagamenti`, `/nulla-osta`, PDF download, SEPA exports) MUST require an active delegation binding to `Entity` or `Company`; when the actor is an agency operator, the route MUST also resolve to an active `agency_mandate` for the selected principal company.
+- The first `admin-ente` onboarding for a public entity MUST use system-generated PDF + signed upload (`.p7m`/PAdES) validated by `P7mVerificationService`.
+- The same validation engine is reused for Agency -> Company special mandates, to keep approval binary and non-discretionary.
+- `agency_mandates.valid_until` MUST NEVER exceed the expiry date written into the signed special-mandate document chosen during PDF generation.
+- A principal company MUST be able to suspend or revoke one agency partner instantly without affecting other partner mandates.
+- Audit trails MUST persist both the acting user and the originating partner context (`agency_mandate_id` or equivalent) on sensitive business operations.
 
 ## PHP & Laravel Conventions
 
@@ -177,8 +226,8 @@ All else → **database**, managed via **admin UI**:
 
 `APP_VERSION*` are Docker build ARGs from CI/CD — not runtime env vars, must not appear in `.env`.
 
-### Database — always MariaDB
-MariaDB 11.4 LTS only. No SQLite fallback. Local dev must use `docker compose up` with `db` service.
+### Database — PostgreSQL + PostGIS
+PostgreSQL 16 with PostGIS 3.4 only. No SQLite fallback. Local dev must use `docker compose up` with `db` service.
 
 ### Production deployment — Portainer, no shell access
 Prod runs on Portainer (Docker stack). No shell access to containers. Consequences:
@@ -207,6 +256,6 @@ The model has `protected $table = 'routes'` explicitly set.
 ## Project Structure Notes
 - PSR-4: application code in `App\`, tests in `Tests\`
 - Jobs (async): `App\Jobs\` — PEC notifications, PDF generation, payment webhooks
-- `.env.example` covers only bootstrap/network vars; production uses MariaDB + Redis
+- `.env.example` covers only bootstrap/network vars; production uses PostgreSQL/PostGIS + Redis
 - EUPL-1.2 license; `publiccode.yml` keep current with new deps or deployment requirements
 - `docker-compose.dev.yml` (gitignored) — local dev override with volume mount; use alongside `docker-compose.yml`

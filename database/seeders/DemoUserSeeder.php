@@ -20,41 +20,58 @@ final class DemoUserSeeder extends Seeder
         $comune = Entity::where('codice_istat', '068014')->first();
         $anas = Entity::where('nome', 'ANAS SpA')->first();
 
-        // 1. Super-admin — Provincia di Pescara
-        $admin = User::updateOrCreate(
-            ['email' => 'admin@provincia.pe.it'],
+        // 1. system-admin — infra/IT operator, local login only, no entity binding
+        User::updateOrCreate(
+            ['email' => 'system@gte.interno'],
             [
-                'name' => 'Admin Provincia',
+                'name' => 'Amministratore Sistema',
+                'password' => Hash::make('password'),
+                'entity_id' => null,
+            ]
+        )->syncRoles([UserRole::SystemAdmin->value]);
+
+        // 2. admin-capofila — Provincia di Pescara (is_capofila entity)
+        User::updateOrCreate(
+            ['email' => 'capofila@provincia.pe.it'],
+            [
+                'name' => 'Responsabile Capofila',
                 'password' => Hash::make('password'),
                 'entity_id' => $provincia?->id,
             ]
-        );
-        $admin->syncRoles([UserRole::SuperAdmin->value]);
+        )->syncRoles([UserRole::AdminCapofila->value]);
 
-        // 2. Third-party — Comune di Pescara
-        $comune_user = User::updateOrCreate(
-            ['email' => 'tecnico@comune.pescara.it'],
+        // 3. admin-ente — Provincia di Pescara standard
+        User::updateOrCreate(
+            ['email' => 'admin@provincia.pe.it'],
             [
-                'name' => 'Tecnico Comune Pescara',
+                'name' => 'Admin Provincia Pescara',
+                'password' => Hash::make('password'),
+                'entity_id' => $provincia?->id,
+            ]
+        )->syncRoles([UserRole::AdminEnte->value]);
+
+        // 4. operator (entity-bound) — Comune di Pescara
+        User::updateOrCreate(
+            ['email' => 'operatore@comune.pescara.it'],
+            [
+                'name' => 'Operatore Comune Pescara',
                 'password' => Hash::make('password'),
                 'entity_id' => $comune?->id,
             ]
-        );
-        $comune_user->syncRoles([UserRole::ThirdParty->value]);
+        )->syncRoles([UserRole::Operator->value]);
 
-        // 3. Third-party — ANAS SpA
-        $anas_user = User::updateOrCreate(
+        // 5. third-party — ANAS SpA
+        User::updateOrCreate(
             ['email' => 'tecnico@anas.it'],
             [
                 'name' => 'Tecnico ANAS',
                 'password' => Hash::make('password'),
                 'entity_id' => $anas?->id,
             ]
-        );
-        $anas_user->syncRoles([UserRole::ThirdParty->value]);
+        )->syncRoles([UserRole::ThirdParty->value]);
 
-        // 4. Citizen — transport company
-        $citizen = User::updateOrCreate(
+        // 6. admin-azienda — transport company principal
+        $admin = User::updateOrCreate(
             ['email' => 'mario.rossi@trasporti.it'],
             [
                 'name' => 'Mario Rossi',
@@ -62,7 +79,7 @@ final class DemoUserSeeder extends Seeder
                 'entity_id' => null,
             ]
         );
-        $citizen->syncRoles([UserRole::Citizen->value]);
+        $admin->syncRoles([UserRole::AdminAzienda->value]);
 
         $company = Company::updateOrCreate(
             ['partita_iva' => '01234567890'],
@@ -76,8 +93,8 @@ final class DemoUserSeeder extends Seeder
             ]
         );
 
-        if (! $company->users()->where('user_id', $citizen->id)->exists()) {
-            $company->users()->attach($citizen->id, [
+        if (! $company->users()->where('user_id', $admin->id)->exists()) {
+            $company->users()->attach($admin->id, [
                 'role' => DelegationRole::Titolare->value,
                 'valid_from' => now(),
                 'approved_at' => now(),
@@ -85,15 +102,24 @@ final class DemoUserSeeder extends Seeder
             ]);
         }
 
-        // 5. Law enforcement
-        $agent = User::updateOrCreate(
+        // 7. citizen — individual submitting requests
+        User::updateOrCreate(
+            ['email' => 'cittadino@example.it'],
+            [
+                'name' => 'Giuseppe Verdi',
+                'password' => Hash::make('password'),
+                'entity_id' => null,
+            ]
+        )->syncRoles([UserRole::Citizen->value]);
+
+        // 8. law-enforcement — Polizia Stradale
+        User::updateOrCreate(
             ['email' => 'agente@polstrada.it'],
             [
                 'name' => 'Agente Polizia Stradale',
                 'password' => Hash::make('password'),
                 'entity_id' => null,
             ]
-        );
-        $agent->syncRoles([UserRole::LawEnforcement->value]);
+        )->syncRoles([UserRole::LawEnforcement->value]);
     }
 }

@@ -17,7 +17,7 @@ final class EntityTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $superAdmin;
+    private User $adminCapofila;
 
     private User $operator;
 
@@ -32,8 +32,8 @@ final class EntityTest extends TestCase
         }
         Setting::set('setup_completed', '1');
 
-        $this->superAdmin = User::factory()->create();
-        $this->superAdmin->assignRole(UserRole::SuperAdmin->value);
+        $this->adminCapofila = User::factory()->create();
+        $this->adminCapofila->assignRole(UserRole::AdminCapofila->value);
 
         $this->operator = User::factory()->create();
         $this->operator->assignRole(UserRole::Operator->value);
@@ -66,7 +66,7 @@ final class EntityTest extends TestCase
 
     public function test_create_form_accessible_by_super_admin(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->get(route('admin.entities.create'))
             ->assertOk()
             ->assertViewIs('admin.entities.form');
@@ -74,7 +74,7 @@ final class EntityTest extends TestCase
 
     public function test_store_creates_entity(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->post(route('admin.entities.store'), [
                 'nome' => 'Comune di Pescara',
                 'tipo' => EntityType::Comune->value,
@@ -99,7 +99,7 @@ final class EntityTest extends TestCase
 
     public function test_store_validates_tipo_enum(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->post(route('admin.entities.store'), [
                 'nome' => 'Test',
                 'tipo' => 'tipo_inesistente',
@@ -110,7 +110,7 @@ final class EntityTest extends TestCase
     {
         Entity::factory()->create(['codice_istat' => '068028']);
 
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->post(route('admin.entities.store'), [
                 'nome' => 'Altro Comune',
                 'tipo' => EntityType::Comune->value,
@@ -132,7 +132,7 @@ final class EntityTest extends TestCase
     {
         $entity = Entity::factory()->create(['nome' => 'Comune Vecchio']);
 
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->put(route('admin.entities.update', $entity), [
                 'nome' => 'Comune Aggiornato',
                 'tipo' => $entity->tipo->value,
@@ -167,7 +167,7 @@ final class EntityTest extends TestCase
     {
         $entity = Entity::factory()->create();
 
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->delete(route('admin.entities.destroy', $entity))
             ->assertRedirect(route('admin.entities.index'));
 

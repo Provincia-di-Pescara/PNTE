@@ -37,7 +37,7 @@ final class ArsOverlayTest extends TestCase
     {
         DB::statement(
             'INSERT INTO standard_routes (entity_id, nome, geometry, vehicle_types, active, created_at, updated_at)
-             VALUES (?, ?, ST_GeomFromText(?, 4326), ?, 1, NOW(), NOW())',
+             VALUES (?, ?, ST_GeomFromText(?, 4326), ?, true, NOW(), NOW())',
             [$entityId, $nome, $wkt, '[]']
         );
     }

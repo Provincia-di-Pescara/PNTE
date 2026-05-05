@@ -1,6 +1,6 @@
-@extends('layouts.admin')
+@extends('layouts.settings')
 
-@section('content')
+@section('settings-content')
 <div class="mb-6 flex items-center gap-3">
     <a href="{{ route('admin.settings.users.index') }}" class="text-ink-3 hover:text-ink transition-colors">
         <x-icon name="chevron" size="14" class="rotate-180" />
@@ -10,7 +10,7 @@
         <p class="text-sm text-ink-2 mt-0.5">{{ $user->email ?? $user->codice_fiscale }}</p>
     </div>
     @if($user->canBeImpersonated())
-    <form method="POST" action="{{ route('admin.users.impersonate', $user) }}" class="ml-auto">
+    <form method="POST" action="{{ route('system.users.impersonate', $user) }}" class="ml-auto">
         @csrf
         <button type="submit" class="btn">
             <x-icon name="user" size="14" /> Impersona

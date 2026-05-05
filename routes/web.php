@@ -9,21 +9,27 @@ use App\Http\Controllers\Admin\ImpersonateController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TariffController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Agency\DashboardController as AgencyDashboardController;
 use App\Http\Controllers\Api\ArsOverlayController;
 use App\Http\Controllers\Api\EntityGeoJsonController;
 use App\Http\Controllers\Api\RoutingController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OidcController;
+use App\Http\Controllers\Citizen\ApplicationController;
 use App\Http\Controllers\Citizen\DelegationController;
 use App\Http\Controllers\Citizen\RouteBuilderController;
+use App\Http\Controllers\Citizen\TripController;
 use App\Http\Controllers\Citizen\VehicleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LawEnforcement\RadarController;
 use App\Http\Controllers\Setup\SetupController;
+use App\Http\Controllers\System\DashboardController as SystemDashboardController;
+use App\Http\Controllers\ThirdParty\ClearanceController;
 use App\Http\Controllers\ThirdParty\RoadworkController;
 use App\Http\Controllers\ThirdParty\StandardRouteController;
 use Illuminate\Support\Facades\Route;
 
-// Setup wizard (exempt from EnsureSetupComplete via middleware logic)
+// ── Setup wizard (exempt from EnsureSetupComplete via middleware logic) ──────
 Route::prefix('setup')->name('setup.')->group(function () {
     Route::get('/', [SetupController::class, 'index'])->name('index');
     Route::get('/1', [SetupController::class, 'showStep1'])->name('step1');
@@ -37,53 +43,51 @@ Route::prefix('setup')->name('setup.')->group(function () {
     Route::post('/test-email', [SetupController::class, 'testEmail'])->name('test-email');
 });
 
-// Authentication — local (operators/admins)
+// ── Authentication ────────────────────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Authentication — SPID/CIE via external OIDC proxy
 Route::get('/auth/redirect', [OidcController::class, 'redirect'])->name('auth.oidc.redirect');
 Route::get('/auth/callback', [OidcController::class, 'callback'])->name('auth.oidc.callback');
 
-// Public-geometry API (no auth required — geographic boundary data)
+// ── Public GIS API ────────────────────────────────────────────────────────────
 Route::get('/api/entities/geojson', [EntityGeoJsonController::class, 'index'])->name('api.entities.geojson');
 
-// Protected area
+// ── Authenticated area ────────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
-        return redirect()->route('dashboard');
-    });
-
+    Route::get('/', fn () => redirect()->route('dashboard'));
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
-    // Citizen: deleghe aziendali
-    Route::prefix('my')->name('my.')->group(function () {
-        Route::post('delegations/lookup', [DelegationController::class, 'lookup'])->name('delegations.lookup');
-        Route::resource('delegations', DelegationController::class)->only(['index', 'create', 'store']);
+    // Leave impersonation — accessible to impersonated users (not system-admin restricted)
+    Route::delete('/impersonate', [ImpersonateController::class, 'leave'])->name('impersonate.leave');
 
-        Route::resource('vehicles', VehicleController::class)
-            ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+    // ── /system — system-admin only (infra panel, zero business data) ─────────
+    Route::prefix('system')->name('system.')->middleware('system-admin')->group(function () {
+        Route::get('/', [SystemDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/tenants', [SystemDashboardController::class, 'tenants'])->name('tenants');
+        Route::post('/tenants/{entity}/toggle', [SystemDashboardController::class, 'toggleTenant'])->name('tenants.toggle');
+        Route::get('/connectors', [SystemDashboardController::class, 'connectors'])->name('connectors');
+        Route::get('/smtp', [SystemDashboardController::class, 'smtp'])->name('smtp');
+        Route::post('/smtp/test', [SystemDashboardController::class, 'testSmtp'])->name('smtp.test');
+        Route::get('/scheduler', [SystemDashboardController::class, 'scheduler'])->name('scheduler');
+        Route::get('/metrics', [SystemDashboardController::class, 'metrics'])->name('metrics');
+        Route::get('/geo', [SystemDashboardController::class, 'geo'])->name('geo');
+        Route::post('/geo/fetch', [SystemDashboardController::class, 'fetchGeo'])->name('geo.fetch');
+        Route::post('/geo/import', [SystemDashboardController::class, 'importGeo'])->name('geo.import');
+        Route::get('/audit', [SystemDashboardController::class, 'auditInfra'])->name('audit');
+        Route::get('/release', [SystemDashboardController::class, 'release'])->name('release');
+        Route::get('/users', [SystemDashboardController::class, 'users'])->name('users.index');
+        Route::post('/users', [SystemDashboardController::class, 'storeUser'])->name('users.store');
+        Route::patch('/users/{user}/disable', [SystemDashboardController::class, 'disableUser'])->name('users.disable');
+        Route::patch('/users/{user}/reset-password', [SystemDashboardController::class, 'resetPassword'])->name('users.reset-password');
 
-        Route::resource('routes', RouteBuilderController::class)->only(['create', 'store', 'show']);
+        // Impersonation — only system-admin can START impersonation; leave is in general auth group above
+        Route::post('/users/{user}/impersonate', [ImpersonateController::class, 'take'])->name('users.impersonate');
     });
 
-    // API
-    Route::prefix('api')->name('api.')->group(function () {
-        Route::post('routing/snap', [RoutingController::class, 'snap'])->name('routing.snap');
-        Route::post('routing/alternatives', [RoutingController::class, 'alternatives'])->name('routing.alternatives');
-        Route::post('routing/ars-overlay', [ArsOverlayController::class, 'index'])->name('routing.ars-overlay');
-        Route::post('admin/companies/lookup', CompanyLookupController::class)->name('admin.companies.lookup');
-    });
-
-    // Third-party: roadworks management
-    Route::prefix('third-party')->name('third-party.')->group(function () {
-        Route::resource('roadworks', RoadworkController::class);
-        Route::resource('standard-routes', StandardRouteController::class);
-    });
-
-    // Admin
-    Route::prefix('admin')->name('admin.')->group(function () {
+    // ── /admin — admin-capofila, admin-ente, operator (entity-bound) ──────────
+    Route::prefix('admin')->name('admin.')->middleware(['not-system-admin', 'role:admin-capofila|admin-ente|operator'])->group(function () {
         Route::resource('companies', CompanyController::class);
         Route::post('companies/{company}/delegations/{user}/action', [CompanyController::class, 'approveDelegation'])
             ->name('companies.delegation.action');
@@ -93,12 +97,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('tariffs', TariffController::class)
             ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
-        // Impersonazione
-        Route::post('users/{user}/impersonate', [ImpersonateController::class, 'take'])->name('users.impersonate');
-        Route::delete('impersonate', [ImpersonateController::class, 'leave'])->name('impersonate.leave');
-
-        // Impostazioni
-        Route::prefix('settings')->name('settings.')->group(function () {
+        // Settings (mail, general, gis, oidc, pec, pdnd) — admin-capofila or admin-ente only
+        Route::prefix('settings')->name('settings.')->middleware('role:admin-capofila|admin-ente')->group(function () {
             Route::get('/', [SettingController::class, 'index'])->name('index');
 
             Route::get('mail', [SettingController::class, 'showMail'])->name('mail');
@@ -134,5 +134,58 @@ Route::middleware('auth')->group(function () {
                 Route::patch('{user}/entity', [UserController::class, 'updateEntity'])->name('entity');
             });
         });
+    });
+
+    // ── /my — admin-azienda, citizen, operator (company-bound) ───────────────
+    Route::prefix('my')->name('my.')->middleware('not-system-admin')->group(function () {
+        Route::post('delegations/lookup', [DelegationController::class, 'lookup'])->name('delegations.lookup');
+        Route::resource('delegations', DelegationController::class)->only(['index', 'create', 'store']);
+
+        Route::resource('vehicles', VehicleController::class)
+            ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+
+        Route::resource('routes', RouteBuilderController::class)->only(['create', 'store', 'show']);
+
+        Route::resource('applications', ApplicationController::class)
+            ->only(['index', 'create', 'store', 'show', 'edit', 'update']);
+
+        Route::post('applications/{application}/trips', [TripController::class, 'store'])
+            ->name('applications.trips.store');
+        Route::patch('trips/{trip}/end', [TripController::class, 'end'])
+            ->name('trips.end');
+    });
+
+    // ── /api — authenticated routing endpoints ────────────────────────────────
+    Route::prefix('api')->name('api.')->middleware('not-system-admin')->group(function () {
+        Route::post('routing/snap', [RoutingController::class, 'snap'])->name('routing.snap');
+        Route::post('routing/alternatives', [RoutingController::class, 'alternatives'])->name('routing.alternatives');
+        Route::post('routing/ars-overlay', [ArsOverlayController::class, 'index'])->name('routing.ars-overlay');
+        Route::post('admin/companies/lookup', CompanyLookupController::class)->name('admin.companies.lookup');
+    });
+
+    // ── /third-party — third-party entity operators ───────────────────────────
+    Route::prefix('third-party')->name('third-party.')->middleware(['not-system-admin', 'role:third-party', 'entity-bound'])->group(function () {
+        Route::resource('roadworks', RoadworkController::class);
+        Route::resource('standard-routes', StandardRouteController::class);
+
+        Route::resource('clearances', ClearanceController::class)->only(['index', 'show']);
+        Route::post('clearances/{clearance}/approve', [ClearanceController::class, 'approve'])
+            ->name('clearances.approve');
+        Route::post('clearances/{clearance}/reject', [ClearanceController::class, 'reject'])
+            ->name('clearances.reject');
+    });
+
+    // ── /agency — Agenzie di pratiche auto (ATECO 82.99.11 · L. 264/1991) ─────
+    Route::prefix('agency')->name('agency.')->middleware(['not-system-admin', 'role:agency'])->group(function () {
+        Route::get('/', [AgencyDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/partners', [AgencyDashboardController::class, 'partners'])->name('partners');
+        Route::get('/applications', [AgencyDashboardController::class, 'applications'])->name('applications');
+        Route::get('/audit', [AgencyDashboardController::class, 'audit'])->name('audit');
+    });
+
+    // ── /law-enforcement — Forze dell'Ordine (read-only) ─────────────────────
+    Route::prefix('law-enforcement')->name('law-enforcement.')->middleware(['not-system-admin', 'role:law-enforcement'])->group(function () {
+        Route::get('radar', [RadarController::class, 'index'])->name('radar.index');
+        Route::get('radar/{application}', [RadarController::class, 'show'])->name('radar.show');
     });
 });

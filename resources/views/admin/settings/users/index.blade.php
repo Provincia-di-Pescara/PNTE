@@ -1,15 +1,10 @@
-@extends('layouts.admin')
+@extends('layouts.settings')
 
-@section('content')
+@section('settings-content')
 <div class="mb-6 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-        <a href="{{ route('admin.settings.index') }}" class="text-ink-3 hover:text-ink transition-colors">
-            <x-icon name="chevron" size="14" class="rotate-180" />
-        </a>
-        <div>
-            <h1 class="text-xl font-bold tracking-tight">Gestione utenti</h1>
-            <p class="text-sm text-ink-2 mt-0.5">{{ $users->total() }} utenti registrati.</p>
-        </div>
+    <div>
+        <h1 class="text-xl font-bold tracking-tight">Gestione utenti</h1>
+        <p class="text-sm text-ink-2 mt-0.5">{{ $users->total() }} utenti registrati.</p>
     </div>
 </div>
 
@@ -59,7 +54,7 @@
                             Gestisci
                         </a>
                         @if($user->canBeImpersonated())
-                        <form method="POST" action="{{ route('admin.users.impersonate', $user) }}">
+                        <form method="POST" action="{{ route('system.users.impersonate', $user) }}">
                             @csrf
                             <button type="submit" class="btn btn-sm" title="Impersona utente">
                                 <x-icon name="user" size="13" />

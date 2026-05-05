@@ -15,7 +15,7 @@ final class SettingsTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $superAdmin;
+    private User $adminCapofila;
 
     private User $operator;
 
@@ -28,8 +28,8 @@ final class SettingsTest extends TestCase
         }
         Setting::set('setup_completed', '1');
 
-        $this->superAdmin = User::factory()->create();
-        $this->superAdmin->assignRole(UserRole::SuperAdmin->value);
+        $this->adminCapofila = User::factory()->create();
+        $this->adminCapofila->assignRole(UserRole::AdminCapofila->value);
 
         $this->operator = User::factory()->create();
         $this->operator->assignRole(UserRole::Operator->value);
@@ -37,7 +37,7 @@ final class SettingsTest extends TestCase
 
     public function test_settings_index_accessible_by_super_admin(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->get(route('admin.settings.index'))
             ->assertOk()
             ->assertViewIs('admin.settings.index');
@@ -52,7 +52,7 @@ final class SettingsTest extends TestCase
 
     public function test_super_admin_can_view_general_settings(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->get(route('admin.settings.general'))
             ->assertOk()
             ->assertViewIs('admin.settings.general');
@@ -60,7 +60,7 @@ final class SettingsTest extends TestCase
 
     public function test_super_admin_can_update_general_settings(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->put(route('admin.settings.general.update'), [
                 'app_name' => 'GTE Molise',
                 'app_timezone' => 'Europe/Rome',
@@ -76,7 +76,7 @@ final class SettingsTest extends TestCase
 
     public function test_general_settings_validates_timezone(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->put(route('admin.settings.general.update'), [
                 'app_name' => 'Test',
                 'app_timezone' => 'Invalid/Zone',
@@ -87,7 +87,7 @@ final class SettingsTest extends TestCase
 
     public function test_super_admin_can_view_branding_settings(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->get(route('admin.settings.branding'))
             ->assertOk()
             ->assertViewIs('admin.settings.branding');
@@ -95,7 +95,7 @@ final class SettingsTest extends TestCase
 
     public function test_super_admin_can_update_branding(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->put(route('admin.settings.branding.update'), [
                 'brand_header_title' => 'GTE Campania',
                 'brand_primary_color' => '#FF5500',
