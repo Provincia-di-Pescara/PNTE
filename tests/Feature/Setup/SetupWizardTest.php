@@ -29,7 +29,7 @@ final class SetupWizardTest extends TestCase
         Setting::set('setup_completed', '1');
 
         $user = User::factory()->create();
-        $user->assignRole(UserRole::SuperAdmin->value);
+        $user->assignRole(UserRole::SystemAdmin->value);
 
         $this->actingAs($user)
             ->get(route('setup.index'))
@@ -175,7 +175,7 @@ final class SetupWizardTest extends TestCase
         // Admin user created with correct role
         $user = User::where('email', 'mario@provincia.pe.it')->first();
         $this->assertNotNull($user);
-        $this->assertTrue($user->hasRole(UserRole::SuperAdmin->value));
+        $this->assertTrue($user->hasRole(UserRole::SystemAdmin->value));
 
         // Settings persisted
         $this->assertDatabaseHas('settings', ['key' => 'setup_completed', 'value' => '1']);
@@ -198,11 +198,12 @@ final class SetupWizardTest extends TestCase
         Setting::set('setup_completed', '1');
 
         $user = User::factory()->create();
-        $user->assignRole(UserRole::SuperAdmin->value);
+        $user->assignRole(UserRole::SystemAdmin->value);
 
+        // system-admin is redirected to /system, not the business dashboard
         $this->actingAs($user)
             ->get(route('dashboard'))
-            ->assertOk();
+            ->assertRedirect(route('system.dashboard'));
     }
 
     public function test_can_send_test_email_during_setup(): void

@@ -19,7 +19,7 @@ final class CompanyLookupControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $superAdmin;
+    private User $adminCapofila;
 
     protected function setUp(): void
     {
@@ -31,15 +31,15 @@ final class CompanyLookupControllerTest extends TestCase
 
         Setting::set('setup_completed', '1');
 
-        $this->superAdmin = User::factory()->create();
-        $this->superAdmin->assignRole(UserRole::SuperAdmin->value);
+        $this->adminCapofila = User::factory()->create();
+        $this->adminCapofila->assignRole(UserRole::AdminCapofila->value);
     }
 
     public function test_returns_503_when_pdnd_is_disabled(): void
     {
         Setting::set('pdnd_enabled', '0', 'pdnd');
 
-        $response = $this->actingAs($this->superAdmin)
+        $response = $this->actingAs($this->adminCapofila)
             ->postJson(route('api.admin.companies.lookup'), ['piva' => '12345678901']);
 
         $response->assertStatus(503)
@@ -50,7 +50,7 @@ final class CompanyLookupControllerTest extends TestCase
     {
         Setting::set('pdnd_enabled', '1', 'pdnd');
 
-        $response = $this->actingAs($this->superAdmin)
+        $response = $this->actingAs($this->adminCapofila)
             ->postJson(route('api.admin.companies.lookup'), ['piva' => 'INVALID']);
 
         $response->assertStatus(422);
@@ -75,7 +75,7 @@ final class CompanyLookupControllerTest extends TestCase
         $mock->shouldReceive('getByPiva')->once()->with('12345678901')->andReturn($fakeData);
         $this->app->instance(InfoCamereServiceInterface::class, $mock);
 
-        $response = $this->actingAs($this->superAdmin)
+        $response = $this->actingAs($this->adminCapofila)
             ->postJson(route('api.admin.companies.lookup'), ['piva' => '12345678901']);
 
         $response->assertOk()
@@ -93,7 +93,7 @@ final class CompanyLookupControllerTest extends TestCase
         );
         $this->app->instance(InfoCamereServiceInterface::class, $mock);
 
-        $response = $this->actingAs($this->superAdmin)
+        $response = $this->actingAs($this->adminCapofila)
             ->postJson(route('api.admin.companies.lookup'), ['piva' => '00000000000']);
 
         $response->assertStatus(404)
@@ -110,7 +110,7 @@ final class CompanyLookupControllerTest extends TestCase
         );
         $this->app->instance(InfoCamereServiceInterface::class, $mock);
 
-        $response = $this->actingAs($this->superAdmin)
+        $response = $this->actingAs($this->adminCapofila)
             ->postJson(route('api.admin.companies.lookup'), ['piva' => '12345678901']);
 
         $response->assertStatus(502)
@@ -128,7 +128,7 @@ final class CompanyLookupControllerTest extends TestCase
 
     public function test_store_company_sets_infocamere_verified_at_when_verified(): void
     {
-        $response = $this->actingAs($this->superAdmin)
+        $response = $this->actingAs($this->adminCapofila)
             ->post(route('admin.companies.store'), [
                 'ragione_sociale' => 'Test S.R.L.',
                 'partita_iva' => '12345678901',
@@ -144,7 +144,7 @@ final class CompanyLookupControllerTest extends TestCase
 
     public function test_store_company_without_verification_leaves_verified_at_null(): void
     {
-        $response = $this->actingAs($this->superAdmin)
+        $response = $this->actingAs($this->adminCapofila)
             ->post(route('admin.companies.store'), [
                 'ragione_sociale' => 'Test S.R.L. 2',
                 'partita_iva' => '98765432100',

@@ -17,7 +17,7 @@ final class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        abort_unless($request->user()->hasRole(UserRole::SuperAdmin->value), 403);
+        abort_unless($request->user()->isEnteManager(), 403);
 
         $users = User::query()
             ->with(['roles', 'entity'])
@@ -29,7 +29,7 @@ final class UserController extends Controller
 
     public function show(Request $request, User $user): View
     {
-        abort_unless($request->user()->hasRole(UserRole::SuperAdmin->value), 403);
+        abort_unless($request->user()->isEnteManager(), 403);
 
         $user->load(['roles', 'entity', 'companies']);
 
@@ -41,7 +41,7 @@ final class UserController extends Controller
 
     public function updateRole(UpdateUserRoleRequest $request, User $user): RedirectResponse
     {
-        abort_if($user->hasRole(UserRole::SuperAdmin->value), 403);
+        abort_if($user->isSystemAdmin(), 403);
 
         $user->syncRoles([$request->input('role')]);
 
@@ -51,7 +51,7 @@ final class UserController extends Controller
 
     public function updateEntity(Request $request, User $user): RedirectResponse
     {
-        abort_unless($request->user()->hasRole(UserRole::SuperAdmin->value), 403);
+        abort_unless($request->user()->isEnteManager(), 403);
 
         $request->validate([
             'entity_id' => ['nullable', 'integer', 'exists:entities,id'],

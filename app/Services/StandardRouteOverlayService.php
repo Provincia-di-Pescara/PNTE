@@ -74,8 +74,8 @@ final class StandardRouteOverlayService
      * emitted: the frontend renders the base route line in red and paints green ARS
      * segments on top, achieving the same visual effect without aggregate SQL.
      *
-    * Note: coverage is communicated via presence/absence of features. This keeps
-    * the payload compact and avoids expensive aggregate geometry operations.
+     * Note: coverage is communicated via presence/absence of features. This keeps
+     * the payload compact and avoids expensive aggregate geometry operations.
      *
      * @param  string  $wkt  WKT LINESTRING of the user's route (SRID 4326)
      * @return array<string, mixed> GeoJSON FeatureCollection

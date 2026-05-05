@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateBrandingSettingsRequest;
 use App\Http\Requests\Admin\UpdateGeneralSettingsRequest;
@@ -406,7 +405,7 @@ final class SettingController extends Controller
     private function denyUnlessSuper(): void
     {
         abort_unless(
-            auth()->user()->hasRole(UserRole::SuperAdmin->value),
+            auth()->user()->isEnteManager(),
             403
         );
     }

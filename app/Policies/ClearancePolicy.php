@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Enums\UserRole;
 use App\Models\Clearance;
 use App\Models\User;
 
@@ -11,7 +12,15 @@ final class ClearancePolicy
 {
     public function view(User $user, Clearance $clearance): bool
     {
-        if ($user->hasAnyRole(['super-admin', 'operator'])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole([
+            UserRole::AdminCapofila->value,
+            UserRole::AdminEnte->value,
+            UserRole::Operator->value,
+        ])) {
             return true;
         }
 

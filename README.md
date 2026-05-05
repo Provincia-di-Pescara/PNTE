@@ -441,7 +441,7 @@ docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
 ```
 
-> **Nota:** Il progetto richiede PHP 8.4+, Node 22 LTS e PostgreSQL 16 + PostGIS 3.4. Per lo sviluppo locale senza Docker è possibile usare `composer run dev` per avviare tutti i servizi concorrenti (server, queue, log, Vite). Il container `osrm` richiede il grafo stradale pre-processato — avviarlo con `docker compose --profile gis up`.
+> **Nota:** Il progetto richiede PHP 8.4+, Node 25 e PostgreSQL 16 + PostGIS 3.4. Per lo sviluppo locale senza Docker è possibile usare `composer run dev` per avviare tutti i servizi concorrenti (server, queue, log, Vite). Il container `osrm` richiede il grafo stradale pre-processato — avviarlo con `docker compose --profile gis up`.
 
 ---
 

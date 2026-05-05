@@ -10,38 +10,53 @@ use App\Models\User;
 
 final class RoadworkPolicy
 {
+    /** @var list<string> */
+    private array $enteManagers = [
+        UserRole::AdminCapofila->value,
+        UserRole::AdminEnte->value,
+        UserRole::Operator->value,
+    ];
+
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole([
-            UserRole::SuperAdmin->value,
-            UserRole::Operator->value,
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        return $user->hasAnyRole(array_merge($this->enteManagers, [
             UserRole::ThirdParty->value,
             UserRole::LawEnforcement->value,
-        ]);
+        ]));
     }
 
     public function view(User $user, Roadwork $roadwork): bool
     {
-        return $user->hasAnyRole([
-            UserRole::SuperAdmin->value,
-            UserRole::Operator->value,
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        return $user->hasAnyRole(array_merge($this->enteManagers, [
             UserRole::ThirdParty->value,
             UserRole::LawEnforcement->value,
-        ]);
+        ]));
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole([
-            UserRole::ThirdParty->value,
-            UserRole::Operator->value,
-            UserRole::SuperAdmin->value,
-        ]);
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        return $user->hasAnyRole(array_merge($this->enteManagers, [UserRole::ThirdParty->value]));
     }
 
     public function update(User $user, Roadwork $roadwork): bool
     {
-        if ($user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole($this->enteManagers)) {
             return true;
         }
 
@@ -50,7 +65,11 @@ final class RoadworkPolicy
 
     public function delete(User $user, Roadwork $roadwork): bool
     {
-        if ($user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole($this->enteManagers)) {
             return true;
         }
 

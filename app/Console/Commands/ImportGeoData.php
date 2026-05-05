@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Enums\EntityType;
 use App\Models\Entity;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +13,7 @@ final class ImportGeoData extends Command
 {
     protected $signature = 'gte:import-geo {file : Percorso al file GeoJSON dei confini territoriali}';
 
-    protected $description = 'Importa confini geografici (GeoJSON) nella colonna geom delle entities';
+    protected $description = 'Importa confini geografici (GeoJSON) nella colonna geom delle entities, creando le entity mancanti (upsert)';
 
     public function handle(): int
     {
@@ -33,11 +34,15 @@ final class ImportGeoData extends Command
         }
 
         $updated = 0;
-        $notFound = 0;
+        $created = 0;
+        $skipped = 0;
 
         foreach ($data['features'] as $feature) {
             $props = $feature['properties'] ?? [];
+
+            // openpolis: comuni → cod_istat (6 cifre), province → cod_prov (3 cifre)
             $istatCode = $props['cod_istat']
+                ?? $props['cod_prov']
                 ?? $props['codice_istat']
                 ?? $props['PRO_COM_T']
                 ?? $props['COD_ISTAT']
@@ -45,30 +50,51 @@ final class ImportGeoData extends Command
 
             if ($istatCode === null) {
                 $this->warn('Feature senza codice ISTAT: saltata.');
-                $notFound++;
+                $skipped++;
 
                 continue;
             }
 
             $istatCode = (string) $istatCode;
-            $entity = Entity::where('codice_istat', $istatCode)->first();
 
-            if ($entity === null) {
-                $this->warn("[{$istatCode}] Entity non trovata: saltata.");
-                $notFound++;
+            // Infer tipo from ISTAT code length
+            $tipo = match (strlen($istatCode)) {
+                3 => EntityType::Provincia,
+                6 => EntityType::Comune,
+                default => null,
+            };
+
+            if ($tipo === null) {
+                $this->warn("[{$istatCode}] Lunghezza codice non riconosciuta: saltata.");
+                $skipped++;
 
                 continue;
             }
 
+            $nome = (string) ($props['name'] ?? $props['nome'] ?? $istatCode);
+
+            $existed = Entity::query()->where('codice_istat', $istatCode)->exists();
+
+            $entity = Entity::query()->updateOrCreate(
+                ['codice_istat' => $istatCode],
+                ['nome' => $nome, 'tipo' => $tipo->value],
+            );
+
             DB::statement(
                 'UPDATE entities SET geom = ST_GeomFromGeoJSON(?) WHERE id = ?',
-                [json_encode($feature['geometry']), $entity->id]
+                [json_encode($feature['geometry']), $entity->id],
             );
-            $updated++;
+
+            if ($existed) {
+                $updated++;
+            } else {
+                $created++;
+            }
         }
 
-        $this->info("Completato — Aggiornate: {$updated} / Non trovate: {$notFound}");
+        $this->info("Completato — Aggiornate: {$updated} / Create: {$created} / Saltate: {$skipped}");
 
         return self::SUCCESS;
     }
 }
+

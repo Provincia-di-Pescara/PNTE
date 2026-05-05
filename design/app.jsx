@@ -1,7 +1,7 @@
 /* global React, GTE, GTEMap, GTEShell, GTEScreens */
 const { Icon: Icm, I: IIm } = window.GTE;
 const { TopBar, SideNav } = window.GTEShell;
-const { WizardScreen, OperatorScreen, ThirdPartyScreen, LawScreen, CitizenScreen, VehicleAddScreen, OperatorSettingsScreen } = window.GTEScreens;
+const { WizardScreen, OperatorScreen, ThirdPartyScreen, LawScreen, CitizenScreen, VehicleAddScreen, OperatorSettingsScreen, SystemAdminScreen, AgencyScreen } = window.GTEScreens;
 
 // Wraps a screen in a fake "app" frame: top bar + side nav.
 function AppFrame({ palette = "civic", role, roleLabel, navItems, navActive, children }) {
@@ -43,6 +43,23 @@ const NAV = {
     { key: "rendi", icon: "doc", label: "Ragioneria" },
     { key: "audit", icon: "clock", label: "Audit log" },
     { key: "settings", icon: "filter", label: "Impostazioni" },
+  ],
+  system: [
+    { key: "overview", icon: "layers", label: "Overview" },
+    { key: "tenants", icon: "flag", label: "Tenant", badge: "9" },
+    { key: "vault", icon: "qr", label: "Vault connettori", badge: "•", badgeTone: "amber" },
+    { key: "smtp", icon: "bell", label: "SMTP/IMAP" },
+    { key: "scheduler", icon: "clock", label: "Scheduler" },
+    { key: "telemetry", icon: "bolt", label: "Telemetria" },
+    { key: "audit", icon: "doc", label: "Audit infra" },
+  ],
+  agency: [
+    { key: "clients", icon: "layers", label: "Clienti", badge: "5" },
+    { key: "new", icon: "plus", label: "Nuova pratica" },
+    { key: "partners", icon: "share", label: "Gestione Partner" },
+    { key: "garage", icon: "truck", label: "Garage clienti" },
+    { key: "scadenze", icon: "clock", label: "Scadenze mandati", badge: "1", badgeTone: "amber" },
+    { key: "audit", icon: "doc", label: "Audit & KPI" },
   ],
   third: [
     { key: "home", icon: "doc", label: "Pareri", badge: "3", badgeTone: "amber" },
@@ -162,9 +179,9 @@ function App() {
         </DCSection>
 
         <DCSection id="multi" title="Vista multi-ruolo"
-                   subtitle="Stesso prodotto, ruoli diversi · super-admin / third-party / law-enforcement / citizen">
+                   subtitle="Stesso prodotto, ruoli diversi · admin-ente / third-party / law-enforcement / citizen">
           <DCArtboard id="operator" label="Scrivania Operatore Provincia" width={1440} height={900}>
-            <AppFrame palette={palette} role="super-admin · Provincia di Pescara"
+            <AppFrame palette={palette} role="admin-ente · Provincia di Pescara"
                       roleLabel="Marta Cipriani" navItems={NAV.operator} navActive="home">
               <OperatorScreen />
             </AppFrame>
@@ -198,10 +215,30 @@ function App() {
             </AppFrame>
           </DCArtboard>
 
-          <DCArtboard id="op-settings" label="Operatore · Impostazioni (super-admin)" width={1440} height={920}>
-            <AppFrame palette={palette} role="super-admin · Provincia di Pescara"
+          <DCArtboard id="op-settings" label="Operatore · Impostazioni (admin-ente)" width={1440} height={920}>
+            <AppFrame palette={palette} role="admin-ente · Provincia di Pescara"
                       roleLabel="Marta Cipriani" navItems={NAV.operator} navActive="settings">
               <OperatorSettingsScreen />
+            </AppFrame>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="system" title="Pannello /system · system-admin"
+                   subtitle="Ruolo separato dall'admin-ente · zero accesso a pratiche, P.IVA, targhe o PDF · solo infrastruttura">
+          <DCArtboard id="sysadmin" label="system-admin · Pannello /system" width={1440} height={920}>
+            <AppFrame palette={palette} role="system-admin · Piattaforma GTE"
+                      roleLabel="Roberto Iezzi" navItems={NAV.system} navActive="vault">
+              <SystemAdminScreen />
+            </AppFrame>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="agency" title="Dashboard Agenzia di pratiche auto"
+                   subtitle="Ruolo `agency` · ATECO 82.99.11 · Legge 264/1991 · multi-cliente con context switcher partner">
+          <DCArtboard id="agency-overview" label="Agenzia · Overview multi-cliente" width={1440} height={920}>
+            <AppFrame palette={palette} role="agency · Studio Auto Abruzzo"
+                      roleLabel="Elisa Marrone" navItems={NAV.agency} navActive="clients">
+              <AgencyScreen />
             </AppFrame>
           </DCArtboard>
         </DCSection>

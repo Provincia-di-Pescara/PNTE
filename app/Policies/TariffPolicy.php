@@ -10,9 +10,20 @@ use App\Models\User;
 
 final class TariffPolicy
 {
+    /** @var list<string> */
+    private array $managers = [
+        UserRole::AdminCapofila->value,
+        UserRole::AdminEnte->value,
+        UserRole::Operator->value,
+    ];
+
     public function viewAny(User $user): bool
     {
-        return $user->hasRole([UserRole::SuperAdmin->value, UserRole::Operator->value]);
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        return $user->hasAnyRole($this->managers);
     }
 
     public function create(User $user): bool
@@ -27,6 +38,10 @@ final class TariffPolicy
 
     public function delete(User $user, Tariff $tariff): bool
     {
-        return $this->viewAny($user);
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        return $user->hasAnyRole([UserRole::AdminCapofila->value, UserRole::AdminEnte->value]);
     }
 }

@@ -10,7 +10,7 @@
         <p class="text-sm text-ink-2 mt-0.5">{{ $user->email ?? $user->codice_fiscale }}</p>
     </div>
     @if($user->canBeImpersonated())
-    <form method="POST" action="{{ route('admin.users.impersonate', $user) }}" class="ml-auto">
+    <form method="POST" action="{{ route('system.users.impersonate', $user) }}" class="ml-auto">
         @csrf
         <button type="submit" class="btn">
             <x-icon name="user" size="14" /> Impersona

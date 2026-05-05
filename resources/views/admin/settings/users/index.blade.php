@@ -54,7 +54,7 @@
                             Gestisci
                         </a>
                         @if($user->canBeImpersonated())
-                        <form method="POST" action="{{ route('admin.users.impersonate', $user) }}">
+                        <form method="POST" action="{{ route('system.users.impersonate', $user) }}">
                             @csrf
                             <button type="submit" class="btn btn-sm" title="Impersona utente">
                                 <x-icon name="user" size="13" />

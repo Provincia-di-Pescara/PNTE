@@ -16,7 +16,7 @@ final class ImpersonateTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $superAdmin;
+    private User $systemAdmin;
 
     private User $citizen;
 
@@ -31,8 +31,8 @@ final class ImpersonateTest extends TestCase
         }
         Setting::set('setup_completed', '1');
 
-        $this->superAdmin = User::factory()->create();
-        $this->superAdmin->assignRole(UserRole::SuperAdmin->value);
+        $this->systemAdmin = User::factory()->create();
+        $this->systemAdmin->assignRole(UserRole::SystemAdmin->value);
 
         $this->citizen = User::factory()->create();
         $this->citizen->assignRole(UserRole::Citizen->value);
@@ -41,22 +41,22 @@ final class ImpersonateTest extends TestCase
         $this->operator->assignRole(UserRole::Operator->value);
     }
 
-    public function test_super_admin_can_impersonate_citizen(): void
+    public function test_system_admin_can_impersonate_citizen(): void
     {
-        $this->actingAs($this->superAdmin)
-            ->post(route('admin.users.impersonate', $this->citizen))
+        $this->actingAs($this->systemAdmin)
+            ->post(route('system.users.impersonate', $this->citizen))
             ->assertRedirect(route('dashboard'))
             ->assertSessionHas('info')
-            ->assertSessionHas('impersonated_by', $this->superAdmin->id);
+            ->assertSessionHas('impersonated_by', $this->systemAdmin->id);
     }
 
     public function test_impersonation_creates_log_entry(): void
     {
-        $this->actingAs($this->superAdmin)
-            ->post(route('admin.users.impersonate', $this->citizen));
+        $this->actingAs($this->systemAdmin)
+            ->post(route('system.users.impersonate', $this->citizen));
 
         $this->assertDatabaseHas('impersonation_logs', [
-            'impersonator_id' => $this->superAdmin->id,
+            'impersonator_id' => $this->systemAdmin->id,
             'impersonated_id' => $this->citizen->id,
         ]);
 
@@ -67,12 +67,12 @@ final class ImpersonateTest extends TestCase
 
     public function test_leaving_impersonation_closes_log(): void
     {
-        $this->actingAs($this->superAdmin)
-            ->post(route('admin.users.impersonate', $this->citizen));
+        $this->actingAs($this->systemAdmin)
+            ->post(route('system.users.impersonate', $this->citizen));
 
         $this->actingAs($this->citizen)
-            ->withSession(['impersonated_by' => $this->superAdmin->id])
-            ->delete(route('admin.impersonate.leave'));
+            ->withSession(['impersonated_by' => $this->systemAdmin->id])
+            ->delete(route('impersonate.leave'));
 
         $log = ImpersonationLog::first();
         $this->assertNotNull($log->ended_at);
@@ -81,24 +81,24 @@ final class ImpersonateTest extends TestCase
     public function test_operator_cannot_impersonate(): void
     {
         $this->actingAs($this->operator)
-            ->post(route('admin.users.impersonate', $this->citizen))
+            ->post(route('system.users.impersonate', $this->citizen))
             ->assertForbidden();
     }
 
-    public function test_super_admin_cannot_be_impersonated(): void
+    public function test_system_admin_cannot_be_impersonated(): void
     {
         $anotherAdmin = User::factory()->create();
-        $anotherAdmin->assignRole(UserRole::SuperAdmin->value);
+        $anotherAdmin->assignRole(UserRole::SystemAdmin->value);
 
-        $this->actingAs($this->superAdmin)
-            ->post(route('admin.users.impersonate', $anotherAdmin))
+        $this->actingAs($this->systemAdmin)
+            ->post(route('system.users.impersonate', $anotherAdmin))
             ->assertForbidden();
     }
 
     public function test_citizen_cannot_impersonate(): void
     {
         $this->actingAs($this->citizen)
-            ->post(route('admin.users.impersonate', $this->operator))
+            ->post(route('system.users.impersonate', $this->operator))
             ->assertForbidden();
     }
 }

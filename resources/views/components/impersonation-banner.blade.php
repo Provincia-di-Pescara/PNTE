@@ -4,7 +4,7 @@
         <x-icon name="user" size="14" />
         <span>Stai operando come <strong>{{ auth()->user()->name }}</strong> ({{ auth()->user()->getRoleNames()->first() }})</span>
     </div>
-    <form method="POST" action="{{ route('admin.impersonate.leave') }}">
+    <form method="POST" action="{{ route('impersonate.leave') }}">
         @csrf
         @method('DELETE')
         <button type="submit" class="text-white underline text-[12px] hover:no-underline">

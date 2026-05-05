@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\ImpersonationLog;
 use App\Models\User;
@@ -17,7 +16,7 @@ final class ImpersonateController extends Controller
     {
         $admin = $request->user();
 
-        abort_unless($admin->hasRole(UserRole::SuperAdmin->value), 403);
+        abort_unless($admin->isSystemAdmin(), 403);
         abort_unless($admin->canImpersonate(), 403);
         abort_unless($user->canBeImpersonated(), 403);
 
@@ -53,7 +52,7 @@ final class ImpersonateController extends Controller
 
         $currentUser->leaveImpersonation();
 
-        return redirect()->route('admin.settings.users.index')
+        return redirect()->route('system.users.index')
             ->with('info', 'Impersonazione terminata.');
     }
 }

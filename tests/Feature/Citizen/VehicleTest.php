@@ -20,8 +20,6 @@ final class VehicleTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $superAdmin;
-
     private User $operator;
 
     private User $citizen;
@@ -39,9 +37,6 @@ final class VehicleTest extends TestCase
         }
 
         Setting::set('setup_completed', '1');
-
-        $this->superAdmin = User::factory()->create();
-        $this->superAdmin->assignRole(UserRole::SuperAdmin->value);
 
         $this->operator = User::factory()->create();
         $this->operator->assignRole(UserRole::Operator->value);

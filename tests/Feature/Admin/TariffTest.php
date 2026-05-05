@@ -16,7 +16,7 @@ final class TariffTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $superAdmin;
+    private User $adminCapofila;
 
     private User $operator;
 
@@ -31,8 +31,8 @@ final class TariffTest extends TestCase
         }
         Setting::set('setup_completed', '1');
 
-        $this->superAdmin = User::factory()->create();
-        $this->superAdmin->assignRole(UserRole::SuperAdmin->value);
+        $this->adminCapofila = User::factory()->create();
+        $this->adminCapofila->assignRole(UserRole::AdminCapofila->value);
 
         $this->operator = User::factory()->create();
         $this->operator->assignRole(UserRole::Operator->value);
@@ -43,7 +43,7 @@ final class TariffTest extends TestCase
 
     public function test_super_admin_can_view_tariffs(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->get(route('admin.tariffs.index'))
             ->assertOk()
             ->assertViewIs('admin.tariffs.index');
@@ -114,11 +114,11 @@ final class TariffTest extends TestCase
         ]);
     }
 
-    public function test_operator_can_delete_tariff(): void
+    public function test_admin_capofila_can_delete_tariff(): void
     {
         $tariff = Tariff::factory()->create();
 
-        $this->actingAs($this->operator)
+        $this->actingAs($this->adminCapofila)
             ->delete(route('admin.tariffs.destroy', $tariff))
             ->assertRedirect(route('admin.tariffs.index'));
 

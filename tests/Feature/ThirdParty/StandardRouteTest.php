@@ -54,7 +54,7 @@ final class StandardRouteTest extends TestCase
     public function test_standard_route_can_be_inserted_with_geometry(): void
     {
         DB::statement(
-            'INSERT INTO standard_routes (entity_id, nome, geometry, vehicle_types, active, created_at, updated_at) VALUES (?, ?, ST_GeomFromText(?, 4326), ?, 1, NOW(), NOW())',
+            'INSERT INTO standard_routes (entity_id, nome, geometry, vehicle_types, active, created_at, updated_at) VALUES (?, ?, ST_GeomFromText(?, 4326), ?, true, NOW(), NOW())',
             [$this->entity->id, 'SP17 Pescara–Chieti', 'LINESTRING(13.5 42.3, 13.6 42.4)', json_encode([VehicleType::Trattore->value])]
         );
 
@@ -64,7 +64,7 @@ final class StandardRouteTest extends TestCase
     public function test_standard_route_supports_vehicle_weight_limits(): void
     {
         DB::statement(
-            'INSERT INTO standard_routes (entity_id, nome, geometry, vehicle_types, max_massa_kg, max_larghezza_mm, active, created_at, updated_at) VALUES (?, ?, ST_GeomFromText(?, 4326), ?, ?, ?, 1, NOW(), NOW())',
+            'INSERT INTO standard_routes (entity_id, nome, geometry, vehicle_types, max_massa_kg, max_larghezza_mm, active, created_at, updated_at) VALUES (?, ?, ST_GeomFromText(?, 4326), ?, ?, ?, true, NOW(), NOW())',
             [$this->entity->id, 'SP1 con limite', 'LINESTRING(13.5 42.3, 13.6 42.4)', json_encode([VehicleType::Trattore->value]), 10_000, 2500]
         );
 
@@ -157,10 +157,10 @@ final class StandardRouteTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_operator_can_view_all_standard_routes(): void
+    public function test_operator_cannot_access_standard_routes(): void
     {
         $this->actingAs($this->operator)
             ->get(route('third-party.standard-routes.index'))
-            ->assertOk();
+            ->assertForbidden();
     }
 }

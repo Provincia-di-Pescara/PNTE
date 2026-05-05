@@ -11,6 +11,13 @@ use App\Models\User;
 
 final class ApplicationPolicy
 {
+    /** @var list<string> */
+    private array $enteManagers = [
+        UserRole::AdminCapofila->value,
+        UserRole::AdminEnte->value,
+        UserRole::Operator->value,
+    ];
+
     public function viewAny(User $user): bool
     {
         return true;
@@ -18,31 +25,39 @@ final class ApplicationPolicy
 
     public function view(User $user, Application $application): bool
     {
-        if ($user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole($this->enteManagers)) {
             return true;
         }
 
-        if ($user->id === $application->user_id) {
-            return true;
-        }
-
-        return false;
+        return $user->id === $application->user_id;
     }
 
     public function create(User $user): bool
     {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
         if ($user->hasRole(UserRole::Citizen->value)) {
             return $user->companies()
                 ->whereNotNull('company_user.approved_at')
                 ->exists();
         }
 
-        return $user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value]);
+        return $user->hasAnyRole(array_merge($this->enteManagers, [UserRole::AdminAzienda->value]));
     }
 
     public function update(User $user, Application $application): bool
     {
-        if ($user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole($this->enteManagers)) {
             return true;
         }
 
@@ -52,7 +67,11 @@ final class ApplicationPolicy
 
     public function delete(User $user, Application $application): bool
     {
-        if ($user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole($this->enteManagers)) {
             return true;
         }
 

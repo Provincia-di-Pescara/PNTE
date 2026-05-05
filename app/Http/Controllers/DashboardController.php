@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\ApplicationStatus;
+use App\Enums\ClearanceStatus;
 use App\Enums\UserRole;
 use App\Models\Application;
 use App\Models\Clearance;
@@ -18,15 +19,20 @@ use App\Models\Tariff;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request): View
+    public function __invoke(Request $request): View|RedirectResponse
     {
         $user = $request->user();
 
-        if ($user->hasRole(['super-admin', 'operator'])) {
+        if ($user->hasRole(UserRole::SystemAdmin->value)) {
+            return redirect()->route('system.dashboard');
+        }
+
+        if ($user->isEnteManager()) {
             $usersByRole = [];
             foreach (UserRole::cases() as $role) {
                 $usersByRole[$role->value] = User::role($role->value)->count();
@@ -62,6 +68,10 @@ class DashboardController extends Controller
                 'approvedThisMonthCount' => Application::query()->where('stato', ApplicationStatus::Approved->value)->whereMonth('updated_at', now()->month)->whereYear('updated_at', now()->year)->count(),
                 'recentApplications' => $recentApplications,
             ]);
+        }
+
+        if ($user->hasRole('agency')) {
+            return redirect()->route('agency.dashboard');
         }
 
         if ($user->hasRole('citizen')) {
@@ -112,7 +122,7 @@ class DashboardController extends Controller
                 ? Clearance::query()
                     ->with(['application.company', 'application.vehicle', 'application.route'])
                     ->where('entity_id', $entity->id)
-                    ->where('stato', \App\Enums\ClearanceStatus::Pending->value)
+                    ->where('stato', ClearanceStatus::Pending->value)
                     ->latest()
                     ->limit(10)
                     ->get()

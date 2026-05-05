@@ -10,22 +10,29 @@ use App\Models\User;
 
 final class TripPolicy
 {
+    /** @var list<string> */
+    private array $managers = [
+        UserRole::AdminCapofila->value,
+        UserRole::AdminEnte->value,
+        UserRole::Operator->value,
+    ];
+
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole([
-            UserRole::SuperAdmin->value,
-            UserRole::Operator->value,
-            UserRole::LawEnforcement->value,
-        ]);
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        return $user->hasAnyRole(array_merge($this->managers, [UserRole::LawEnforcement->value]));
     }
 
     public function view(User $user, Trip $trip): bool
     {
-        if ($user->hasAnyRole([
-            UserRole::SuperAdmin->value,
-            UserRole::Operator->value,
-            UserRole::LawEnforcement->value,
-        ])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole(array_merge($this->managers, [UserRole::LawEnforcement->value]))) {
             return true;
         }
 
@@ -34,6 +41,10 @@ final class TripPolicy
 
     public function create(User $user): bool
     {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
         if (! $user->hasRole(UserRole::Citizen->value)) {
             return false;
         }
@@ -45,7 +56,11 @@ final class TripPolicy
 
     public function update(User $user, Trip $trip): bool
     {
-        if ($user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole($this->managers)) {
             return true;
         }
 

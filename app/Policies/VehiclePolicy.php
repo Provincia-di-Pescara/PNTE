@@ -11,9 +11,20 @@ use App\Models\Vehicle;
 
 final class VehiclePolicy
 {
+    /** @var list<string> */
+    private array $managers = [
+        UserRole::AdminCapofila->value,
+        UserRole::AdminEnte->value,
+        UserRole::Operator->value,
+    ];
+
     public function viewAny(User $user): bool
     {
-        if ($user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole($this->managers)) {
             return true;
         }
 
@@ -24,7 +35,11 @@ final class VehiclePolicy
 
     public function view(User $user, Vehicle $vehicle): bool
     {
-        if ($user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole($this->managers)) {
             return true;
         }
 
@@ -33,7 +48,11 @@ final class VehiclePolicy
 
     public function create(User $user): bool
     {
-        if ($user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole($this->managers)) {
             return true;
         }
 
@@ -44,7 +63,11 @@ final class VehiclePolicy
 
     public function update(User $user, Vehicle $vehicle): bool
     {
-        if ($user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole($this->managers)) {
             return true;
         }
 
@@ -53,7 +76,11 @@ final class VehiclePolicy
 
     public function delete(User $user, Vehicle $vehicle): bool
     {
-        if ($user->hasAnyRole([UserRole::SuperAdmin->value, UserRole::Operator->value])) {
+        if ($user->isSystemAdmin()) {
+            return false;
+        }
+
+        if ($user->hasAnyRole($this->managers)) {
             return true;
         }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Console;
 
 use App\Enums\UserRole;
+use App\Enums\EntityType;
 use App\Models\Entity;
 use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -56,11 +57,12 @@ final class ImportGeoDataTest extends TestCase
 
     public function test_warns_when_entity_not_found(): void
     {
+        // 6-digit ISTAT code → command creates a new Comune entity (upsert)
         $geojson = json_encode([
             'type' => 'FeatureCollection',
             'features' => [[
                 'type' => 'Feature',
-                'properties' => ['cod_istat' => '999999'],
+                'properties' => ['cod_istat' => '099999', 'name' => 'Test Comune'],
                 'geometry' => [
                     'type' => 'MultiPolygon',
                     'coordinates' => [[[[13.0, 42.0], [13.1, 42.0], [13.1, 42.1], [13.0, 42.1], [13.0, 42.0]]]],
@@ -73,7 +75,43 @@ final class ImportGeoDataTest extends TestCase
 
         $this->artisan('gte:import-geo', ['file' => $tmpFile])
             ->assertExitCode(0)
-            ->expectsOutputToContain('Non trovate: 1');
+            ->expectsOutputToContain('Create: 1');
+
+        $this->assertDatabaseHas('entities', [
+            'codice_istat' => '099999',
+            'tipo' => EntityType::Comune->value,
+            'nome' => 'Test Comune',
+        ]);
+
+        @unlink($tmpFile);
+    }
+
+    public function test_creates_province_from_cod_prov_property(): void
+    {
+        $geojson = json_encode([
+            'type' => 'FeatureCollection',
+            'features' => [[
+                'type' => 'Feature',
+                'properties' => ['cod_prov' => '099', 'name' => 'Provincia Test'],
+                'geometry' => [
+                    'type' => 'MultiPolygon',
+                    'coordinates' => [[[[13.0, 42.0], [13.1, 42.0], [13.1, 42.1], [13.0, 42.1], [13.0, 42.0]]]],
+                ],
+            ]],
+        ]);
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'geo_').'.json';
+        file_put_contents($tmpFile, $geojson);
+
+        $this->artisan('gte:import-geo', ['file' => $tmpFile])
+            ->assertExitCode(0)
+            ->expectsOutputToContain('Create: 1');
+
+        $this->assertDatabaseHas('entities', [
+            'codice_istat' => '099',
+            'tipo' => EntityType::Provincia->value,
+            'nome' => 'Provincia Test',
+        ]);
 
         @unlink($tmpFile);
     }

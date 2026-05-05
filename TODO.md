@@ -34,7 +34,7 @@
 - [x] Alpine.js v3 aggiunto
 - [x] `spatie/laravel-permission ^6` aggiunto
 - [x] `spatie/browsershot ^5` aggiunto
-- [x] Node `20-slim` → `22-slim` in Dockerfile
+- [x] Node `20-slim` → `25-trixie-slim` in Dockerfile
 - [x] `docker-compose.yml` creato (app, db, redis, osrm)
 - [x] `.env.example` aggiornato
 - [x] `publiccode.yml` aggiornato a v0.1.0

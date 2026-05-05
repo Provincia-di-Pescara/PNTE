@@ -93,18 +93,17 @@ final class RoadworkTest extends TestCase
         $response->assertForbidden();
     }
 
-    public function test_operator_can_manage_any_roadwork(): void
+    public function test_operator_cannot_access_roadworks(): void
     {
         $roadwork = Roadwork::factory()->create(['entity_id' => $this->entity->id]);
-        DB::statement('UPDATE roadworks SET geometry = ST_GeomFromText(?, 4326) WHERE id = ?', ['LINESTRING(13.5 42.3, 13.6 42.4)', $roadwork->id]);
 
         $this->actingAs($this->operator)
             ->get(route('third-party.roadworks.index'))
-            ->assertOk();
+            ->assertForbidden();
 
         $this->actingAs($this->operator)
             ->get(route('third-party.roadworks.edit', $roadwork))
-            ->assertOk();
+            ->assertForbidden();
     }
 
     public function test_citizen_cannot_access_roadworks(): void

@@ -17,7 +17,7 @@ final class SettingMailTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $superAdmin;
+    private User $adminCapofila;
 
     private User $operator;
 
@@ -30,8 +30,8 @@ final class SettingMailTest extends TestCase
         }
         Setting::set('setup_completed', '1');
 
-        $this->superAdmin = User::factory()->create();
-        $this->superAdmin->assignRole(UserRole::SuperAdmin->value);
+        $this->adminCapofila = User::factory()->create();
+        $this->adminCapofila->assignRole(UserRole::AdminCapofila->value);
 
         $this->operator = User::factory()->create();
         $this->operator->assignRole(UserRole::Operator->value);
@@ -39,7 +39,7 @@ final class SettingMailTest extends TestCase
 
     public function test_super_admin_can_view_mail_settings(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->get(route('admin.settings.mail'))
             ->assertOk()
             ->assertViewIs('admin.settings.mail');
@@ -54,7 +54,7 @@ final class SettingMailTest extends TestCase
 
     public function test_super_admin_can_update_mail_settings(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->put(route('admin.settings.mail.update'), [
                 'mail_host' => 'smtp.example.com',
                 'mail_port' => '587',
@@ -77,7 +77,7 @@ final class SettingMailTest extends TestCase
     {
         Setting::set('mail_password', 'existing-secret', 'mail');
 
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->put(route('admin.settings.mail.update'), [
                 'mail_host' => 'smtp.example.com',
                 'mail_port' => '587',
@@ -98,7 +98,7 @@ final class SettingMailTest extends TestCase
 
         Setting::set('mail_host', 'smtp.example.com', 'mail');
 
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->post(route('admin.settings.mail.test'))
             ->assertRedirect(route('admin.settings.mail'))
             ->assertSessionHas('success');
@@ -108,7 +108,7 @@ final class SettingMailTest extends TestCase
 
     public function test_test_mail_fails_gracefully_with_invalid_config(): void
     {
-        $this->actingAs($this->superAdmin)
+        $this->actingAs($this->adminCapofila)
             ->post(route('admin.settings.mail.test'))
             ->assertRedirect(route('admin.settings.mail'))
             ->assertSessionHas('error');
