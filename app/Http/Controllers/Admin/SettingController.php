@@ -42,11 +42,12 @@ final class SettingController extends Controller
         ['key' => 'pagopa',     'label' => 'PagoPA',          'icon' => 'euro',    'route' => null,                     'status' => 'coming-soon', 'keywords' => ['pagopa', 'iuv', 'pagamento', 'bollo']],
     ];
 
-    public function index(Request $request): View
+    public function index(Request $request): RedirectResponse
     {
-        $this->denyUnlessSuper();
-
-        return view('admin.settings.index', ['categories' => self::$categories]);
+        // Le configurazioni di integrazione (mail, PEC, OIDC, PDND, ecc.) e branding
+        // sono migrate sotto /system/* (system-admin only). Resta solo gestione utenti
+        // a livello di ente — vi reindirizziamo lì.
+        return redirect()->route('admin.settings.users.index');
     }
 
     public function showGeneral(): View

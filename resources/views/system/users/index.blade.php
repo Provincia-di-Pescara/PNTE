@@ -1,4 +1,4 @@
-@extends('layouts.system-sidebar')
+﻿@extends('layouts.system')
 
 @section('content')
 <div class="space-y-6">

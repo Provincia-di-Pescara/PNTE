@@ -103,8 +103,9 @@ Eloquent models — implemented (✅) or planned (🔜):
 - 🔜 `clearances` — third-party approvals (Nulla Osta) per entity per application; states: `pre_cleared`, `pending_review`, `approved`, `rejected`
 
 ### RBAC Roles
-- `system-admin` — platform/infrastructure operators; no entity/company binding; only `/system`; 403 on all business routes
-- `admin-ente` — entity-bound manager; handles operators, payments, clearances, reports; `is_capofila=true` unlocks governance powers
+- `system-admin` — platform/infrastructure operators; no entity/company binding; only `/system`; 403 on all business routes. Owns all integration credentials (SMTP, PEC, OIDC SPID/CIE, PDND, PagoPA, AINOP), GIS sources, app behaviour (debug/timezone/locale/maintenance), and global branding (logo + nome piattaforma).
+- `admin-ente` — entity-bound manager; handles operators, payments, clearances, reports. **Province sono tutte uguali post-certificazione**: ogni provincia gestisce in autonomia propri comuni/operatori/pratiche.
+- `admin-capofila` — equivalente a `admin-ente`. Il flag `is_capofila` resta nel DB per identificare l'ente fallback degli enti non-federati (gestione errori di routing/onboarding); **non è una superpower governance**.
 - `operator` — entity-bound staff for own tenant/entity workflows
 - `admin-azienda` — company-bound manager for transport company or agency
 - `agency` — agency operators with multiple active `agency_mandates` and session-level partner context switcher
@@ -119,6 +120,22 @@ Eloquent models — implemented (✅) or planned (🔜):
 - **`RoadworkConflictService`** — `ST_Intersects` + date overlap + status filter → active conflicts on a route
 - **`GeoJsonExportService`** — RFC 7946 GeoJSON export for routes, entities, roadworks; SRID 4326 compliance; geometry simplification for frontend; metadata enrichment (entity breakdown, authority names, km totals)
 - **`SpatialQueryService`** — unified interface for `ST_Intersects()`, `ST_Length()`, `ST_Buffer()` operations; caches results in Redis (TTL 30 min); pre-computes `entity_breakdown` materialization; manages spatial index optimization
+
+### Diagnostics Layer (system-admin only)
+
+`App\Services\Diagnostics\*` — 13 diagnostic services + `HealthCheckService` orchestrator. Ognuno implementa `DiagnosticInterface::run(): DiagnosticResult` e logga in `system_audit_logs` (action `diagnostic.run.{key}`).
+
+Servizi: `db`, `postgis`, `redis`, `queue`, `storage`, `osrm`, `smtp`, `imap`, `oidc`, `pdnd`, `pagopa`, `ainop`, `routing` (E2E pipeline).
+
+Tre superfici di accesso, **tutte autenticate (session web) e protette da middleware `system-admin`**:
+
+| Superficie | Endpoint | Uso |
+|---|---|---|
+| **UI web** | `/system/diagnostics` (master), `/system/diagnostics/api-tester`, `/system/integrations/{service}/test` | Test interattivi via Alpine.js + fetch |
+| **JSON API** | `GET /api/v1/system/health`, `GET /api/v1/system/health/{service}`, `POST /api/v1/system/test/{mail,routing,geojson}` | CI/healthcheck/monitoring (session cookie required) |
+| **Artisan CLI** | `php artisan gte:diag` (all), `php artisan gte:diag:run {service}` (single) | Docker `HEALTHCHECK`, Portainer exec, debug. Flag `--json`, `--no-audit`. Exit 0 ok / 1 fail / 2 error |
+
+Nessun servizio diagnostic deve mai lanciare eccezioni: i fallimenti sono catturati e wrappati in `DiagnosticResult::fail()`.
 
 ### Planned Services
 - **`AgencyDetectionService`** — queries PDND Infocamiere API by P.IVA; extracts `ateco_principale` and `descrizione_attivita`; filters by ATECO 82.99.11 + Legge 264/1991 compliance keywords; returns `['is_agency' => bool, 'ateco_code' => string, 'ateco_description' => string, 'compliance_verified' => bool]`; used in onboarding flow and monthly re-sync job
@@ -166,7 +183,7 @@ Tre boolean su `entities`, indipendenti e ortogonali:
 
 - **`is_tenant`** (default `false`): se `true`, l'ente ha una dashboard attiva; il sistema invia PEC di avviso e attende approvazione in piattaforma. Se `false`, PEC automatica e operatore Provincia sblocca manualmente.
 - **`has_financial_delegation`** (default `false`): se `true`, la quota usura dell'ente è inclusa nell'IUV PagoPA della Provincia e redistribuita via SEPA mensile. Se `false`, quota scorporata dall'IUV con avviso all'utente. Il flag può essere attivato/disattivato dall'ente dalla propria dashboard con grace period fino a mezzanotte.
-- **`is_capofila`** (default `false`): se `true`, l'ente abilita onboarding zero-touch del primo `admin-ente`, governance fallback, reportistica aggregata e coordinamento tenant.
+- **`is_capofila`** (default `false`): se `true`, l'ente è il **fallback handler per enti non-federati** (riceve pratiche orfane, gestione errori onboarding/routing). NON conferisce poteri governance speciali in dashboard quotidiana — le province sono tutte uguali post-certificazione. La logica fallback è server-side, mai esposta come UI privilegiata.
 
 ### System/Admin Isolation
 
@@ -219,10 +236,13 @@ Never call `env()` outside `config/` files. Use `config('key')` in app code.
 ### .env — bootstrap and network topology only
 `.env` contains only bootstrap + network topology vars: `APP_KEY`, `APP_ENV`, `APP_URL`, DB credentials, Redis credentials, `OSRM_BASE_URL`, `CHROMIUM_PATH`. Nothing else.
 
-All else → **database**, managed via **admin UI**:
-- App behaviour: debug mode, timezone, locale/i18n, maintenance mode
-- Mail/SMTP server and credentials
-- Integration credentials: SPID SP metadata, PagoPA station IDs, PDND client keys, Firma Remota endpoints, etc.
+All else → **database**, managed via **system-admin UI under `/system/*`**:
+- App behaviour: debug mode, timezone, locale/i18n, maintenance mode (`/system/settings/app-behaviour`)
+- Mail/SMTP server and credentials (`/system/integrations/smtp`)
+- PEC/IMAP listener credentials (`/system/integrations/pec`)
+- Integration credentials: SPID/CIE OIDC (`/system/integrations/oidc`), PDND voucher (`/system/integrations/pdnd`), PagoPA (`/system/integrations/pagopa`), AINOP X.509 (`/system/integrations/ainop`)
+- Branding **minimale globale** (logo + nome piattaforma) — niente colori/CSS per-tenant, niente personalizzazione per provincia (`/system/settings/branding`)
+- GIS sources (URL ISTAT comuni/province) e import via `/system/geo`
 
 `APP_VERSION*` are Docker build ARGs from CI/CD — not runtime env vars, must not appear in `.env`.
 

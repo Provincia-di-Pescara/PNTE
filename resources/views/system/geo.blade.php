@@ -1,4 +1,4 @@
-@extends('layouts.system-sidebar')
+﻿@extends('layouts.system')
 
 @push('scripts')
     @vite('resources/js/geo-map.js')

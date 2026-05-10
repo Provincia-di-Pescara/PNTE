@@ -42,8 +42,13 @@ final class RouteSimulatorTest extends TestCase
 
     public function test_system_admin_can_view_route_simulator(): void
     {
+        // Legacy /system/routes redirects to /system/geo/simulator (the live tester).
         $this->actingAs($this->makeSystemAdmin())
             ->get(route('system.routes'))
+            ->assertRedirect(route('system.geo.simulator'));
+
+        $this->actingAs($this->makeSystemAdmin())
+            ->get(route('system.geo.simulator'))
             ->assertOk();
     }
 

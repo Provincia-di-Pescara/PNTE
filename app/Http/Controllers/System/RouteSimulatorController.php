@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
-use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 final class RouteSimulatorController extends Controller
 {
-    public function index(): View
+    public function index(): RedirectResponse
     {
-        return view('system.routes');
+        return redirect()->route('system.geo.simulator');
     }
 }

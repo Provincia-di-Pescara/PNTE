@@ -23,8 +23,13 @@ use App\Http\Controllers\Citizen\VehicleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LawEnforcement\RadarController;
 use App\Http\Controllers\Setup\SetupController;
+use App\Http\Controllers\System\Api\HealthController as SystemHealthController;
 use App\Http\Controllers\System\DashboardController as SystemDashboardController;
+use App\Http\Controllers\System\DiagnosticsController as SystemDiagnosticsController;
+use App\Http\Controllers\System\GeoViewerController as SystemGeoViewerController;
+use App\Http\Controllers\System\IntegrationController as SystemIntegrationController;
 use App\Http\Controllers\System\RouteSimulatorController;
+use App\Http\Controllers\System\SettingsController as SystemSettingsController;
 use App\Http\Controllers\ThirdParty\ClearanceController;
 use App\Http\Controllers\ThirdParty\RoadworkController;
 use App\Http\Controllers\ThirdParty\StandardRouteController;
@@ -89,6 +94,48 @@ Route::middleware('auth')->group(function () {
         Route::post('/users/{user}/impersonate', [ImpersonateController::class, 'take'])->name('users.impersonate');
 
         Route::get('/routes', [RouteSimulatorController::class, 'index'])->name('routes');
+
+        // Dataset geo — viewer + tester
+        Route::prefix('geo')->name('geo.')->group(function () {
+            Route::get('/viewer', [SystemGeoViewerController::class, 'viewer'])->name('viewer');
+            Route::get('/osrm', [SystemGeoViewerController::class, 'osrm'])->name('osrm');
+            Route::get('/simulator', [SystemGeoViewerController::class, 'simulator'])->name('simulator');
+        });
+
+        // Diagnostica
+        Route::prefix('diagnostics')->name('diagnostics.')->group(function () {
+            Route::get('/', [SystemDiagnosticsController::class, 'index'])->name('index');
+            Route::get('/api-tester', [SystemDiagnosticsController::class, 'apiTester'])->name('api-tester');
+            Route::get('/cache-queue', [SystemDiagnosticsController::class, 'cacheQueue'])->name('cache-queue');
+            Route::get('/database', [SystemDiagnosticsController::class, 'database'])->name('database');
+        });
+
+        // Sistema (branding minimale + app behaviour)
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/branding', [SystemSettingsController::class, 'branding'])->name('branding');
+            Route::put('/branding', [SystemSettingsController::class, 'updateBranding'])->name('branding.update');
+            Route::get('/app-behaviour', [SystemSettingsController::class, 'appBehaviour'])->name('app-behaviour');
+            Route::put('/app-behaviour', [SystemSettingsController::class, 'updateAppBehaviour'])->name('app-behaviour.update');
+        });
+
+        // Integrazioni esterne (SPID/CIE, PDND, PagoPA, SMTP, PEC, AINOP)
+        Route::prefix('integrations')->name('integrations.')->group(function () {
+            Route::get('/', [SystemIntegrationController::class, 'index'])->name('index');
+            Route::get('/{service}/{tab?}', [SystemIntegrationController::class, 'show'])
+                ->whereIn('tab', ['configure', 'test', 'audit'])
+                ->name('show');
+            Route::put('/{service}', [SystemIntegrationController::class, 'update'])->name('update');
+            Route::post('/{service}/test', [SystemIntegrationController::class, 'test'])->name('test');
+        });
+    });
+
+    // ── /api/v1/system — JSON status & test endpoints (system-admin only) ─────
+    Route::prefix('api/v1/system')->name('system.api.')->middleware('system-admin')->group(function () {
+        Route::get('health', [SystemHealthController::class, 'all'])->name('health');
+        Route::get('health/{service}', [SystemHealthController::class, 'single'])->name('health.single');
+        Route::post('test/mail', [SystemHealthController::class, 'testMail'])->name('test.mail');
+        Route::post('test/routing', [SystemHealthController::class, 'testRouting'])->name('test.routing');
+        Route::post('test/geojson', [SystemHealthController::class, 'testGeojson'])->name('test.geojson');
     });
 
     // ── /admin — admin-capofila, admin-ente, operator (entity-bound) ──────────
@@ -102,35 +149,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('tariffs', TariffController::class)
             ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
-        // Settings (mail, general, gis, oidc, pec, pdnd) — admin-capofila or admin-ente only
+        // Settings entity-level — admin-capofila / admin-ente: solo gestione utenti dell'ente.
+        // Le credenziali integrazione (SMTP, PEC, OIDC, PDND, PagoPA, AINOP) e branding
+        // globale sono ora sotto /system/* (system-admin only).
         Route::prefix('settings')->name('settings.')->middleware('role:admin-capofila|admin-ente')->group(function () {
             Route::get('/', [SettingController::class, 'index'])->name('index');
-
-            Route::get('mail', [SettingController::class, 'showMail'])->name('mail');
-            Route::put('mail', [SettingController::class, 'updateMail'])->name('mail.update');
-            Route::post('mail/test', [SettingController::class, 'testMail'])->name('mail.test');
-
-            Route::get('general', [SettingController::class, 'showGeneral'])->name('general');
-            Route::put('general', [SettingController::class, 'updateGeneral'])->name('general.update');
-
-            Route::get('branding', [SettingController::class, 'showBranding'])->name('branding');
-            Route::put('branding', [SettingController::class, 'updateBranding'])->name('branding.update');
-
-            Route::get('gis', [SettingController::class, 'showGis'])->name('gis');
-            Route::put('gis', [SettingController::class, 'updateGis'])->name('gis.update');
-            Route::post('gis/fetch-boundaries', [SettingController::class, 'fetchBoundaries'])->name('gis.fetch-boundaries');
-
-            Route::get('oidc', [SettingController::class, 'showOidc'])->name('oidc');
-            Route::put('oidc', [SettingController::class, 'updateOidc'])->name('oidc.update');
-
-            Route::get('pec', [SettingController::class, 'showPec'])->name('pec');
-            Route::put('pec', [SettingController::class, 'updatePec'])->name('pec.update');
-            Route::post('pec/test', [SettingController::class, 'testPec'])->name('pec.test');
-
-            Route::get('pdnd', [SettingController::class, 'showPdnd'])->name('pdnd');
-            Route::put('pdnd', [SettingController::class, 'updatePdnd'])->name('pdnd.update');
-            Route::post('pdnd/generate-dpop-key', [SettingController::class, 'generateDpopKey'])->name('pdnd.generate-dpop-key');
-            Route::post('pdnd/sync-ipa', [SettingController::class, 'syncIpa'])->name('pdnd.sync-ipa');
 
             Route::prefix('users')->name('users.')->group(function () {
                 Route::get('/', [UserController::class, 'index'])->name('index');
@@ -163,9 +186,9 @@ Route::middleware('auth')->group(function () {
     // ── /api — authenticated endpoints ───────────────────────────────────────
     Route::prefix('api')->name('api.')->group(function () {
         // Routing engine — accessible to all authenticated roles (incl. system-admin for the route simulator)
-        Route::post('routing/snap',        [RoutingController::class, 'snap'])        ->name('routing.snap');
+        Route::post('routing/snap', [RoutingController::class, 'snap'])->name('routing.snap');
         Route::post('routing/alternatives', [RoutingController::class, 'alternatives'])->name('routing.alternatives');
-        Route::post('routing/breakdown',   [RoutingController::class, 'breakdown'])   ->name('routing.breakdown');
+        Route::post('routing/breakdown', [RoutingController::class, 'breakdown'])->name('routing.breakdown');
 
         // ARS overlay requires entity context — system-admin excluded
         Route::post('routing/ars-overlay', [ArsOverlayController::class, 'index'])

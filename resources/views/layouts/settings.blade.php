@@ -16,28 +16,17 @@
         {{-- Nav groups --}}
         <div class="flex-1 overflow-y-auto py-2.5 px-2">
             @php
+            $hasRoute = fn (?string $name): bool => $name !== null && \Illuminate\Support\Facades\Route::has($name);
             $navGroups = [
                 ['title' => 'Ente', 'items' => [
-                    ['icon' => 'flag',    'label' => 'Profilo ente',        'sub' => 'Provincia di Pescara · IPA', 'route' => 'admin.settings.general'],
-                    ['icon' => 'euro',    'label' => 'Tariffario',          'sub' => 'Gestione fasce tariffarie',  'route' => 'admin.tariffs.index'],
-                    ['icon' => 'map',     'label' => 'Territorio & strade', 'sub' => 'GIS · OSRM · confini enti',  'route' => 'admin.settings.gis'],
+                    ['icon' => 'euro',    'label' => 'Tariffario',          'sub' => 'Gestione fasce tariffarie',  'route' => $hasRoute('admin.tariffs.index') ? 'admin.tariffs.index' : null],
                 ]],
                 ['title' => 'Persone', 'items' => [
-                    ['icon' => 'user',    'label' => 'Utenti & ruoli',      'sub' => 'Accessi e permessi',          'route' => 'admin.settings.users.index'],
-                    ['icon' => 'share',   'label' => 'Deleghe & SPID',      'sub' => 'Cittadini autorizzati',       'route' => 'admin.settings.oidc'],
+                    ['icon' => 'user',    'label' => 'Utenti & ruoli',      'sub' => 'Accessi e permessi',          'route' => $hasRoute('admin.settings.users.index') ? 'admin.settings.users.index' : null],
                     ['icon' => 'layers',  'label' => 'Enti terzi federati', 'sub' => 'Comuni · ANAS · gestori',     'route' => null],
                 ]],
-                ['title' => 'Workflow', 'items' => [
-                    ['icon' => 'refresh', 'label' => 'Stati pratica',    'sub' => 'Macchina a stati',              'route' => null],
-                    ['icon' => 'clock',   'label' => 'SLA & promemoria', 'sub' => '30 gg standard · 7 gg urgenti', 'route' => null],
-                    ['icon' => 'doc',     'label' => 'Modelli atti',     'sub' => 'Template autorizzazioni',        'route' => null],
-                ]],
                 ['title' => 'Sistema', 'items' => [
-                    ['icon' => 'bolt',  'label' => 'Integrazioni',     'sub' => 'PagoPA · AINOP · PDND · IPA', 'route' => 'admin.settings.pdnd',  'badge' => true],
-                    ['icon' => 'bell',  'label' => 'Notifiche & PEC',  'sub' => 'PEC istituzionale · IO app',  'route' => 'admin.settings.pec'],
-                    ['icon' => 'mail',  'label' => 'Mail SMTP',        'sub' => 'Server posta in uscita',      'route' => 'admin.settings.mail'],
-                    ['icon' => 'qr',    'label' => 'Sicurezza & audit','sub' => 'MFA · log accessi',           'route' => null],
-                    ['icon' => 'brush', 'label' => 'Identità visiva',  'sub' => 'Logo · palette · header',     'route' => 'admin.settings.branding'],
+                    ['icon' => 'bolt',  'label' => 'Pannello /system',     'sub' => 'Integrazioni · diagnostica · branding · app behaviour (system-admin)', 'route' => null],
                 ]],
             ];
             @endphp

@@ -1,32 +1,46 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-palette="istituzionale">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ $title ?? trim(View::yieldContent('title-prefix').' Pannello /system') }} — {{ \App\Models\Setting::get('branding.platform_name', config('app.name', 'GTE Abruzzo')) }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="bg-bg text-ink font-sans h-screen overflow-hidden">
+<div class="h-screen flex flex-col overflow-hidden">
+    <x-system.topbar />
 
-@section('nav-items')
-    @php
-        $nav = [
-            ['icon' => 'sliders',  'label' => 'Pannello',       'route' => 'system.dashboard',    'pattern' => 'system.dashboard'],
-            ['icon' => 'flag',     'label' => 'Tenant',         'route' => 'system.tenants',      'pattern' => 'system.tenants*'],
-            ['icon' => 'layers',   'label' => 'Connettori',      'route' => 'system.connectors',   'pattern' => 'system.connectors'],
-            ['icon' => 'bell',     'label' => 'SMTP/IMAP',      'route' => 'system.smtp',         'pattern' => 'system.smtp*'],
-            ['icon' => 'clock',    'label' => 'Scheduler',       'route' => 'system.scheduler',    'pattern' => 'system.scheduler'],
-            ['icon' => 'doc',      'label' => 'Telemetria',      'route' => 'system.metrics',      'pattern' => 'system.metrics'],
-            ['icon' => 'map',      'label' => 'Geo dataset',     'route' => 'system.geo',          'pattern' => 'system.geo'],
-            ['icon' => 'doc',      'label' => 'Audit infra',     'route' => 'system.audit',        'pattern' => 'system.audit'],
-            ['icon' => 'refresh',  'label' => 'Release',         'route' => 'system.release',      'pattern' => 'system.release'],
-            ['icon' => 'user',     'label' => 'Utenti sistema',  'route' => 'system.users.index',  'pattern' => 'system.users.*'],
-        ];
-    @endphp
+    <div class="flex-1 flex overflow-hidden min-h-0">
+        <x-system.sidebar />
 
-    @foreach($nav as $item)
-        @php
-            $isActive = request()->routeIs($item['pattern']);
-            $classes  = $isActive
-                ? 'bg-surface-2 text-ink font-semibold'
-                : 'text-ink-2 hover:bg-surface-2 hover:text-ink font-medium';
-        @endphp
-        <a href="{{ route($item['route']) }}"
-           class="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[13px] transition-colors {{ $classes }}">
-            <x-icon name="{{ $item['icon'] }}" size="14" class="{{ $isActive ? 'text-accent' : '' }}" />
-            <span class="flex-1">{{ $item['label'] }}</span>
-        </a>
-    @endforeach
-@endsection
+        <main class="flex-1 overflow-hidden bg-bg flex flex-col min-w-0">
+            <x-impersonation-banner />
+
+            @hasSection('tabs')
+                @yield('tabs')
+            @endif
+
+            <div class="flex-1 overflow-auto">
+                @if(session('success'))
+                    <div class="px-6 pt-6">
+                        <x-alert tone="success">{{ session('success') }}</x-alert>
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div class="px-6 pt-6">
+                        <x-alert tone="danger">{{ session('error') }}</x-alert>
+                    </div>
+                @endif
+
+                @yield('content')
+            </div>
+        </main>
+    </div>
+</div>
+@stack('scripts')
+</body>
+</html>

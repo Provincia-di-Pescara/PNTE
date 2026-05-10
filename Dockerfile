@@ -121,4 +121,10 @@ RUN printf '%s\n' "$APP_VERSION" > /var/www/html/VERSION \
         );'
 
 EXPOSE 80
+
+# Healthcheck: runs `gte:diag` (cached, no-audit) and exits 0 if all services ok.
+# Skips audit logging to avoid filling system_audit_logs every 30s.
+HEALTHCHECK --interval=30s --timeout=20s --start-period=60s --retries=3 \
+    CMD php /var/www/html/artisan gte:diag --quiet-ok --no-audit --json > /dev/null 2>&1 || exit 1
+
 ENTRYPOINT ["/entrypoint.sh"]
