@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\UserRole;
+use App\Jobs\ImportGeoFileJob;
 use App\Models\Entity;
 use App\Models\Setting;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -103,7 +104,7 @@ final class SystemAdminTest extends TestCase
     {
         $this->withoutExceptionHandling();
         Storage::fake('local');
-        Artisan::shouldReceive('call')->andReturn(0);
+        Queue::fake();
 
         $user = $this->makeUser(UserRole::SystemAdmin);
         $file = UploadedFile::fake()->createWithContent(
@@ -113,8 +114,10 @@ final class SystemAdminTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('system.geo.import'), ['file' => $file])
-            ->assertRedirect(route('system.geo'))
-            ->assertSessionHas('success');
+            ->assertOk()
+            ->assertJsonFragment(['ok' => true]);
+
+        Queue::assertPushed(ImportGeoFileJob::class);
     }
 
     public function test_system_admin_geo_import_rejects_non_json_file(): void

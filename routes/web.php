@@ -24,6 +24,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LawEnforcement\RadarController;
 use App\Http\Controllers\Setup\SetupController;
 use App\Http\Controllers\System\DashboardController as SystemDashboardController;
+use App\Http\Controllers\System\RouteSimulatorController;
 use App\Http\Controllers\ThirdParty\ClearanceController;
 use App\Http\Controllers\ThirdParty\RoadworkController;
 use App\Http\Controllers\ThirdParty\StandardRouteController;
@@ -75,6 +76,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/geo', [SystemDashboardController::class, 'geo'])->name('geo');
         Route::post('/geo/fetch', [SystemDashboardController::class, 'fetchGeo'])->name('geo.fetch');
         Route::post('/geo/import', [SystemDashboardController::class, 'importGeo'])->name('geo.import');
+        Route::get('/geo/status', [SystemDashboardController::class, 'geoStatus'])->name('geo.status');
+        Route::put('/geo/sources', [SystemDashboardController::class, 'saveGeoSources'])->name('geo.sources');
         Route::get('/audit', [SystemDashboardController::class, 'auditInfra'])->name('audit');
         Route::get('/release', [SystemDashboardController::class, 'release'])->name('release');
         Route::get('/users', [SystemDashboardController::class, 'users'])->name('users.index');
@@ -84,6 +87,8 @@ Route::middleware('auth')->group(function () {
 
         // Impersonation — only system-admin can START impersonation; leave is in general auth group above
         Route::post('/users/{user}/impersonate', [ImpersonateController::class, 'take'])->name('users.impersonate');
+
+        Route::get('/routes', [RouteSimulatorController::class, 'index'])->name('routes');
     });
 
     // ── /admin — admin-capofila, admin-ente, operator (entity-bound) ──────────
@@ -155,12 +160,19 @@ Route::middleware('auth')->group(function () {
             ->name('trips.end');
     });
 
-    // ── /api — authenticated routing endpoints ────────────────────────────────
-    Route::prefix('api')->name('api.')->middleware('not-system-admin')->group(function () {
-        Route::post('routing/snap', [RoutingController::class, 'snap'])->name('routing.snap');
+    // ── /api — authenticated endpoints ───────────────────────────────────────
+    Route::prefix('api')->name('api.')->group(function () {
+        // Routing engine — accessible to all authenticated roles (incl. system-admin for the route simulator)
+        Route::post('routing/snap',        [RoutingController::class, 'snap'])        ->name('routing.snap');
         Route::post('routing/alternatives', [RoutingController::class, 'alternatives'])->name('routing.alternatives');
-        Route::post('routing/ars-overlay', [ArsOverlayController::class, 'index'])->name('routing.ars-overlay');
-        Route::post('admin/companies/lookup', CompanyLookupController::class)->name('admin.companies.lookup');
+        Route::post('routing/breakdown',   [RoutingController::class, 'breakdown'])   ->name('routing.breakdown');
+
+        // ARS overlay requires entity context — system-admin excluded
+        Route::post('routing/ars-overlay', [ArsOverlayController::class, 'index'])
+            ->middleware('not-system-admin')->name('routing.ars-overlay');
+
+        Route::post('admin/companies/lookup', CompanyLookupController::class)
+            ->middleware('not-system-admin')->name('admin.companies.lookup');
     });
 
     // ── /third-party — third-party entity operators ───────────────────────────

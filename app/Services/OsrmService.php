@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\OsrmServiceInterface;
+use App\Exceptions\OsrmNoRouteException;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Facades\DB;
 
@@ -21,6 +22,10 @@ final class OsrmService implements OsrmServiceInterface
     public function snapToRoad(array $waypoints): array
     {
         $routes = $this->fetchRoutes($waypoints, alternatives: false);
+
+        if (empty($routes)) {
+            throw new OsrmNoRouteException('Nessun percorso trovato: uno o più waypoint sono lontani dalla rete stradale.');
+        }
 
         return $this->parseRoute($routes[0]);
     }

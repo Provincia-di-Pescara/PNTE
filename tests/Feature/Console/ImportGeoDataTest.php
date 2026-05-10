@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Console;
 
-use App\Enums\UserRole;
 use App\Enums\EntityType;
+use App\Enums\UserRole;
 use App\Models\Entity;
 use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;

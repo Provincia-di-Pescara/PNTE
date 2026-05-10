@@ -34,4 +34,30 @@ final class RouteIntersectionService
             ->mapWithKeys(fn ($r) => [(int) $r->id => round((float) $r->km, 3)])
             ->all();
     }
+
+    /**
+     * @return array<int, array{entity_id: int, nome: string, tipo: string, km: float}>
+     */
+    public function breakdownFromWkt(string $wkt): array
+    {
+        $rows = DB::select(
+            'SELECT e.id, e.nome, e.tipo,
+                    ST_Length(ST_Intersection(ST_GeomFromText(?, 4326), e.geom)) * 111.32 AS km
+             FROM entities e
+             WHERE e.geom IS NOT NULL
+               AND ST_Intersects(ST_GeomFromText(?, 4326), e.geom)',
+            [$wkt, $wkt]
+        );
+
+        return collect($rows)
+            ->map(fn ($r) => [
+                'entity_id' => (int) $r->id,
+                'nome'      => (string) $r->nome,
+                'tipo'      => (string) $r->tipo,
+                'km'        => round((float) $r->km, 3),
+            ])
+            ->sortByDesc('km')
+            ->values()
+            ->all();
+    }
 }

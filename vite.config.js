@@ -6,7 +6,7 @@ export default defineConfig({
     plugins: [
         tailwindcss(),
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/route-builder.js', 'resources/js/geo-map.js'],
+            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/route-builder.js', 'resources/js/geo-map.js', 'resources/js/route-simulator.js'],
             refresh: true,
         }),
     ],

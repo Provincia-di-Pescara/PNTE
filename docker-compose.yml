@@ -53,22 +53,89 @@ services:
     networks:
       - gte
 
+  # ── GIS Routing — init ───────────────────────────────────────────────────────
+  # Attivo solo con il profilo "routing" (COMPOSE_PROFILES=routing nel .env).
+  # Idempotente: salta tutto se il grafo è già presente nel volume.
+  # Primo avvio: download ~1.5 GB + preprocessing ~30 min; poi volume riutilizzato.
+  osrm-init:
+    image: ghcr.io/project-osrm/osrm-backend:latest
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        # Sentinel files: ogni step scrive un marker al completamento.
+        # Se il container viene ricreato (OOM, riavvio), riprende dall'ultimo step completato.
+
+        apk add --no-cache curl > /dev/null 2>&1
+
+        REGION="$${OSRM_REGION:-europe/italy/sud}"
+        REGION_NAME="$$(basename "$$REGION")"
+        PBF="/data/$${REGION_NAME}-latest.osm.pbf"
+        OSRM="/data/$${REGION_NAME}-latest.osrm"
+
+        if [ -f /data/.osrm_ready ]; then
+          echo "OSRM: grafo pronto, nulla da fare."
+          exit 0
+        fi
+
+        if [ ! -f /data/.osrm_extracted ]; then
+          if [ ! -f /data/.osrm_downloaded ]; then
+            rm -f "$$PBF"
+            echo "OSRM: download $${REGION_NAME} OSM da Geofabrik..."
+            curl -fL --retry 3 --retry-delay 5 \
+              -o "$$PBF" \
+              "https://download.geofabrik.de/$${REGION}-latest.osm.pbf"
+            [ "$$(stat -c%s "$$PBF")" -gt 1000000 ] || { echo "OSRM: file PBF troppo piccolo, download fallito."; rm -f "$$PBF"; exit 1; }
+            touch /data/.osrm_downloaded
+          fi
+          echo "OSRM: estrazione grafo stradale (car.lua, $${OSRM_THREADS:-2} thread)..."
+          osrm-extract --threads "$${OSRM_THREADS:-2}" -p /opt/car.lua "$$PBF"
+          rm -f "$$PBF" /data/.osrm_downloaded
+          touch /data/.osrm_extracted
+        fi
+
+        if [ ! -f /data/.osrm_partitioned ]; then
+          echo "OSRM: partizionamento MLD ($${OSRM_THREADS:-2} thread)..."
+          osrm-partition --threads "$${OSRM_THREADS:-2}" "$$OSRM"
+          touch /data/.osrm_partitioned
+        fi
+
+        echo "OSRM: customizzazione ($${OSRM_THREADS:-2} thread)..."
+        osrm-customize --threads "$${OSRM_THREADS:-2}" "$$OSRM"
+        touch /data/.osrm_ready
+        echo "OSRM: preprocessing completato."
+    environment:
+      OSRM_THREADS: "${OSRM_THREADS:-2}"
+      OSRM_REGION: "${OSRM_REGION:-europe/italy/sud}"
+    volumes:
+      - osrm_data:/data
+    restart: "no"
+    profiles: [routing]
+    networks:
+      - gte
+
   # ── GIS Routing (OSRM) ────────────────────────────────────────────────────
-  # Requires pre-processed Abruzzo road graph. See docs/GIS_ROUTING.md.
-  # Pre-processing steps (run once, outside this compose):
-  #   docker run --rm -v $(pwd)/osrm-data:/data ghcr.io/project-osrm/osrm-backend \
-  #     osrm-extract -p /opt/car.lua /data/abruzzo-latest.osm.pbf
-  #   (then osrm-partition and osrm-customize)
+  # Aspetta che osrm-init abbia completato il preprocessing prima di avviarsi.
+  # Nessun crash loop: polling sul fileIndex ogni 10 secondi.
   osrm:
     image: ghcr.io/project-osrm/osrm-backend:latest
     restart: unless-stopped
-    command: osrm-routed --algorithm mld /data/abruzzo-latest.osrm
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        REGION_NAME="$$(basename "$${OSRM_REGION:-europe/italy/sud}")"
+        OSRM="/data/$${REGION_NAME}-latest.osrm"
+        echo "OSRM: attendo preprocessing completo (osrm-init)..."
+        while [ ! -f "//data/.osrm_ready" ]; do
+          sleep 10
+        done
+        echo "OSRM: dati pronti, avvio osrm-routed."
+        exec osrm-routed --algorithm mld --max-table-size 1000 "$$OSRM"
+    environment:
+      OSRM_REGION: "${OSRM_REGION:-europe/italy/sud}"
     volumes:
-      - ./osrm-data:/data:ro
-    ports:
-      - "5000:5000"
-    profiles:
-      - gis
+      - osrm_data:/data:ro
+    profiles: [routing]
     networks:
       - gte
 
@@ -76,6 +143,7 @@ volumes:
   db_data:
   redis_data:
   app_storage:
+  osrm_data:
 
 networks:
   gte:

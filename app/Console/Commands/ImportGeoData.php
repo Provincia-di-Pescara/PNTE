@@ -17,6 +17,8 @@ final class ImportGeoData extends Command
 
     public function handle(): int
     {
+        ini_set('memory_limit', '512M');
+
         $path = (string) $this->argument('file');
 
         if (! file_exists($path)) {
@@ -40,13 +42,38 @@ final class ImportGeoData extends Command
         foreach ($data['features'] as $feature) {
             $props = $feature['properties'] ?? [];
 
-            // openpolis: comuni → cod_istat (6 cifre), province → cod_prov (3 cifre)
-            $istatCode = $props['cod_istat']
-                ?? $props['cod_prov']
-                ?? $props['codice_istat']
-                ?? $props['PRO_COM_T']
-                ?? $props['COD_ISTAT']
-                ?? null;
+            // Rileva codice ISTAT e tipo dal GeoJSON sorgente.
+            // Priorità: openpolis (com_istat_code / prov_istat_code) poi formati legacy.
+            // com_istat_code va prima di prov_istat_code: entrambi presenti nei comuni.
+            $tipo = null;
+            $istatCode = null;
+
+            if (isset($props['com_istat_code'])) {
+                // openpolis comuni: '001001' (6 cifre, già padded)
+                $istatCode = str_pad((string) $props['com_istat_code'], 6, '0', STR_PAD_LEFT);
+                $tipo = EntityType::Comune;
+            } elseif (isset($props['prov_istat_code'])) {
+                // openpolis province: '001' (3 cifre, già padded)
+                $istatCode = str_pad((string) $props['prov_istat_code'], 3, '0', STR_PAD_LEFT);
+                $tipo = EntityType::Provincia;
+            } elseif (isset($props['cod_istat'])) {
+                $istatCode = str_pad((string) $props['cod_istat'], 6, '0', STR_PAD_LEFT);
+                $tipo = EntityType::Comune;
+            } elseif (isset($props['cod_prov'])) {
+                $istatCode = str_pad((string) $props['cod_prov'], 3, '0', STR_PAD_LEFT);
+                $tipo = EntityType::Provincia;
+            } elseif (isset($props['PRO_COM_T'])) {
+                $istatCode = str_pad((string) $props['PRO_COM_T'], 6, '0', STR_PAD_LEFT);
+                $tipo = EntityType::Comune;
+            } elseif (isset($props['codice_istat'], $props['COD_ISTAT'])) {
+                $raw = (string) ($props['codice_istat'] ?? $props['COD_ISTAT']);
+                $istatCode = $raw;
+                $tipo = match (strlen($raw)) {
+                    3 => EntityType::Provincia,
+                    6 => EntityType::Comune,
+                    default => null,
+                };
+            }
 
             if ($istatCode === null) {
                 $this->warn('Feature senza codice ISTAT: saltata.');
@@ -55,23 +82,14 @@ final class ImportGeoData extends Command
                 continue;
             }
 
-            $istatCode = (string) $istatCode;
-
-            // Infer tipo from ISTAT code length
-            $tipo = match (strlen($istatCode)) {
-                3 => EntityType::Provincia,
-                6 => EntityType::Comune,
-                default => null,
-            };
-
             if ($tipo === null) {
-                $this->warn("[{$istatCode}] Lunghezza codice non riconosciuta: saltata.");
+                $this->warn("[{$istatCode}] Tipo non determinabile: saltata.");
                 $skipped++;
 
                 continue;
             }
 
-            $nome = (string) ($props['name'] ?? $props['nome'] ?? $istatCode);
+            $nome = (string) ($props['name'] ?? $props['prov_name'] ?? $props['nome'] ?? $istatCode);
 
             $existed = Entity::query()->where('codice_istat', $istatCode)->exists();
 
@@ -97,4 +115,3 @@ final class ImportGeoData extends Command
         return self::SUCCESS;
     }
 }
-

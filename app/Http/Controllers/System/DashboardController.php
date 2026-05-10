@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\System;
 
+use App\Console\Commands\FetchIstatBoundaries;
 use App\Enums\ApplicationStatus;
+use App\Enums\EntityType;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\System\ImportGeoRequest;
+use App\Jobs\FetchGeoBoundariesJob;
+use App\Jobs\ImportGeoFileJob;
 use App\Mail\TestMail;
 use App\Models\Application;
 use App\Models\Entity;
@@ -17,9 +21,10 @@ use App\Models\StandardRoute;
 use App\Models\SystemAuditLog;
 use App\Models\User;
 use App\Models\Vehicle;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -27,7 +32,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -276,8 +280,17 @@ final class DashboardController extends Controller
     public function geo(): View
     {
         $totalEntities = Entity::query()->count();
-        $entitiesWithGeom = Schema::hasColumn('entities', 'geom')
-            ? Entity::query()->whereNotNull('geom')->count()
+
+        $hasGeom = Schema::hasColumn('entities', 'geom');
+
+        $entitiesWithGeom = $hasGeom ? Entity::query()->whereNotNull('geom')->count() : 0;
+
+        $comuniCount = $hasGeom
+            ? Entity::query()->where('tipo', EntityType::Comune->value)->whereNotNull('geom')->count()
+            : 0;
+
+        $provinceCount = $hasGeom
+            ? Entity::query()->where('tipo', EntityType::Provincia->value)->whereNotNull('geom')->count()
             : 0;
 
         $coverage = $totalEntities > 0
@@ -297,8 +310,15 @@ final class DashboardController extends Controller
             ['name' => 'Entities · confini amministrativi', 'provider' => 'DB tenant', 'features' => number_format($entitiesWithGeom).'/'.number_format($totalEntities), 'status' => $coverage >= 95 ? 'ok' : 'warn'],
             ['name' => 'Roadworks · cantieri attivi', 'provider' => 'Enti terzi', 'features' => (string) Roadwork::query()->count(), 'status' => 'ok'],
             ['name' => 'ARS · standard routes', 'provider' => 'Archivio regionale', 'features' => (string) StandardRoute::query()->count(), 'status' => 'ok'],
-            ['name' => 'ISTAT · confini comunali', 'provider' => 'ISTAT', 'features' => '7.901', 'status' => 'stale'],
             ['name' => 'SRTM · elevazione', 'provider' => 'NASA', 'features' => 'raster', 'status' => 'ok'],
+        ];
+
+        /** @var array<string, mixed> $importStatus */
+        $importStatus = Cache::get('geo_import_status', ['status' => 'idle']);
+
+        $geoSources = [
+            'comuni_url' => Setting::get('geo.source_comuni_url', FetchIstatBoundaries::DEFAULT_URLS['comuni']),
+            'province_url' => Setting::get('geo.source_province_url', FetchIstatBoundaries::DEFAULT_URLS['province']),
         ];
 
         return view('system.geo', [
@@ -306,18 +326,20 @@ final class DashboardController extends Controller
             'coverage' => $coverage,
             'entitiesWithGeom' => $entitiesWithGeom,
             'totalEntities' => $totalEntities,
+            'comuniCount' => $comuniCount,
+            'provinceCount' => $provinceCount,
+            'importStatus' => $importStatus,
+            'geoSources' => $geoSources,
         ]);
     }
 
-    public function fetchGeo(Request $request): RedirectResponse
+    public function fetchGeo(Request $request): JsonResponse
     {
         $tipo = $request->input('tipo', 'tutti');
 
         if (! in_array($tipo, ['comuni', 'province', 'tutti'], true)) {
-            return redirect()->route('system.geo')->with('error', 'Tipo non valido.');
+            return response()->json(['error' => 'Tipo non valido.'], 422);
         }
-
-        set_time_limit(300);
 
         $tipi = match ($tipo) {
             'comuni' => ['comuni'],
@@ -325,64 +347,80 @@ final class DashboardController extends Controller
             default => ['comuni', 'province'],
         };
 
+        $actor = $request->user();
+
+        Cache::put('geo_import_status', [
+            'status' => 'downloading',
+            'tipo' => $tipo,
+            'step' => 'Job avviato...',
+            'started_at' => now()->toIso8601String(),
+            'completed_at' => null,
+            'error' => null,
+            'result' => null,
+        ], 3600);
+
         foreach ($tipi as $t) {
-            $exitCode = Artisan::call('gte:fetch-istat-boundaries', ['tipo' => $t]);
+            $url = (string) Setting::get("geo.source_{$t}_url", FetchIstatBoundaries::DEFAULT_URLS[$t]);
 
-            if ($exitCode !== 0) {
-                SystemAuditLog::query()->create([
-                    'actor_id' => $request->user()->id,
-                    'actor_name' => $request->user()->name ?? 'sistema',
-                    'action' => 'geo.fetch-istat',
-                    'detail' => "Fetch ISTAT fallito per layer: {$t} (exit {$exitCode})",
-                    'created_at' => now(),
-                ]);
-
-                return redirect()->route('system.geo')->with('error', "Fetch ISTAT fallito per: {$t}.");
-            }
+            FetchGeoBoundariesJob::dispatch($t, $url, $actor->id, $actor->name ?? 'sistema');
         }
 
-        SystemAuditLog::query()->create([
-            'actor_id' => $request->user()->id,
-            'actor_name' => $request->user()->name ?? 'sistema',
-            'action' => 'geo.fetch-istat',
-            'detail' => 'Layer aggiornati: '.implode(', ', $tipi),
-            'created_at' => now(),
-        ]);
-
-        return redirect()->route('system.geo')->with('success', 'Dataset ISTAT aggiornato con successo.');
+        return response()->json(['ok' => true]);
     }
 
-    public function importGeo(ImportGeoRequest $request): RedirectResponse
+    public function importGeo(ImportGeoRequest $request): JsonResponse
     {
-        $path = $request->file('file')->store('geo-imports', 'local');
+        $file = $request->file('file');
+        $path = $file->store('geo-imports', 'local');
+        $actor = $request->user();
 
-        try {
-            $exitCode = Artisan::call('gte:import-geo', ['file' => storage_path('app/'.$path)]);
-        } finally {
-            Storage::disk('local')->delete($path);
-        }
+        Cache::put('geo_import_status', [
+            'status' => 'importing',
+            'tipo' => 'upload',
+            'step' => 'Importando file '.$file->getClientOriginalName().'...',
+            'started_at' => now()->toIso8601String(),
+            'completed_at' => null,
+            'error' => null,
+            'result' => null,
+        ], 3600);
 
-        if ($exitCode !== 0) {
-            SystemAuditLog::query()->create([
-                'actor_id' => $request->user()->id,
-                'actor_name' => $request->user()->name ?? 'sistema',
-                'action' => 'geo.import-file',
-                'detail' => "Import fallito: {$request->file('file')->getClientOriginalName()} (exit {$exitCode})",
-                'created_at' => now(),
-            ]);
+        ImportGeoFileJob::dispatch(
+            storage_path('app/'.$path),
+            $file->getClientOriginalName(),
+            $actor->id,
+            $actor->name ?? 'sistema',
+        );
 
-            return redirect()->route('system.geo')->with('error', 'Importazione fallita. Verifica il formato del file.');
-        }
+        return response()->json(['ok' => true]);
+    }
+
+    public function geoStatus(): JsonResponse
+    {
+        /** @var array<string, mixed> $status */
+        $status = Cache::get('geo_import_status', ['status' => 'idle']);
+
+        return response()->json($status);
+    }
+
+    public function saveGeoSources(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'source_comuni_url' => ['required', 'url', 'max:512'],
+            'source_province_url' => ['required', 'url', 'max:512'],
+        ]);
+
+        Setting::set('geo.source_comuni_url', $validated['source_comuni_url'], 'geo');
+        Setting::set('geo.source_province_url', $validated['source_province_url'], 'geo');
 
         SystemAuditLog::query()->create([
             'actor_id' => $request->user()->id,
             'actor_name' => $request->user()->name ?? 'sistema',
-            'action' => 'geo.import-file',
-            'detail' => "Import completato: {$request->file('file')->getClientOriginalName()}",
+            'action' => 'geo.sources-update',
+            'detail' => 'Sorgenti GIS aggiornate.',
             'created_at' => now(),
         ]);
 
-        return redirect()->route('system.geo')->with('success', 'File GeoJSON importato con successo.');
+        return redirect()->route('system.geo')->with('success', 'Sorgenti salvate.');
     }
 
     public function auditInfra(): View

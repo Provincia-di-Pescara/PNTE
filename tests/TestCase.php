@@ -9,6 +9,16 @@ use Spatie\Permission\PermissionRegistrar;
 
 abstract class TestCase extends BaseTestCase
 {
+    protected function refreshApplication(): void
+    {
+        // Force the test database before the app boots so dotenv (immutable) keeps this value.
+        $_ENV['DB_DATABASE'] = 'gte_abruzzo_test';
+        $_SERVER['DB_DATABASE'] = 'gte_abruzzo_test';
+        putenv('DB_DATABASE=gte_abruzzo_test');
+
+        parent::refreshApplication();
+    }
+
     protected function setUp(): void
     {
         parent::setUp();

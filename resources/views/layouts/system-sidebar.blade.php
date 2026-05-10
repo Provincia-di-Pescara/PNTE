@@ -41,7 +41,8 @@
                     [
                         'title' => 'Dataset geo',
                         'items' => [
-                            ['label' => 'Geo dataset', 'route' => 'system.geo', 'pattern' => 'system.geo', 'icon' => 'map'],
+                            ['label' => 'Geo dataset',       'route' => 'system.geo',    'pattern' => 'system.geo',     'icon' => 'map'],
+                            ['label' => 'Simulatore rotte',  'route' => 'system.routes', 'pattern' => 'system.routes*', 'icon' => 'map'],
                         ],
                     ],
                     [
