@@ -1,6 +1,8 @@
 # PNTE
 
-![PNTE Logo](./design/logo-icon.png)
+<p align="center">
+	<img src="./design/logo-icon.png" alt="PNTE Logo" />
+</p>
 
 PNTE adotta un'architettura "Walled Garden Ibrido" che risolve il problema della scalabilità nazionale garantendo al contempo il controllo della Provincia Capofila.
 
