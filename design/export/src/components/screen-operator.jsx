@@ -1,11 +1,11 @@
-/* global React, GTE, GTEMap */
-const { Chip: Co, StatusPill: SPp, Avatar: Avp, Icon: Icp, I: IIp, APPLICATIONS: APPSp, ENTITIES_CROSSED: ECp } = window.GTE;
+/* global React, PNTE, PNTEMap */
+const { Chip: Co, StatusPill: SPp, Avatar: Avp, Icon: Icp, I: IIp, APPLICATIONS: APPSp, ENTITIES_CROSSED: ECp } = window.PNTE;
 
 // ===========================================================================
 // Operator (Provincia di Pescara) — Dashboard with table + state timeline
 // ===========================================================================
 function OperatorScreen() {
-  const [selected, setSelected] = React.useState("GTE-2026-002417");
+  const [selected, setSelected] = React.useState("PNTE-2026-002417");
   const sel = APPSp.find(a => a.id === selected) || APPSp[1];
 
   // KPIs
@@ -140,7 +140,7 @@ function OperatorScreen() {
 
           {/* mini map */}
           <div style={{ padding: 12 }}>
-            <GTEMap height={180} variant="minimal" showLegend={false} showZoom={false}
+            <PNTEMap height={180} variant="minimal" showLegend={false} showZoom={false}
                     showCompass={false} showLabels={false} showRoadworks={false} showBridges={false} />
           </div>
 
@@ -218,4 +218,4 @@ function OperatorScreen() {
   );
 }
 
-window.GTEScreens = { ...(window.GTEScreens || {}), OperatorScreen };
+window.PNTEScreens = { ...(window.PNTEScreens || {}), OperatorScreen };

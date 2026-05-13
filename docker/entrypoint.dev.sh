@@ -28,13 +28,13 @@ if [ ! -f public/build/manifest.json ]; then
 fi
 
 # Create test database if it doesn't exist (used by php artisan test)
-TEST_DB="${DB_DATABASE:-gte_abruzzo}_test"
-PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST:-db}" -U "${DB_USERNAME:-gte}" -d postgres \
+TEST_DB="${DB_DATABASE:-pnte}_test"
+PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST:-db}" -U "${DB_USERNAME:-pnte}" -d postgres \
     -tc "SELECT 1 FROM pg_database WHERE datname = '${TEST_DB}'" \
     | grep -q 1 || {
-  PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST:-db}" -U "${DB_USERNAME:-gte}" -d postgres \
+  PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST:-db}" -U "${DB_USERNAME:-pnte}" -d postgres \
     -c "CREATE DATABASE ${TEST_DB} WITH TEMPLATE template0 ENCODING 'UTF8';" && \
-  PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST:-db}" -U "${DB_USERNAME:-gte}" -d "${TEST_DB}" \
+  PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST:-db}" -U "${DB_USERNAME:-pnte}" -d "${TEST_DB}" \
     -c "CREATE EXTENSION IF NOT EXISTS postgis; CREATE EXTENSION IF NOT EXISTS postgis_tiger_geocoder CASCADE; CREATE EXTENSION IF NOT EXISTS postgis_topology;" || true
 }
 

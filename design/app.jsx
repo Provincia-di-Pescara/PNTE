@@ -1,7 +1,7 @@
-/* global React, GTE, GTEMap, GTEShell, GTEScreens */
-const { Icon: Icm, I: IIm } = window.GTE;
-const { TopBar, SideNav } = window.GTEShell;
-const { WizardScreen, OperatorScreen, ThirdPartyScreen, LawScreen, CitizenScreen, VehicleAddScreen, OperatorSettingsScreen, SystemAdminScreen, AgencyScreen } = window.GTEScreens;
+/* global React, PNTE, PNTEMap, PNTEShell, PNTEScreens */
+const { Icon: Icm, I: IIm } = window.PNTE;
+const { TopBar, SideNav } = window.PNTEShell;
+const { WizardScreen, OperatorScreen, ThirdPartyScreen, LawScreen, CitizenScreen, VehicleAddScreen, OperatorSettingsScreen, SystemAdminScreen, AgencyScreen } = window.PNTEScreens;
 
 // Wraps a screen in a fake "app" frame: top bar + side nav.
 function AppFrame({ palette = "civic", role, roleLabel, navItems, navActive, children }) {
@@ -92,10 +92,10 @@ function PaletteVariation({ palette, label }) {
         <div style={{ width: 28, height: 28, borderRadius: 6, background: "var(--ink)",
                       color: "var(--bg)", display: "flex", alignItems: "center",
                       justifyContent: "center", fontWeight: 700, fontSize: 12 }}>
-          GTE
+          PNTE
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 600, fontSize: 14 }}>GTE Abruzzo</div>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>PNTE</div>
           <div style={{ fontSize: 11, color: "var(--ink-3)" }}>Direzione visiva: {label}</div>
         </div>
         <span className="chip chip-amber"><Icm d={IIm.bolt} size={11} /> Hero feature</span>
@@ -111,7 +111,7 @@ function PaletteVariation({ palette, label }) {
           <span className="chip chip-amber">1 cantiere</span>
         </div>
         <div style={{ flex: 1, minHeight: 0 }}>
-          <GTEMap height="100%" />
+          <PNTEMap height="100%" />
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0,
                       border: "1px solid var(--line)", borderRadius: 8, overflow: "hidden" }}>
@@ -152,7 +152,7 @@ function App() {
   return (
     <>
       <DesignCanvas
-        title="GTE-Abruzzo · Esplorazione design"
+        title="PNTE · Esplorazione design"
         subtitle="Gestionale Trasporti Eccezionali · Provincia di Pescara · Riuso EUPL-1.2"
       >
         <DCSection id="visual" title="Direzioni visive · Hero feature (WebGIS)"
@@ -226,7 +226,7 @@ function App() {
         <DCSection id="system" title="Pannello /system · system-admin"
                    subtitle="Ruolo separato dall'admin-ente · zero accesso a pratiche, P.IVA, targhe o PDF · solo infrastruttura">
           <DCArtboard id="sysadmin" label="system-admin · Pannello /system" width={1440} height={920}>
-            <AppFrame palette={palette} role="system-admin · Piattaforma GTE"
+            <AppFrame palette={palette} role="system-admin · Piattaforma PNTE"
                       roleLabel="Roberto Iezzi" navItems={NAV.system} navActive="vault">
               <SystemAdminScreen />
             </AppFrame>

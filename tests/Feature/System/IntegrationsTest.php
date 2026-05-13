@@ -82,7 +82,7 @@ final class IntegrationsTest extends TestCase
                 'mail_encryption' => 'tls',
                 'mail_username' => 'noreply@example.test',
                 'mail_from_address' => 'noreply@example.test',
-                'mail_from_name' => 'GTE Test',
+                'mail_from_name' => 'PNTE Test',
                 'mail_password' => 'segreta',
             ])
             ->assertRedirect(route('system.integrations.show', ['service' => 'smtp']))
@@ -108,7 +108,7 @@ final class IntegrationsTest extends TestCase
                 'mail_encryption' => 'tls',
                 'mail_username' => 'u',
                 'mail_from_address' => 'u@example.test',
-                'mail_from_name' => 'GTE',
+                'mail_from_name' => 'PNTE',
                 'mail_password' => '',
             ])
             ->assertRedirect();

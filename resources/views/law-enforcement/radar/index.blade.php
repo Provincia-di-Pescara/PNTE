@@ -29,7 +29,7 @@
         <tbody class="divide-y divide-line">
             @foreach($applications as $app)
             <tr class="row-hover transition-colors">
-                <td class="px-5 py-3 font-mono text-xs">{{ sprintf('GTE-%06d', $app->id) }}</td>
+                <td class="px-5 py-3 font-mono text-xs">{{ sprintf('PNTE-%06d', $app->id) }}</td>
                 <td class="px-5 py-3 text-ink">{{ $app->company?->ragione_sociale ?? '—' }}</td>
                 <td class="px-5 py-3 font-mono font-semibold">{{ $app->vehicle?->targa ?? '—' }}</td>
                 <td class="px-5 py-3 font-mono text-ink-2">{{ $app->valida_fino->format('d/m/Y') }}</td>

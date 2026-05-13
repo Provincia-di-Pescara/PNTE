@@ -96,7 +96,7 @@ final class SetupWizardTest extends TestCase
     public function test_step2_rejects_invalid_timezone(): void
     {
         $this->post(route('setup.step2.store'), [
-            'app_name' => 'GTE Test',
+            'app_name' => 'PNTE Test',
             'app_timezone' => 'Mars/Olympus',
             'app_locale' => 'it',
         ])->assertSessionHasErrors(['app_timezone']);
@@ -105,11 +105,11 @@ final class SetupWizardTest extends TestCase
     public function test_step2_stores_in_session_and_redirects_to_step3(): void
     {
         $this->post(route('setup.step2.store'), [
-            'app_name' => 'GTE Abruzzo Test',
+            'app_name' => 'PNTE Test',
             'app_timezone' => 'Europe/Rome',
             'app_locale' => 'it',
         ])->assertRedirect(route('setup.step3'))
-            ->assertSessionHas('setup.app.app_name', 'GTE Abruzzo Test');
+            ->assertSessionHas('setup.app.app_name', 'PNTE Test');
     }
 
     public function test_step3_is_accessible(): void
@@ -144,7 +144,7 @@ final class SetupWizardTest extends TestCase
     {
         $this->withSession([
             'setup.admin' => ['name' => 'Admin', 'email' => 'admin@test.it', 'password' => 'pass'],
-            'setup.app' => ['app_name' => 'GTE', 'app_timezone' => 'Europe/Rome', 'app_locale' => 'it'],
+            'setup.app' => ['app_name' => 'PNTE', 'app_timezone' => 'Europe/Rome', 'app_locale' => 'it'],
         ])->get(route('setup.riepilogo'))
             ->assertOk()
             ->assertViewIs('setup.riepilogo');
@@ -159,7 +159,7 @@ final class SetupWizardTest extends TestCase
                 'password' => 'password-sicura-123',
             ],
             'setup.app' => [
-                'app_name' => 'GTE Abruzzo',
+                'app_name' => 'PNTE',
                 'app_timezone' => 'Europe/Rome',
                 'app_locale' => 'it',
             ],
@@ -179,7 +179,7 @@ final class SetupWizardTest extends TestCase
 
         // Settings persisted
         $this->assertDatabaseHas('settings', ['key' => 'setup_completed', 'value' => '1']);
-        $this->assertDatabaseHas('settings', ['key' => 'app_name', 'value' => 'GTE Abruzzo']);
+        $this->assertDatabaseHas('settings', ['key' => 'app_name', 'value' => 'PNTE']);
         $this->assertDatabaseHas('settings', ['key' => 'app_timezone', 'value' => 'Europe/Rome']);
 
         // Session cleared
@@ -219,7 +219,7 @@ final class SetupWizardTest extends TestCase
             'mail_username' => 'user@example.com',
             'mail_password' => 'secret',
             'mail_from_address' => 'noreply@example.com',
-            'mail_from_name' => 'GTE Abruzzo',
+            'mail_from_name' => 'PNTE',
         ])->assertRedirect(route('setup.step3'))
             ->assertSessionHas('success');
 

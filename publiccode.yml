@@ -1,7 +1,7 @@
 publiccodeYmlVersion: '0.2'
 
-name: GTE-Abruzzo
-url: 'https://github.com/provincia-pescara/gte-abruzzo'
+name: PNTE
+url: 'https://github.com/provincia-di-pescara/PNTE'
 softwareVersion: '0.1.0'
 releaseDate: '2026-04-24'
 
@@ -53,14 +53,14 @@ localisation:
 
 description:
   it:
-    localisedName: GTE-Abruzzo
+    localisedName: PNTE
     shortDescription: >
       Gestionale SaaS multi-tenant per il ciclo di vita e il rilascio delle
       autorizzazioni per i Trasporti Eccezionali, conforme alle linee guida MIT 2027.
     longDescription: |
-      GTE-Abruzzo è la piattaforma web a riuso sviluppata dalla Provincia di Pescara
+      PNTE è la piattaforma web a riuso sviluppata dalla Provincia di Pescara
       come ente capofila per gestire in modalità SaaS (Software as a Service) l'intero
-      iter burocratico dei Trasporti Eccezionali sull'intero territorio regionale.
+      iter burocratico dei Trasporti Eccezionali sull'intero territorio nazionale.
 
       Il software permette ad aziende e agenzie di pratiche auto di autenticarsi tramite
       SPID/CIE, compilare la propria anagrafica mezzi (Garage Virtuale) e tracciare su

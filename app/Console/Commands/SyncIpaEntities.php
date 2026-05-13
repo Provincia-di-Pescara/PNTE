@@ -11,7 +11,7 @@ use Throwable;
 
 final class SyncIpaEntities extends Command
 {
-    protected $signature = 'gte:sync-ipa {--dry-run : Simula la sincronizzazione senza salvare}';
+    protected $signature = 'pnte:sync-ipa {--dry-run : Simula la sincronizzazione senza salvare}';
 
     protected $description = 'Sincronizza le PEC degli enti tramite AgID IPA via PDND Interoperabilità';
 

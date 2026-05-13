@@ -1,4 +1,4 @@
-# Piano di Sviluppo: GTE-Abruzzo (Gestionale Trasporti Eccezionali)
+# Piano di Sviluppo: PNTE (Piattaforma Nazionale Trasporti Eccezionali)
 
 ## Il Cappello Logico: L'Iter della Domanda di Trasporto Eccezionale
 
@@ -60,10 +60,10 @@ Richieste non gestite automaticamente → admin Provincia Tenant di appartenenza
 
 ## Analisi TEWEB: cosa prendiamo e cosa superiamo
 
-Il portale TEWEB di ANAS è il riferimento nazionale di fatto per le pratiche di viabilità statale. Per GTE-Abruzzo va studiato come **Stele di Rosetta**: importiamo le logiche di business consolidate e scartiamo gli aspetti peggiori di UX.
+Il portale TEWEB di ANAS è il riferimento nazionale di fatto per le pratiche di viabilità statale. Per PNTE va studiato come **Stele di Rosetta**: importiamo le logiche di business consolidate e scartiamo gli aspetti peggiori di UX.
 
 **1. Preavviso di Viaggio:**
-TEWEB conferma la correttezza del nostro Modulo Viaggi. Per autorizzazioni multiple e periodiche, il singolo viaggio deve dichiarare quali mezzi effettivi stanno partendo quel giorno. In GTE-Abruzzo questo diventa una **PWA mobile-first** integrata nel portale: l'autista seleziona l'autorizzazione, sceglie motrice e rimorchio dal Garage, preme "Inizia Viaggio" e il sistema scala il contatore.
+TEWEB conferma la correttezza del nostro Modulo Viaggi. Per autorizzazioni multiple e periodiche, il singolo viaggio deve dichiarare quali mezzi effettivi stanno partendo quel giorno. In PNTE questo diventa una **PWA mobile-first** integrata nel portale: l'autista seleziona l'autorizzazione, sceglie motrice e rimorchio dal Garage, preme "Inizia Viaggio" e il sistema scala il contatore.
 
 **2. Agenzia di Consulenza:**
 Il ruolo `agency` copre il caso reale delle pratiche inserite da studi di consulenza e agenzie pratiche auto. L'aggregate `agency_mandates` governa i rapporti partner Ditta -> Agenzia; le `delegations` governano invece i singoli utenti dell'Agenzia che operano nel contesto partner selezionato dalla dashboard.
@@ -105,9 +105,9 @@ Il ruolo `law-enforcement` non ha accesso alle pratiche in stato `draft`/`submit
 
 La proroga delle linee guida MIT non indica un ripensamento normativo, ma una criticità operativa: i dati infrastrutturali locali non sono ancora digitalizzati in modo completo (ponti, viadotti, portate).
 
-Il progetto GTE-Abruzzo, quindi, va posizionato come **sistema di censimento infrastrutturale** oltre che gestionale autorizzativo. L'alimentazione dei dati da parte di Comuni e Province diventa un contributo diretto alla base informativa richiesta a livello nazionale.
+Il progetto PNTE, quindi, va posizionato come **sistema di censimento infrastrutturale** oltre che gestionale autorizzativo. L'alimentazione dei dati da parte di Comuni e Province diventa un contributo diretto alla base informativa richiesta a livello nazionale.
 
-### Implicazioni Tecniche per GTE-Abruzzo
+### Implicazioni Tecniche per PNTE
 
 1. **Integrazione AINOP (Archivio Informatico Nazionale delle Opere Pubbliche)**
    - Inserire una fase esplicita di interoperabilità con AINOP (tramite PDND) nella roadmap.

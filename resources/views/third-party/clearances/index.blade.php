@@ -30,7 +30,7 @@
             @foreach($clearances as $clearance)
             <tr class="row-hover transition-colors">
                 <td class="px-5 py-3 font-mono text-xs text-ink-2">#{{ $clearance->id }}</td>
-                <td class="px-5 py-3 text-ink">{{ sprintf('GTE-%06d', $clearance->application_id) }}</td>
+                <td class="px-5 py-3 text-ink">{{ sprintf('PNTE-%06d', $clearance->application_id) }}</td>
                 <td class="px-5 py-3 text-ink-2">{{ $clearance->application->company?->ragione_sociale ?? '—' }}</td>
                 <td class="px-5 py-3 font-mono text-ink-2">{{ $clearance->application->vehicle?->targa ?? '—' }}</td>
                 <td class="px-5 py-3 text-center">

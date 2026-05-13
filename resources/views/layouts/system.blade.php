@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? trim(View::yieldContent('title-prefix').' Pannello /system') }} — {{ \App\Models\Setting::get('branding.platform_name', config('app.name', 'GTE Abruzzo')) }}</title>
+    <title>{{ $title ?? trim(View::yieldContent('title-prefix').' Pannello /system') }} — {{ \App\Models\Setting::get('branding.platform_name', config('app.name', 'PNTE')) }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">

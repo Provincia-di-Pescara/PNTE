@@ -4,7 +4,7 @@
 <div class="mb-6 flex items-center justify-between">
     <div>
         <h1 class="text-xl font-bold tracking-tight">Nulla osta #{{ $clearance->id }}</h1>
-        <p class="text-sm text-ink-2 mt-1">Istanza {{ sprintf('GTE-%06d', $clearance->application_id) }}</p>
+        <p class="text-sm text-ink-2 mt-1">Istanza {{ sprintf('PNTE-%06d', $clearance->application_id) }}</p>
     </div>
     <span class="badge badge-{{ $clearance->stato->color() }} text-sm px-3 py-1">{{ $clearance->stato->label() }}</span>
 </div>

@@ -74,7 +74,7 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="mono text-[11px] text-ink-3">
-                                {{ sprintf('GTE-%04d', $clearance->application_id) }}
+                                {{ sprintf('PNTE-%04d', $clearance->application_id) }}
                             </span>
                             <x-chip tone="amber" :dot="true">In attesa</x-chip>
                         </div>

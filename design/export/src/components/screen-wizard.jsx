@@ -1,5 +1,5 @@
-/* global React, GTE, GTEMap, GTEShell */
-const { Chip: C, StatusPill: SP, Avatar: Av, Icon: Ic, I: II, APPLICATIONS: APPS, ENTITIES_CROSSED: EC } = window.GTE;
+/* global React, PNTE, PNTEMap, PNTEShell */
+const { Chip: C, StatusPill: SP, Avatar: Av, Icon: Ic, I: II, APPLICATIONS: APPS, ENTITIES_CROSSED: EC } = window.PNTE;
 
 // ===========================================================================
 // 1) WIZARD — Tracciamento percorso (HERO, multi-role: cittadino/azienda)
@@ -28,7 +28,7 @@ function WizardScreen() {
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
         <div>
           <div style={{ fontSize: 10.5, letterSpacing: 1.4, color: "var(--ink-3)", textTransform: "uppercase" }}>
-            Pratica · GTE-2026-002419 · Bozza
+            Pratica · PNTE-2026-002419 · Bozza
           </div>
           <h1 style={{ margin: "4px 0 0", fontSize: 22, fontWeight: 600, letterSpacing: "-0.015em" }}>
             Tracciamento percorso
@@ -88,7 +88,7 @@ function WizardScreen() {
           </div>
 
           <div style={{ position: "relative", flex: 1 }}>
-            <GTEMap height={520} />
+            <PNTEMap height={520} />
 
             {/* roadwork callout */}
             <div style={{
@@ -214,4 +214,4 @@ function WizardScreen() {
   );
 }
 
-window.GTEScreens = { ...(window.GTEScreens || {}), WizardScreen };
+window.PNTEScreens = { ...(window.PNTEScreens || {}), WizardScreen };

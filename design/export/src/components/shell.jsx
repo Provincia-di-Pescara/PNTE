@@ -1,6 +1,6 @@
-/* global React, GTE, GTEMap */
+/* global React, PNTE, PNTEMap */
 const { useState: useStateApp } = React;
-const { Chip, StatusPill, Avatar, Icon, I, APPLICATIONS, ENTITIES_CROSSED } = window.GTE;
+const { Chip, StatusPill, Avatar, Icon, I, APPLICATIONS, ENTITIES_CROSSED } = window.PNTE;
 
 // ============================================================================
 // Top bar (shared across roles)
@@ -22,10 +22,10 @@ function TopBar({ role, roleLabel, onRoleHover }) {
           display: "flex", alignItems: "center", justifyContent: "center",
           fontWeight: 700, fontSize: 12, letterSpacing: 0.5,
         }}>
-          GTE
+          PNTE
         </div>
         <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15 }}>
-          <span style={{ fontWeight: 600, fontSize: 13.5 }}>GTE Abruzzo</span>
+          <span style={{ fontWeight: 600, fontSize: 13.5 }}>PNTE</span>
           <span style={{ fontSize: 11, color: "var(--ink-3)" }}>Provincia di Pescara · Ente capofila</span>
         </div>
       </div>
@@ -121,4 +121,4 @@ function SideNav({ items, active, onSelect }) {
   );
 }
 
-window.GTEShell = { TopBar, SideNav };
+window.PNTEShell = { TopBar, SideNav };

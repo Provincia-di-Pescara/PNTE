@@ -1,5 +1,5 @@
-/* global React, GTE */
-const { Chip: Cv, Icon: Icv, I: IIv } = window.GTE;
+/* global React, PNTE */
+const { Chip: Cv, Icon: Icv, I: IIv } = window.PNTE;
 
 // ===========================================================================
 // Cittadino / Azienda — Garage Virtuale → Aggiungi convoglio
@@ -640,4 +640,4 @@ function ConvoySilhouette({ axles, L, H, padL, padR, length }) {
   );
 }
 
-window.GTEScreens = { ...(window.GTEScreens || {}), VehicleAddScreen };
+window.PNTEScreens = { ...(window.PNTEScreens || {}), VehicleAddScreen };

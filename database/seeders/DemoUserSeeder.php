@@ -22,7 +22,7 @@ final class DemoUserSeeder extends Seeder
 
         // 1. system-admin — infra/IT operator, local login only, no entity binding
         User::updateOrCreate(
-            ['email' => 'system@gte.interno'],
+            ['email' => 'system@pnte.interno'],
             [
                 'name' => 'Amministratore Sistema',
                 'password' => Hash::make('password'),

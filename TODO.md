@@ -1,4 +1,4 @@
-# GTE-Abruzzo — Todo & Versioning
+# PNTE — Todo & Versioning
 
 ## Schema versioni
 
@@ -71,13 +71,13 @@
 - [ ] **[1.18]** Dashboard ditta **Gestione Partner** + dashboard agenzia: lista partner, context switcher "Per quale cliente sto lavorando?", stato, scadenza, ultimo accesso, azioni per singola Agenzia
 - [ ] **[1.19]** `PdfTemplateService`: generazione PDF da Blade per Procura Speciale Agenzia-Ditta e nomina primo `admin-ente`, includendo la data di validità scelta dall'Agenzia
 - [ ] **[1.20]** `P7mVerificationService`: verifica integrità firma, revoca/scadenza certificato, estrazione CF firmatario e matching binario con IPA/Registro Imprese
-- [ ] **[1.21]** Mandato Agenzia -> Ditta Scenario A: richiesta in piattaforma e approvazione con click della Ditta già censita → creazione `agency_mandate`
+- [ ] **[1.21]** Mandato Agenzia -> Ditta Scenario A: richiesta in piattaforma e approvazione con click della Ditta già censita → creazione `agency_mandates`
 - [ ] **[1.22]** Mandato Agenzia -> Ditta Scenario B: PDF Procura Speciale autogenerato + upload `.p7m` + attivazione automatica del `agency_mandate` se il firmatario coincide con il legale rappresentante
 - [ ] **[1.23]** Primo censimento Ente: PDF di nomina autogenerato + upload firmato + verifica automatica di sostanza e forma; auto-approvazione se `is_capofila=true`
 - [ ] **[1.24]** Lifecycle `agency_mandates`: scadenza naturale obbligatoria, notifiche T-30/T-7, rinnovo semplificato se condizioni immutate, nuova firma P7M se cambiano poteri/soggetti/durata legale
 - [ ] **[1.25]** Sospensione e revoca istantanea partner: kill-switch per singola Agenzia senza impattare gli altri mandati della stessa Ditta
 - [ ] **[1.26]** Audit partner: salvare contesto `agency_mandate_id` e `created_by_agency_id` sulle operazioni sensibili per attribuzione responsabilità e KPI per Agenzia
-- [ ] **[1.27]** ATECO-based agency auto-classification via PDND Infocamiere: target codice 82.99.11 (Fornitura assistenza registrazione autoveicoli) + Legge 264/1991 compliance keywords in descrizione attività; `companies` migration: add `ateco_code` (string, nullable), `ateco_last_synced_at` (timestamp, nullable); service `AgencyDetectionService::detectAgencyStatus(piva)` ritorna `['is_agency' => bool, 'ateco_code' => string, 'ateco_description' => string, 'compliance_verified' => bool]`; onboarding integration auto-flag `is_agency = true` + UI confirmation dialog; Artisan `gte:re-sync-agency-ateco` (monthly scheduler) revoca tutti gli `agency_mandates` attivi con `status = 'revoked'` se ATECO cambia o compliance fallisce; PDF Procura Speciale aggiunge dichiarazione Legge 264/1991 per audit
+- [ ] **[1.27]** ATECO-based agency auto-classification via PDND Infocamiere: target codice 82.99.11 (Fornitura assistenza registrazione autoveicoli) + Legge 264/1991 compliance keywords in descrizione attività; `companies` migration: add `ateco_code` (string, nullable), `ateco_last_synced_at` (timestamp, nullable); service `AgencyDetectionService::detectAgencyStatus(piva)` ritorna `['is_agency' => bool, 'ateco_code' => string, 'ateco_description' => string, 'compliance_verified' => bool]`; onboarding integration auto-flag `is_agency = true` + UI confirmation dialog; Artisan `pnte:re-sync-agency-ateco` (monthly scheduler) revoca tutti gli `agency_mandates` attivi con `status = 'revoked'` se ATECO cambia o compliance fallisce; PDF Procura Speciale aggiunge dichiarazione Legge 264/1991 per audit
 - [ ] **[1.28]** Immediate DB cutover: sostituzione stack `mariadb` con `postgresql + postgis` in docker compose, env defaults e `config/database.php` (`DB_CONNECTION=pgsql`, porta 5432)
 - [ ] **[1.29]** Refactor migrations SQL MySQL-specifiche (`AFTER`, `MODIFY COLUMN`, `DROP INDEX ... ON`) verso sintassi PostgreSQL + attivazione `CREATE EXTENSION IF NOT EXISTS postgis`
 - [ ] **[1.30]** Spatial index migration: sostituire `CREATE SPATIAL INDEX` con indici `GiST` (`CREATE INDEX ... USING GIST (...)`) su `entities.geom`, `routes.geometry`, `roadworks.geometry`, `standard_routes.geometry`
@@ -112,7 +112,7 @@
 - [x] **[3.8]** `StandardRouteOverlayService`: `analyze()` + `segmentCoverage()` con `ST_Buffer` (≈11m) sul percorso
 - [x] **[3.9]** `ArsOverlayController` `POST /api/routing/ars-overlay` + `EntityGeoJsonController` `GET /api/entities/geojson`
 - [x] **[3.10]** `route-builder.js`: layer verde/rosso ARS (singola/multipla) + modalità selezione poligoni ISTAT (periodica)
-- [x] **[3.11]** `gte:import-standard-routes {file} {entity_id}` — import GeoJSON strade standard
+- [x] **[3.11]** `pnte:import-standard-routes {file} {entity_id}` — import GeoJSON strade standard
 - [x] **[3.12]** `VehicleType` enum: +4 tipi agricoli + `isAgricultural()` helper
 - [x] **[3.13]** `TipoApplicazioneTariff` enum + `Tariff::scopeByTipoApplicazione()` + `TariffFactory` aggiornata — `WearCalculationService::calculateForApplication(WearContext)` rinviato a v0.5.x (dipende da `TipoIstanza`)
 - [ ] **[3.14]** Import confini ISTAT nazionale (non solo Abruzzo) in `entities.geom` — cartografia completa per percorsi interregionali; filtro `is_tenant` per attivazione operativa

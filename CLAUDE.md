@@ -1,10 +1,10 @@
-# CLAUDE.md
+# PNTE.md
 
-Guidance for Claude Code when working in this repo.
+Guidance for PNTE Code when working in this repo.
 
 ## Project Overview
 
-**GTE-Abruzzo** (Gestionale Trasporti Eccezionali) — multi-tenant SaaS by Provincia di Pescara to digitize exceptional vehicle transport authorizations in Abruzzo. Intended for reuse across Italian public admin via Developers Italia.
+**PNTE** (Piattaforma Nazionale Trasporti Eccezionali) — multi-tenant SaaS by Provincia di Pescara to digitize exceptional vehicle transport authorizations in Italy. Intended for reuse across Italian public admin via Developers Italia.
 
 Must comply: Art. 10 D.Lgs 285/1992 (Codice della Strada), D.P.R. 495/1992 wear formulas, AgID guidelines, MIT bridge-safety directives.
 
@@ -133,7 +133,7 @@ Tre superfici di accesso, **tutte autenticate (session web) e protette da middle
 |---|---|---|
 | **UI web** | `/system/diagnostics` (master), `/system/diagnostics/api-tester`, `/system/integrations/{service}/test` | Test interattivi via Alpine.js + fetch |
 | **JSON API** | `GET /api/v1/system/health`, `GET /api/v1/system/health/{service}`, `POST /api/v1/system/test/{mail,routing,geojson}` | CI/healthcheck/monitoring (session cookie required) |
-| **Artisan CLI** | `php artisan gte:diag` (all), `php artisan gte:diag:run {service}` (single) | Docker `HEALTHCHECK`, Portainer exec, debug. Flag `--json`, `--no-audit`. Exit 0 ok / 1 fail / 2 error |
+| **Artisan CLI** | `php artisan pnte:diag` (all), `php artisan pnte:diag:run {service}` (single) | Docker `HEALTHCHECK`, Portainer exec, debug. Flag `--json`, `--no-audit`. Exit 0 ok / 1 fail / 2 error |
 
 Nessun servizio diagnostic deve mai lanciare eccezioni: i fallimenti sono catturati e wrappati in `DiagnosticResult::fail()`.
 
@@ -155,7 +155,7 @@ PostGIS spatial fields (`POLYGON`, `MULTIPOLYGON`, `LINESTRING`) store entity bo
 - Spatial columns added via `DB::statement('ALTER TABLE ... ADD COLUMN geometry geometry(LINESTRING, 4326) NOT NULL')` and `CREATE INDEX ... USING GIST (...)`
 
 ### GIS Import
-`php artisan gte:import-geo {file}` — imports GeoJSON FeatureCollection into `entities.geom`. Matches by `codice_istat` property. Source shapefiles converted via `ogr2ogr -f GeoJSON output.geojson input.shp`.
+`php artisan pnte:import-geo {file}` — imports GeoJSON FeatureCollection into `entities.geom`. Matches by `codice_istat` property. Source shapefiles converted via `ogr2ogr -f GeoJSON output.geojson input.shp`.
 
 ### Architecture Docs
 `.ai/` dir (to be created) — deep-dive docs on complex subsystems: `STATE_MACHINE.md`, `GIS_ROUTING.md`, `WEAR_CALCULATION.md`, `PAGOPA.md`. Read before working on relevant domain.

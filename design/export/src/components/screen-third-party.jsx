@@ -1,5 +1,5 @@
-/* global React, GTE, GTEMap */
-const { Chip: Ct, Icon: Ict, I: IIt } = window.GTE;
+/* global React, PNTE, PNTEMap */
+const { Chip: Ct, Icon: Ict, I: IIt } = window.PNTE;
 
 // ===========================================================================
 // Ente Terzo — Comune / ANAS / Autostrade
@@ -7,11 +7,11 @@ const { Chip: Ct, Icon: Ict, I: IIt } = window.GTE;
 // ===========================================================================
 function ThirdPartyScreen() {
   const requests = [
-    { id: "GTE-2026-002417", req: "Adriatica Logistic S.r.l.", km: "3,1 km su SS17",
+    { id: "PNTE-2026-002417", req: "Adriatica Logistic S.r.l.", km: "3,1 km su SS17",
       from: "Pescara", to: "Sulmona", weight: "92,1 t", deadline: "2g 14h", status: "pending" },
-    { id: "GTE-2026-002418", req: "Ferraris Trasporti S.p.A.", km: "1,8 km via Cavour",
+    { id: "PNTE-2026-002418", req: "Ferraris Trasporti S.p.A.", km: "1,8 km via Cavour",
       from: "Pescara", to: "Sulmona", weight: "76,4 t", deadline: "4g 02h", status: "pending" },
-    { id: "GTE-2026-002411", req: "Edilstrade Abruzzo", km: "0,9 km centro",
+    { id: "PNTE-2026-002411", req: "Edilstrade Abruzzo", km: "0,9 km centro",
       from: "Chieti", to: "Avezzano", weight: "64,8 t", deadline: "scaduto",
       status: "overdue" },
   ];
@@ -121,7 +121,7 @@ function ThirdPartyScreen() {
           </div>
 
           <div style={{ padding: 12 }}>
-            <GTEMap height={180} variant="minimal" showLegend={false} showZoom={false}
+            <PNTEMap height={180} variant="minimal" showLegend={false} showZoom={false}
                     showCompass={false} showLabels={false} showRoute={false} showBridges={false} />
           </div>
 
@@ -164,4 +164,4 @@ function ThirdPartyScreen() {
   );
 }
 
-window.GTEScreens = { ...(window.GTEScreens || {}), ThirdPartyScreen };
+window.PNTEScreens = { ...(window.PNTEScreens || {}), ThirdPartyScreen };

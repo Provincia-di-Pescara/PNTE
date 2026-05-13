@@ -85,17 +85,17 @@ const I = {
 
 // shared "company" picker mock + applications dataset
 const APPLICATIONS = [
-  { id: "GTE-2026-002418", company: "Ferraris Trasporti S.p.A.", from: "Pescara (PE)", to: "Sulmona (AQ)",
+  { id: "PNTE-2026-002418", company: "Ferraris Trasporti S.p.A.", from: "Pescara (PE)", to: "Sulmona (AQ)",
     state: "approved", km: 84.2, weight: 76.4, axles: 8, day: "12 mag 2026", entities: 6, fee: 412.80, plate: "FT 728 ZR" },
-  { id: "GTE-2026-002417", company: "Adriatica Logistic S.r.l.", from: "Pescara (PE)", to: "L'Aquila (AQ)",
+  { id: "PNTE-2026-002417", company: "Adriatica Logistic S.r.l.", from: "Pescara (PE)", to: "L'Aquila (AQ)",
     state: "waiting_clearances", km: 112.8, weight: 92.1, axles: 10, day: "14 mag 2026", entities: 9, fee: 0, plate: "AL 091 KP" },
-  { id: "GTE-2026-002416", company: "Edilstrade Abruzzo", from: "Chieti (CH)", to: "Avezzano (AQ)",
+  { id: "PNTE-2026-002416", company: "Edilstrade Abruzzo", from: "Chieti (CH)", to: "Avezzano (AQ)",
     state: "waiting_payment", km: 98.5, weight: 64.8, axles: 7, day: "13 mag 2026", entities: 7, fee: 287.40, plate: "ED 442 BB" },
-  { id: "GTE-2026-002415", company: "Ferraris Trasporti S.p.A.", from: "Penne (PE)", to: "Teramo (TE)",
+  { id: "PNTE-2026-002415", company: "Ferraris Trasporti S.p.A.", from: "Penne (PE)", to: "Teramo (TE)",
     state: "submitted", km: 56.1, weight: 48.0, axles: 6, day: "15 mag 2026", entities: 4, fee: 0, plate: "FT 304 LM" },
-  { id: "GTE-2026-002414", company: "Trasporti Maiella", from: "Lanciano (CH)", to: "Roseto degli Abruzzi (TE)",
+  { id: "PNTE-2026-002414", company: "Trasporti Maiella", from: "Lanciano (CH)", to: "Roseto degli Abruzzi (TE)",
     state: "rejected", km: 121.0, weight: 84.2, axles: 9, day: "10 mag 2026", entities: 8, fee: 0, plate: "TM 619 GH" },
-  { id: "GTE-2026-002413", company: "Adriatica Logistic S.r.l.", from: "Vasto (CH)", to: "Pescara (PE)",
+  { id: "PNTE-2026-002413", company: "Adriatica Logistic S.r.l.", from: "Vasto (CH)", to: "Pescara (PE)",
     state: "draft", km: 73.5, weight: 58.0, axles: 6, day: "—", entities: 5, fee: 0, plate: "AL 220 RM" },
 ];
 
@@ -110,4 +110,4 @@ const ENTITIES_CROSSED = [
   { name: "Provincia dell'Aquila",  type: "Provincia",  km: 13.7, status: "approved", fee: 48.70 },
 ];
 
-window.GTE = { Chip, StatusPill, Avatar, Icon, I, APPLICATIONS, ENTITIES_CROSSED };
+window.PNTE = { Chip, StatusPill, Avatar, Icon, I, APPLICATIONS, ENTITIES_CROSSED };

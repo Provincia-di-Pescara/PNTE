@@ -79,7 +79,7 @@ final class IntegrationController extends Controller
                 ['name' => 'mail_username', 'label' => 'Username', 'type' => 'text'],
                 ['name' => 'mail_password', 'label' => 'Password', 'type' => 'password', 'secret' => true],
                 ['name' => 'mail_from_address', 'label' => 'From address', 'type' => 'email'],
-                ['name' => 'mail_from_name', 'label' => 'From name', 'type' => 'text', 'default' => 'GTE Abruzzo'],
+                ['name' => 'mail_from_name', 'label' => 'From name', 'type' => 'text', 'default' => 'PNTE'],
             ],
         ],
         'pec' => [

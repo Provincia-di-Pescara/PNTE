@@ -91,7 +91,7 @@
             <div>
                 <label for="mail_from_name" class="block text-sm font-medium text-slate-700">Nome mittente</label>
                 <input type="text" id="mail_from_name" name="mail_from_name"
-                       value="{{ old('mail_from_name', $data['mail_from_name'] ?? 'GTE Abruzzo') }}"
+                       value="{{ old('mail_from_name', $data['mail_from_name'] ?? 'PNTE') }}"
                        class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
             </div>
         </div>

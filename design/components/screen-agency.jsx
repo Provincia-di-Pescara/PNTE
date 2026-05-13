@@ -1,5 +1,5 @@
-/* global React, GTE */
-const { Chip: Cz, Avatar: Avz, Icon: Icz, I: IIz } = window.GTE;
+/* global React, PNTE */
+const { Chip: Cz, Avatar: Avz, Icon: Icz, I: IIz } = window.PNTE;
 
 // ===========================================================================
 // AGENZIA DI PRATICHE AUTO — dashboard ruolo `agency`
@@ -235,7 +235,7 @@ function AgencyOverview({ client }) {
             <div style={{ padding: "10px 12px", border: "1px solid var(--line)",
                           borderRadius: 8, background: "var(--surface-2)" }}>
               <div style={{ fontSize: 12, fontWeight: 600 }}>
-                Conflitto risorsa · Iannucci · GTE-2026-002391
+                Conflitto risorsa · Iannucci · PNTE-2026-002391
               </div>
               <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 3, lineHeight: 1.4 }}>
                 Mezzo PE-984ZK già impegnato da <em>Agenzia Adriatica</em> (mandato AM-2026-009) per il 18 mag.
@@ -368,13 +368,13 @@ function AgencyPartners() {
 function AgencyApplications({ client }) {
   if (!client) return null;
   const apps = [
-    { id: "GTE-2026-002417", state: "waiting_clearances", route: "Pescara → Sulmona",
+    { id: "PNTE-2026-002417", state: "waiting_clearances", route: "Pescara → Sulmona",
       veh: "PE-432LM + R-9821", when: "18 mag · 06:00", clearances: "3/5", semaforo: "amber" },
-    { id: "GTE-2026-002408", state: "waiting_payment",    route: "Chieti → L'Aquila",
+    { id: "PNTE-2026-002408", state: "waiting_payment",    route: "Chieti → L'Aquila",
       veh: "PE-981XR + R-7732", when: "20 mag · 04:00", clearances: "5/5", semaforo: "ok" },
-    { id: "GTE-2026-002391", state: "draft",              route: "Pescara → Roseto degli A.",
+    { id: "PNTE-2026-002391", state: "draft",              route: "Pescara → Roseto degli A.",
       veh: "PE-984ZK + R-1244", when: "—",              clearances: "—",   semaforo: "default" },
-    { id: "GTE-2026-002378", state: "approved",           route: "Pescara → Avezzano",
+    { id: "PNTE-2026-002378", state: "approved",           route: "Pescara → Avezzano",
       veh: "PE-432LM + R-7732", when: "11 mag · 05:30", clearances: "5/5", semaforo: "ok" },
   ];
   const stateLabels = {
@@ -438,7 +438,7 @@ function AgencyApplications({ client }) {
 // ============================================================================
 function AgencyAudit() {
   const events = [
-    ["14 mag · 14:32","E. Marrone","Apertura pratica GTE-2026-002417 per Edilstrade Abruzzo","AM-2025-014"],
+    ["14 mag · 14:32","E. Marrone","Apertura pratica PNTE-2026-002417 per Edilstrade Abruzzo","AM-2025-014"],
     ["14 mag · 11:08","E. Marrone","Caricato .p7m per ColdLogistics — verifica avviata","AM-2026-007"],
     ["13 mag · 17:51","Sistema","Notifica T-30 inviata a Edilcave Costruzioni","AM-2025-022"],
     ["13 mag · 09:14","E. Marrone","Switch contesto cliente: Iannucci Mezzi d'Opera","AM-2026-002"],
@@ -478,4 +478,4 @@ function AgencyAudit() {
   );
 }
 
-window.GTEScreens = { ...(window.GTEScreens || {}), AgencyScreen };
+window.PNTEScreens = { ...(window.PNTEScreens || {}), AgencyScreen };

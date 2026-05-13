@@ -4,16 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Accesso — GTE Abruzzo</title>
+    <title>Accesso — PNTE</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-bg text-ink font-sans min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-accent selection:text-white">
 
 <div class="sm:mx-auto sm:w-full sm:max-w-md text-center mb-8">
     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-ink text-bg mb-4 font-bold text-2xl tracking-tight">
-        GTE
+        PNTE
     </div>
-    <h1 class="text-2xl font-bold tracking-tight">GTE Abruzzo</h1>
+    <h1 class="text-2xl font-bold tracking-tight">PNTE</h1>
     <p class="text-[13px] text-ink-2 mt-1">Gestionale Trasporti Eccezionali</p>
 </div>
 
@@ -88,7 +88,7 @@
     </div>
 
     <p class="mt-8 text-center text-[11px] text-ink-3">
-        Provincia di Pescara — EUPL-1.2 — <a href="https://github.com/provincia-di-pescara/gte-abruzzo" class="hover:text-ink transition-colors">GitHub</a>
+        Provincia di Pescara — EUPL-1.2 — <a href="https://github.com/provincia-di-pescara/PNTE" class="hover:text-ink transition-colors">GitHub</a>
     </p>
 </div>
 

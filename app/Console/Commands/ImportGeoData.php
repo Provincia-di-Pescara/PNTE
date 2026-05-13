@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 final class ImportGeoData extends Command
 {
-    protected $signature = 'gte:import-geo {file : Percorso al file GeoJSON dei confini territoriali}';
+    protected $signature = 'pnte:import-geo {file : Percorso al file GeoJSON dei confini territoriali}';
 
     protected $description = 'Importa confini geografici (GeoJSON) nella colonna geom delle entities, creando le entity mancanti (upsert)';
 

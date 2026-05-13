@@ -1,5 +1,5 @@
-/* global React, GTE */
-const { Chip: Cy, Avatar: Avy, Icon: Icy, I: IIy } = window.GTE;
+/* global React, PNTE */
+const { Chip: Cy, Avatar: Avy, Icon: Icy, I: IIy } = window.PNTE;
 
 // ===========================================================================
 // system-admin — Pannello /system
@@ -305,8 +305,8 @@ function SmtpSec() {
           <h3 style={{ margin: 0, fontSize: 13.5, fontWeight: 600 }}>SMTP in uscita</h3>
           {[
             ["Host","mail.aruba.pec.it"],["Porta","465 · SSL"],
-            ["Username","sistema.gte@legalmail.it"],
-            ["Mittente","GTE Abruzzo · Sistema"],
+            ["Username","sistema.PNTE@legalmail.it"],
+            ["Mittente","PNTE · Sistema"],
             ["Rate limit","30 mail/min"],
           ].map(([l,v]) => (
             <div key={l} style={{ display: "flex", alignItems: "center", gap: 12,
@@ -321,7 +321,7 @@ function SmtpSec() {
           {[
             ["Host","imaps.pec.aruba.it"],["Porta","993 · TLS 1.3"],
             ["Frequenza poll","ogni 5 min"],
-            ["Match oggetto","regex `GTE-\\d{4}-\\d{6}`"],
+            ["Match oggetto","regex `PNTE-\\d{4}-\\d{6}`"],
             ["Esito default","pending_review"],
           ].map(([l,v]) => (
             <div key={l} style={{ display: "flex", alignItems: "center", gap: 12,
@@ -336,10 +336,10 @@ function SmtpSec() {
       <DivY title="Ultimi messaggi PEC processati" />
       <div className="card" style={{ overflow: "hidden" }}>
         {[
-          ["14:31","GTE-2026-002417","Comune di Popoli Terme","allegato PDF · pending_review"],
-          ["13:08","GTE-2026-002411","ANAS — SS17","allegato PDF · pending_review"],
-          ["11:48","GTE-2026-002409","Comune di Sulmona","ricevuta consegna"],
-          ["09:14","GTE-2026-002405","Provincia dell'Aquila","ricevuta accettazione"],
+          ["14:31","PNTE-2026-002417","Comune di Popoli Terme","allegato PDF · pending_review"],
+          ["13:08","PNTE-2026-002411","ANAS — SS17","allegato PDF · pending_review"],
+          ["11:48","PNTE-2026-002409","Comune di Sulmona","ricevuta consegna"],
+          ["09:14","PNTE-2026-002405","Provincia dell'Aquila","ricevuta accettazione"],
         ].map(([when,prat,who,what],i,arr) => (
           <div key={i} style={{ display: "grid", gridTemplateColumns: "60px 160px 1.2fr 1fr",
                 padding: "10px 14px", gap: 10, alignItems: "center", fontSize: 12.5,
@@ -563,7 +563,7 @@ function GeoDatasetSec() {
                       borderBottom: "1px solid var(--line)" }}>
           {/* Map area */}
           <div style={{ position: "relative", minHeight: 480, background: "var(--surface-2)" }}>
-            <window.GTEMap height={480} showRoute={false} showRoadworks={false}
+            <window.PNTEMap height={480} showRoute={false} showRoadworks={false}
               showBridges={false} highlightIntersected={false} variant="minimal" />
 
             {/* Overlay strip — controlli layer (sopra la mappa) */}
@@ -783,4 +783,4 @@ function GeoDatasetSec() {
   );
 }
 
-window.GTEScreens = { ...(window.GTEScreens || {}), SystemAdminScreen };
+window.PNTEScreens = { ...(window.PNTEScreens || {}), SystemAdminScreen };

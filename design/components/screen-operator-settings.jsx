@@ -1,5 +1,5 @@
-/* global React, GTE */
-const { Chip: Cs, Avatar: Avs, Icon: Ics, I: IIs } = window.GTE;
+/* global React, PNTE */
+const { Chip: Cs, Avatar: Avs, Icon: Ics, I: IIs } = window.PNTE;
 
 // ===========================================================================
 // Operator (super-admin Provincia) — Impostazioni
@@ -963,4 +963,4 @@ function SwitchRow({ label, desc, on }) {
   );
 }
 
-window.GTEScreens = { ...(window.GTEScreens || {}), OperatorSettingsScreen };
+window.PNTEScreens = { ...(window.PNTEScreens || {}), OperatorSettingsScreen };

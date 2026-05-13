@@ -1,5 +1,5 @@
-/* global React, GTE */
-const { Chip: Cg, StatusPill: SPg, Icon: Icg, I: IIg, APPLICATIONS: APPSg } = window.GTE;
+/* global React, PNTE */
+const { Chip: Cg, StatusPill: SPg, Icon: Icg, I: IIg, APPLICATIONS: APPSg } = window.PNTE;
 
 // ===========================================================================
 // Cittadino / Azienda — Le mie pratiche + Garage Virtuale
@@ -191,4 +191,4 @@ function CitizenScreen() {
   );
 }
 
-window.GTEScreens = { ...(window.GTEScreens || {}), CitizenScreen };
+window.PNTEScreens = { ...(window.PNTEScreens || {}), CitizenScreen };

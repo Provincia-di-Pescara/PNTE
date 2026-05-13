@@ -12,7 +12,7 @@ use Illuminate\Console\Command;
  */
 final class RunSingleDiagnosticCommand extends Command
 {
-    protected $signature = 'gte:diag:run
+    protected $signature = 'pnte:diag:run
         {service : Diagnostic key (db, postgis, redis, queue, storage, osrm, smtp, imap, oidc, pdnd, pagopa, ainop, routing)}
         {--json : Output as JSON}
         {--no-audit : Skip writing system_audit_logs entry}';

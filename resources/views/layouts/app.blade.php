@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'GTE Abruzzo') }}</title>
+    <title>{{ config('app.name', 'PNTE') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
@@ -14,9 +14,9 @@
 
 <header class="h-14 border-b border-line bg-surface flex items-center justify-between px-4 shrink-0">
     <div class="flex items-center gap-3">
-        <div class="w-7 h-7 bg-ink text-bg flex items-center justify-center rounded font-bold text-sm tracking-tight">GTE</div>
+        <div class="w-7 h-7 bg-ink text-bg flex items-center justify-center rounded font-bold text-sm tracking-tight">PNTE</div>
         <div class="text-sm">
-            <span class="font-semibold">GTE Abruzzo</span>
+            <span class="font-semibold">PNTE</span>
             <span class="text-ink-2 mx-1.5">·</span>
             <span class="text-ink-2">Provincia di Pescara</span>
             <span class="text-ink-3"> · Ente capofila</span>

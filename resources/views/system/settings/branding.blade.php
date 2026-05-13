@@ -34,7 +34,7 @@
             @endif
             <input type="file" id="platform_logo" name="platform_logo" accept="image/*"
                    class="w-full text-[12.5px]">
-            <div class="text-[11px] text-ink-3">Max 1 MB. PNG/SVG consigliati. Se non caricato resta il monogramma "GTE".</div>
+            <div class="text-[11px] text-ink-3">Max 1 MB. PNG/SVG consigliati. Se non caricato resta il monogramma "PNTE".</div>
         </div>
 
         <div class="flex items-center gap-2 pt-2 border-t border-line">

@@ -1,5 +1,5 @@
 @php
-    $platformName = \App\Models\Setting::get('branding.platform_name', config('app.name', 'GTE Abruzzo'));
+    $platformName = \App\Models\Setting::get('branding.platform_name', config('app.name', 'PNTE'));
     $platformLogo = \App\Models\Setting::get('branding.platform_logo');
 @endphp
 
@@ -10,7 +10,7 @@
             <img src="{{ asset($platformLogo) }}" alt="" class="w-7 h-7 rounded-md object-contain bg-surface-2" />
         @else
             <div class="w-7 h-7 rounded-md bg-ink text-bg flex items-center justify-center font-bold text-[12px] tracking-wider">
-                GTE
+                PNTE
             </div>
         @endif
         <div class="flex flex-col leading-tight">

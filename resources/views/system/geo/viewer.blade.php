@@ -158,7 +158,7 @@ function geoViewer() {
                 type: 'FeatureCollection',
                 features: [{
                     type: 'Feature',
-                    properties: { name: 'Pescara sample', source: 'GTE diagnostics' },
+                    properties: { name: 'Pescara sample', source: 'PNTE diagnostics' },
                     geometry: {
                         type: 'LineString',
                         coordinates: [[14.2156, 42.4647], [13.9, 42.4], [13.6, 42.38], [13.3995, 42.3498]],

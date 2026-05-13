@@ -4,7 +4,7 @@ services:
   # Image is built by CI and pushed to GHCR. APP_VERSION selects the tag
   # (e.g. latest, v0.2.0, dev). Version metadata is baked into the image.
   app:
-    image: ghcr.io/provincia-pescara/gte-abruzzo-app:${APP_VERSION:-latest}
+    image: ghcr.io/provincia-di-pescara/pnte-app:${APP_VERSION:-latest}
     restart: unless-stopped
     env_file: .env
     depends_on:
@@ -17,15 +17,15 @@ services:
     volumes:
       - app_storage:/var/www/html/storage
     networks:
-      - gte
+      - pnte
 
   # ── Database (PostgreSQL 16 + PostGIS 3.4) ───────────────────────────────
   db:
     image: postgis/postgis:16-3.4
     restart: unless-stopped
     environment:
-      POSTGRES_DB: "${DB_DATABASE:-gte_abruzzo}"
-      POSTGRES_USER: "${DB_USERNAME:-gte}"
+      POSTGRES_DB: "${DB_DATABASE:-pnte}"
+      POSTGRES_USER: "${DB_USERNAME:-pnte}"
       POSTGRES_PASSWORD: "${DB_PASSWORD}"
     volumes:
       - db_data:/var/lib/postgresql/data
@@ -36,7 +36,7 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - gte
+      - pnte
 
   # ── Cache / Queue (Redis 7) ───────────────────────────────────────────────
   redis:
@@ -51,7 +51,7 @@ services:
       timeout: 3s
       retries: 5
     networks:
-      - gte
+      - pnte
 
   # ── GIS Routing — init ───────────────────────────────────────────────────────
   # Attivo solo con il profilo "routing" (COMPOSE_PROFILES=routing nel .env).
@@ -112,7 +112,7 @@ services:
     restart: "no"
     profiles: [routing]
     networks:
-      - gte
+      - pnte
 
   # ── GIS Routing (OSRM) ────────────────────────────────────────────────────
   # Aspetta che osrm-init abbia completato il preprocessing prima di avviarsi.
@@ -137,7 +137,7 @@ services:
       - osrm_data:/data:ro
     profiles: [routing]
     networks:
-      - gte
+      - pnte
 
 volumes:
   db_data:
@@ -146,5 +146,5 @@ volumes:
   osrm_data:
 
 networks:
-  gte:
+  pnte:
     driver: bridge

@@ -80,7 +80,7 @@
         <p class="text-xs text-ink-2 mb-4">
             Per importare un file GeoJSON personalizzato, usa il comando Artisan da terminale:
         </p>
-        <pre class="bg-surface-2 rounded-md px-4 py-3 text-[11px] font-mono text-ink overflow-x-auto">php artisan gte:import-geo /percorso/al/file.geojson</pre>
+        <pre class="bg-surface-2 rounded-md px-4 py-3 text-[11px] font-mono text-ink overflow-x-auto">php artisan PNTE:import-geo /percorso/al/file.geojson</pre>
         <p class="text-[11px] text-ink-3 mt-2">Il file deve essere una FeatureCollection con proprietà <code>codice_istat</code>.</p>
     </div>
 </div>

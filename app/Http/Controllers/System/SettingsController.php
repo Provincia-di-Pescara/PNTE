@@ -18,7 +18,7 @@ final class SettingsController extends Controller
     public function branding(): View
     {
         $values = [
-            'platform_name' => Setting::get('branding.platform_name', config('app.name', 'GTE Abruzzo')),
+            'platform_name' => Setting::get('branding.platform_name', config('app.name', 'PNTE')),
             'platform_logo' => Setting::get('branding.platform_logo'),
         ];
 

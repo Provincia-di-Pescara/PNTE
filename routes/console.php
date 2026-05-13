@@ -8,4 +8,4 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('gte:sync-ipa')->dailyAt('02:00');
+Schedule::command('pnte:sync-ipa')->dailyAt('02:00');

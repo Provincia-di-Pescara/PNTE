@@ -167,7 +167,7 @@
                     </main>
 
                     <footer class="py-16 text-center text-sm text-black dark:text-white/70">
-                        GTE-Abruzzo <span class="font-mono">{{ config('version.label') }}</span>
+                        PNTE <span class="font-mono">{{ config('version.label') }}</span>
                         &mdash; Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
                     </footer>
                 </div>

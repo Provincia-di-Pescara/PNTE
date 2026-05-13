@@ -158,7 +158,7 @@
             <h3 class="text-sm font-semibold mb-3">Riferimento</h3>
             <dl class="text-sm space-y-2">
                 <dt class="text-ink-2">Protocollo</dt>
-                <dd class="font-mono text-xs">{{ sprintf('GTE-%06d', $application->id) }}</dd>
+                <dd class="font-mono text-xs">{{ sprintf('PNTE-%06d', $application->id) }}</dd>
                 <dt class="text-ink-2 mt-2">Presentata il</dt>
                 <dd>{{ $application->created_at->format('d/m/Y') }}</dd>
             </dl>

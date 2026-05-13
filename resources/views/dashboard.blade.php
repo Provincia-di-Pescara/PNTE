@@ -100,7 +100,7 @@
                             :class="selected === {{ $app->id }} ? 'bg-accent-bg border-l-[3px] border-accent' : 'border-l-[3px] border-transparent'"
                             @click="selected = {{ $app->id }}">
                             <td class="px-3 py-2.5 border-b border-line">
-                                <div class="mono text-[11.5px] font-semibold">{{ sprintf('GTE-%04d', $app->id) }}</div>
+                                <div class="mono text-[11.5px] font-semibold">{{ sprintf('PNTE-%04d', $app->id) }}</div>
                                 <div class="text-[11px] text-ink-3">{{ $app->vehicle?->targa ?? '—' }}</div>
                             </td>
                             <td class="px-3 py-2.5 border-b border-line font-medium">
@@ -151,7 +151,7 @@
                     {{-- Header --}}
                     <div class="px-4 py-3 border-b border-line flex items-center gap-3">
                         <div class="flex-1 min-w-0">
-                            <div class="mono text-[11px] text-ink-3" x-text="'GTE-' + String(sel.id).padStart(4, '0')"></div>
+                            <div class="mono text-[11px] text-ink-3" x-text="'PNTE-' + String(sel.id).padStart(4, '0')"></div>
                             <div class="font-semibold text-[14px] truncate" x-text="sel.company?.ragione_sociale ?? '—'"></div>
                         </div>
                         <span class="chip"

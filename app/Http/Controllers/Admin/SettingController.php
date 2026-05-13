@@ -55,7 +55,7 @@ final class SettingController extends Controller
         $this->denyUnlessSuper();
 
         $settings = [
-            'app_name' => Setting::get('app_name', config('app.name', 'GTE Abruzzo')),
+            'app_name' => Setting::get('app_name', config('app.name', 'PNTE')),
             'app_timezone' => Setting::get('app_timezone', 'Europe/Rome'),
             'app_locale' => Setting::get('app_locale', 'it'),
         ];
@@ -80,7 +80,7 @@ final class SettingController extends Controller
         $this->denyUnlessSuper();
 
         $settings = [
-            'brand_header_title' => Setting::get('brand_header_title', 'GTE Abruzzo'),
+            'brand_header_title' => Setting::get('brand_header_title', 'PNTE'),
             'brand_primary_color' => Setting::get('brand_primary_color', '#0055CC'),
             'brand_logo_url' => Setting::get('brand_logo_url'),
         ];
@@ -112,7 +112,7 @@ final class SettingController extends Controller
             'mail_encryption' => Setting::get('mail_encryption', 'tls'),
             'mail_username' => Setting::get('mail_username', ''),
             'mail_from_address' => Setting::get('mail_from_address', ''),
-            'mail_from_name' => Setting::get('mail_from_name', 'GTE Abruzzo'),
+            'mail_from_name' => Setting::get('mail_from_name', 'PNTE'),
         ];
 
         return view('admin.settings.mail', compact('settings'));
@@ -192,7 +192,7 @@ final class SettingController extends Controller
         }
 
         try {
-            Artisan::call('gte:fetch-istat-boundaries', ['tipo' => $tipo]);
+            Artisan::call('pnte:fetch-istat-boundaries', ['tipo' => $tipo]);
 
             $output = Artisan::output();
 

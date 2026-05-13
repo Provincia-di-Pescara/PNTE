@@ -54,7 +54,7 @@ final class ImportStandardRoutesTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'sr_').'.json';
         file_put_contents($tmpFile, json_encode($geojson));
 
-        $this->artisan('gte:import-standard-routes', [
+        $this->artisan('pnte:import-standard-routes', [
             'file' => $tmpFile,
             'entity_id' => $entity->id,
         ])->assertExitCode(0)
@@ -83,14 +83,14 @@ final class ImportStandardRoutesTest extends TestCase
         file_put_contents($tmpFile, json_encode($geojson));
 
         // First import
-        $this->artisan('gte:import-standard-routes', ['file' => $tmpFile, 'entity_id' => $entity->id])
+        $this->artisan('pnte:import-standard-routes', ['file' => $tmpFile, 'entity_id' => $entity->id])
             ->assertExitCode(0);
 
         // Second import with updated limit
         $geojson2 = $this->makeGeoJson([$this->makeFeature('Via Roma', ['max_massa_kg' => 44000])]);
         file_put_contents($tmpFile, json_encode($geojson2));
 
-        $this->artisan('gte:import-standard-routes', ['file' => $tmpFile, 'entity_id' => $entity->id])
+        $this->artisan('pnte:import-standard-routes', ['file' => $tmpFile, 'entity_id' => $entity->id])
             ->assertExitCode(0)
             ->expectsOutputToContain('Aggiornate: 1');
 
@@ -115,7 +115,7 @@ final class ImportStandardRoutesTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'sr_').'.json';
         file_put_contents($tmpFile, json_encode($geojson));
 
-        $this->artisan('gte:import-standard-routes', ['file' => $tmpFile, 'entity_id' => $entity->id])
+        $this->artisan('pnte:import-standard-routes', ['file' => $tmpFile, 'entity_id' => $entity->id])
             ->assertExitCode(0)
             ->expectsOutputToContain('Saltate: 1');
 
@@ -137,7 +137,7 @@ final class ImportStandardRoutesTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'sr_').'.json';
         file_put_contents($tmpFile, json_encode($geojson));
 
-        $this->artisan('gte:import-standard-routes', ['file' => $tmpFile, 'entity_id' => $entity->id])
+        $this->artisan('pnte:import-standard-routes', ['file' => $tmpFile, 'entity_id' => $entity->id])
             ->assertExitCode(0)
             ->expectsOutputToContain('Saltate: 1');
 
@@ -148,7 +148,7 @@ final class ImportStandardRoutesTest extends TestCase
     {
         $entity = Entity::factory()->create();
 
-        $this->artisan('gte:import-standard-routes', [
+        $this->artisan('pnte:import-standard-routes', [
             'file' => '/tmp/nonexistent_file.json',
             'entity_id' => $entity->id,
         ])->assertExitCode(1);
@@ -159,7 +159,7 @@ final class ImportStandardRoutesTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'sr_').'.json';
         file_put_contents($tmpFile, json_encode($this->makeGeoJson([$this->makeFeature('Via Roma')])));
 
-        $this->artisan('gte:import-standard-routes', [
+        $this->artisan('pnte:import-standard-routes', [
             'file' => $tmpFile,
             'entity_id' => 99999,
         ])->assertExitCode(1);

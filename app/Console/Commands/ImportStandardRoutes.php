@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 final class ImportStandardRoutes extends Command
 {
-    protected $signature = 'gte:import-standard-routes
+    protected $signature = 'pnte:import-standard-routes
                             {file : Percorso al file GeoJSON delle strade standard}
                             {entity_id : ID dell\'entità amministrativa a cui associare le strade}';
 

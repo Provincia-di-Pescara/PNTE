@@ -1,6 +1,10 @@
-# GTE-Abruzzo: Gestionale Trasporti Eccezionali
+# PNTE
 
-## Progetto di Trasformazione Digitale per la Provincia di Pescara e il riuso regionale
+![PNTE Logo](./design/logo.png)
+
+PNTE adotta un'architettura "Walled Garden Ibrido" che risolve il problema della scalabilità nazionale garantendo al contempo il controllo della Provincia Capofila.
+
+## Progetto di Trasformazione Digitale per la Provincia di Pescara e il riuso nazionale
 
 > Software a riuso sviluppato dalla **Provincia di Pescara** ai sensi dell'art. 69 del D.Lgs. 82/2005 (CAD) e pubblicato sul catalogo [Developers Italia](https://developers.italia.it/). Licenza **EUPL-1.2**.
 
@@ -8,7 +12,7 @@
 
 ### 1. Premessa e Visione
 
-Il progetto **GTE-Abruzzo** (Gestionale Trasporti Eccezionali) nasce per digitalizzare l'intero ciclo di vita delle autorizzazioni per il transito di veicoli e trasporti eccezionali. Il software è sviluppato dalla **Provincia di Pescara** in qualità di ente capofila, con l'obiettivo di essere messo a disposizione di tutti gli enti della Regione Abruzzo e del territorio nazionale tramite il catalogo del **Riuso di Developers Italia**.
+Il progetto **PNTE** (Piattaforma Nazionale Trasporti Eccezionali) nasce per digitalizzare l'intero ciclo di vita delle autorizzazioni per il transito di veicoli e trasporti eccezionali. Il software è sviluppato dalla **Provincia di Pescara** in qualità di ente capofila, con l'obiettivo di essere messo a disposizione di tutti gli enti della Regione Abruzzo e del territorio nazionale tramite il catalogo del **Riuso di Developers Italia**.
 
 L'architettura è concepita come un **SaaS (Software as a Service) Multi-tenant**, dove ogni ente (Province, Comuni, ANAS) può gestire le proprie competenze in un ambiente isolato ma integrato in un unico flusso geografico e amministrativo.
 
@@ -16,7 +20,7 @@ L'architettura è concepita come un **SaaS (Software as a Service) Multi-tenant*
 
 ### 2. Architettura Multi-Tenant: Il Walled Garden Ibrido
 
-GTE-Abruzzo adotta un'architettura "Walled Garden Ibrido" che risolve il problema della scalabilità nazionale garantendo al contempo il controllo della Provincia Capofila.
+PNTE adotta un'architettura "Walled Garden Ibrido" che risolve il problema della scalabilità nazionale garantendo al contempo il controllo della Provincia Capofila.
 
 **Cartografia Nazionale, Azione Locale:** Il database contiene i confini ISTAT e la rete stradale dell'intera Italia, ma il sistema opera attivamente soltanto per le **Province Tenant** — quelle che hanno aderito formalmente alla piattaforma. Questo permette sin dal primo giorno di tracciare percorsi interregionali senza riconfigurare la cartografia a ogni nuova adesione.
 
@@ -70,7 +74,7 @@ La piattaforma rileva automaticamente se un'azienda è un'agenzia di pratiche au
 - **Filtro 1 - Codice ATECO:** Il codice target è **82.99.11** (Fornitura di assistenza per la registrazione di autoveicoli).
 - **Filtro 2 - Compliance Legge 264/1991:** La descrizione dell'attività (`descrizione_attivita`) deve contenere almeno una keyword: "Consulenza", "Legge 264", "Agenzia di pratiche", "Studi di consulenza".
 - **Attivazione:** Al primo login tramite SPID/CIE, se ATECO 82.99.11 + keyword compliance matchano, il sistema auto-flag `companies.is_agency = true` senza richiedere conferma operatore.
-- **Monitoraggio Continuo:** Un job Artisan `gte:re-sync-agency-ateco` eseguito monthly interroga PDND per tutte le aziende flaggate come agenzie. Se ATECO cambia o P.IVA diventa inattiva, tutti gli `agency_mandates` attivi verso quella agenzia vengono revocati automaticamente (`status = 'revoked'`, `revocation_reason = 'ATECO compliance check: agency status revoked'`). L'agenzia riceve una PEC di notifica.
+- **Monitoraggio Continuo:** Un job Artisan `pnte:re-sync-agency-ateco` eseguito monthly interroga PDND per tutte le aziende flaggate come agenzie. Se ATECO cambia o P.IVA diventa inattiva, tutti gli `agency_mandates` attivi verso quella agenzia vengono revocati automaticamente (`status = 'revoked'`, `revocation_reason = 'ATECO compliance check: agency status revoked'`). L'agenzia riceve una PEC di notifica.
 - **Audit:** Campi `ateco_code` (string) e `ateco_last_synced_at` (timestamp) aggiunti a `companies` per tracciabilità compliance.
 
 **3. Agenzie di Consulenza: doppio livello `agency_mandates + delegations`:**
@@ -113,7 +117,7 @@ Il `system-admin` non atterra sulla dashboard classica ma su un pannello separat
 
 Il software è progettato per rispettare le **Linee Guida AgID** e il **European Interoperability Framework (EIF)**. I seguenti principi guidano ogni scelta architetturale e implementativa:
 
-| Principio | Applicazione in GTE-Abruzzo |
+| Principio | Applicazione in PNTE |
 | :--- | :--- |
 | **Once-Only** | I dati disponibili da banche dati nazionali (attributi SPID, IPA, Registro Imprese PDND) non vengono mai richiesti manualmente all'utente. I campi pre-compilati da API sono in sola lettura. |
 | **Digital-by-Default** | Ogni processo burocratico è integralmente eseguibile online. Non esistono fallback cartacei né procedure "scarica il PDF e mandalo via email". |
@@ -179,7 +183,7 @@ Il cuore innovativo del sistema è il motore geografico: non è semplicemente un
 
 **Routing Snap-to-Road:** Grazie a **OSRM**, l'utente inserisce i punti di partenza/arrivo e la linea del percorso viene automaticamente ancorata alle strade reali, calcolando i chilometri precisi su ogni tratta.
 
-**Intersezione Spaziale:** Il backend incrocia la `LineString` del percorso con i poligoni dei confini comunali e provinciali (ISTAT, intera Italia) tramite `ST_Intersects` + `ST_Length`. Il risultato è un `entity_breakdown`: per ogni ente attraversato, i chilometri esatti di competenza, calcolati in millisecondi.
+**Intersezione Spaziale:** Il backend incrocia la `LineString` del percorso con i poligoni dei confini comunali e provinciali (ISTAT, intera Italia) tramite `ST_Intersects` + `ST_LENGTH`. Il risultato è un `entity_breakdown`: per ogni ente attraversato, i chilometri esatti di competenza, calcolati in millisecondi.
 
 **Motore di Calcolo (D.P.R. 495/1992):** Un rule-engine basato su tabelle di coefficienti storicizzate calcola l'indennizzo d'usura totale e la quota spettante a ogni ente (formula: peso × km × coefficiente-asse), in conformità alle formule ministeriali.
 
@@ -189,7 +193,7 @@ Il cuore innovativo del sistema è il motore geografico: non è semplicemente un
 
 **Trasporti Periodici:** Per le autorizzazioni con `tipo_istanza = periodico`, l'utente seleziona un'**area geografica** (poligono ISTAT) anziché una linea. Il conteggio chilometrico viene sospeso e il sistema applica le **tariffe forfettarie ministeriali**, come previsto per i trasporti agricoli ricorrenti.
 
-GTE-Abruzzo adotta la logica di business corretta e scarta il vincolo dell'inserimento manuale di nodi chilometrici: l'utente disegna sulla mappa come in un navigatore consumer e il backend calcola automaticamente intersezioni, km e competenze.
+PNTE adotta la logica di business corretta e scarta il vincolo dell'inserimento manuale di nodi chilometrici: l'utente disegna sulla mappa come in un navigatore consumer e il backend calcola automaticamente intersezioni, km e competenze.
 
 ---
 
@@ -201,9 +205,9 @@ La piattaforma non gestisce geometrie come feature opzionale, ma come **fondamen
 
 Tutte le geometrie sono archiviate in **SRID 4326 (WGS84)**: coordinate in `[longitude, latitude]` (precisione a metri). PostgreSQL con PostGIS gestisce nativamente `spatial_ref_sys` e le operazioni geografiche avanzate su SRID 4326.
 
-**Conversione distanze:** `ST_Length()` su SRID 4326 ritorna distanze in gradi decimali. Per le coordinate di Abruzzo (41–42°N), il fattore di conversione è **111.32 km/°**, con errore relativo < 2%. Tutte le distanze chilometriche nel sistema usano questo fattore; le rotte con lunghezza > 300 km in direzione Nord-Sud sono suddivise per minimizzare l'errore.
+**Conversione distanze:** `ST_LENGTH()` su SRID 4326 ritorna distanze in gradi decimali. Per le coordinate di Abruzzo (41–42°N), il fattore di conversione è **111.32 km/°**, con errore relativo < 2%. Tutte le distanze chilometriche nel sistema usano questo fattore; le rotte con lunghezza > 300 km in direzione Nord-Sud sono suddivise per minimizzare l'errore.
 
-**Spatial Index (Performance):** Tutte le colonne geometriche hanno indice `GiST` su PostGIS. Le query `ST_Intersects` su interi dataset di entità (300+ poligoni) eseguono in millisecondi.
+**Spatial Index (Performance):** Tutte le colonne geometriche hanno indice `GiST` su PostGIS. Le query `ST_INTERSECTS` su interi dataset di entità (300+ poligoni) eseguono in millisecondi.
 
 #### Colonne Geometriche (Database Schema)
 
@@ -230,12 +234,12 @@ Tutte le geometrie sono archiviate in **SRID 4326 (WGS84)**: coordinate in `[lon
 
 Il backend utilizza natively le funzioni spaziali di PostGIS per ogni operazione critica:
 
-- **`ST_Intersects(route_geom, entity_geom)`** — Identifica tutti gli enti attraversati dal percorso in una singola query. Utilizzato per il calcolo dell'`entity_breakdown`.
-- **`ST_Length(route_geom)`** — Calcola la lunghezza della rotta in gradi; moltiplicato per 111.32 per ottenere km. Utilizzato per il calcolo dell'usura e delle tariffe.
-- **`ST_Buffer(point, radius_degrees)`** — Buffer di sicurezza intorno a punti di interesse (es., ~11 m = 0.0001° per il matching ARS). Usato per identificare "Tratti Verdi" con tolleranza geometrica.
-- **`ST_AsText(geometry)`** — Esporta geometria in WKT per le query OSRM.
-- **`ST_GeomFromGeoJSON(geojson_str, 4326)`** — Importa GeoJSON dal frontend Leaflet draw.
-- **`ST_Simplify(geometry, tolerance)`** — Riduce vertici per il rendering frontend.
+- **`ST_INTERSECTS(route_geom, entity_geom)`** — Identifica tutti gli enti attraversati dal percorso in una singola query. Utilizzato per il calcolo dell'`entity_breakdown`.
+- **`ST_LENGTH(route_geom)`** — Calcola la lunghezza della rotta in gradi; moltiplicato per 111.32 per ottenere km. Utilizzato per il calcolo dell'usura e delle tariffe.
+- **`ST_BUFFER(point, radius_degrees)`** — Buffer di sicurezza intorno a punti di interesse (es., ~11 m = 0.0001° per il matching ARS). Usato per identificare "Tratti Verdi" con tolleranza geometrica.
+- **`ST_AS_TEXT(geometry)`** — Esporta geometria in WKT per le query OSRM.
+- **`ST_GEOMFROMGEOJSON(geojson_str, 4326)`** — Importa GeoJSON dal frontend Leaflet draw.
+- **`ST_SIMPLIFY(geometry, tolerance)`** — Riduce vertici per il rendering frontend.
 
 **Caching in Redis:** Query spaziali frequenti cachate con TTL 30 minuti, chiave = hash(route_geometry). Invalidazione: aggiornamento `entities.geom` o `roadworks.geometry`.
 
@@ -243,13 +247,13 @@ Il backend utilizza natively le funzioni spaziali di PostGIS per ogni operazione
 
 **Import da GeoJSON:**
 ```bash
-php artisan gte:import-geo /data/regione-abruzzo.geojson --upsert-by=codice_istat
+php artisan pnte:import-geo /data/regione-abruzzo.geojson --upsert-by=codice_istat
 ```
 
 **Import da Shapefile:**
 ```bash
 ogr2ogr -f GeoJSON output.geojson comuni.shp
-php artisan gte:import-geo output.geojson
+php artisan pnte:import-geo output.geojson
 ```
 
 **Export Route / Entities:**
@@ -331,14 +335,14 @@ Il limite di 5 co-beneficiari del nodo PagoPA viene aggirato per non bloccare le
 
 Il sistema è architetturalmente predisposto per la piena interoperabilità con **AINOP** tramite la **Piattaforma Digitale Nazionale Dati (PDND)**.
 
-Quando le API AINOP saranno disponibili in produzione, GTE-Abruzzo potrà:
+Quando le API AINOP saranno disponibili in produzione, PNTE potrà:
 
 - **Verificare in tempo reale** la portata e le limitazioni di ponti e viadotti presenti lungo il percorso autorizzativo, interrogando il dataset AINOP tramite le API PDND.
 - **Collegare automaticamente** le opere d'arte censite a sistema (tramite coordinate geografiche o identificativi univoci `codice_univoco_ainop`) alle corrispondenti schede AINOP.
 - **Esporre nel WebGIS** lo stato di idoneità infrastrutturale dei tratti percorsi, con evidenza visiva delle limitazioni di carico o delle criticità segnalate.
 - **Alimentare il censimento nazionale**, trasformando ogni ente aderente in un contribuente attivo alla base dati infrastrutturale richiesta dal Piano Nazionale MIT.
 
-Questo posiziona GTE-Abruzzo come strumento di **censimento infrastrutturale** oltre che gestionale autorizzativo, in anticipo sulle scadenze normative del 2027.
+Questo posiziona PNTE come strumento di **censimento infrastrutturale** oltre che gestionale autorizzativo, in anticipo sulle scadenze normative del 2027.
 
 ---
 
@@ -346,7 +350,7 @@ Questo posiziona GTE-Abruzzo come strumento di **censimento infrastrutturale** o
 
 Gli enti gestori di competenza (Comuni, ANAS, Autostrade) segnalano i cantieri stradali direttamente dalla propria Scrivania. Ogni cantiere è definito da una geometria GIS (tratto stradale), un periodo di validità e un livello di severità (informativo / limitato / chiuso).
 
-Al momento del tracciamento del percorso, prima della sottomissione, il sistema verifica automaticamente la sovrapposizione spaziale e temporale (`ST_Intersects` + date range) tra il percorso richiesto e i cantieri attivi. In caso di conflitto:
+Al momento del tracciamento del percorso, prima della sottomissione, il sistema verifica automaticamente la sovrapposizione spaziale e temporale (`ST_INTERSECTS` + date range) tra il percorso richiesto e i cantieri attivi. In caso di conflitto:
 
 - La sottomissione viene bloccata con indicazione del tratto incompatibile.
 - Vengono proposti sulla mappa **percorsi alternativi** calcolati da OSRM escludendo i tratti interessati.
@@ -362,11 +366,11 @@ Le **Forze dell'Ordine** (`law-enforcement`) accedono in sola lettura a:
 
 ### 16. Conformità 2027 (MIT Compliance)
 
-Le linee guida MIT per la sicurezza dei ponti e la gestione dei trasporti eccezionali prevedono scadenze di adeguamento entro il **2027**. L'architettura di GTE-Abruzzo è stata progettata per anticipare tali requisiti:
+Le linee guida MIT per la sicurezza dei ponti e la gestione dei trasporti eccezionali prevedono scadenze di adeguamento entro il **2027**. L'architettura di PNTE è stata progettata per anticipare tali requisiti:
 
 - Il modello dati include i campi necessari per il collegamento alle schede AINOP (`codice_univoco_ainop`) e per tracciare le limitazioni strutturali per tratta.
 - Il modulo WebGIS è predisposto per importare e visualizzare i **Corridoi Nazionali** definiti dal Piano MIT, privilegiando i tratti classificati come idonei in fase di tracciamento del percorso.
-- La finestra temporale fino al 2027 è un vantaggio competitivo per gli enti che adottano GTE-Abruzzo oggi: arriveranno alla scadenza già allineati agli standard AINOP e al Piano Nazionale, senza interventi straordinari di migrazione.
+- La finestra temporale fino al 2027 è un vantaggio competitivo per gli enti che adottano PNTE oggi: arriveranno alla scadenza già allineati agli standard AINOP e al Piano Nazionale, senza interventi straordinari di migrazione.
 
 ---
 
@@ -393,7 +397,7 @@ Le linee guida MIT per la sicurezza dei ponti e la gestione dei trasporti eccezi
 | `vehicle_documents` | Libretti, schemi di carico, omologazioni e allegati della flotta |
 | `vehicles` | Anagrafica tecnica (assi, pesi, configurazioni) per il Garage Virtuale e il Preavviso di Viaggio |
 | `entities` | Comuni, Province, gestori stradali (poligoni GIS, PEC, `is_tenant`, `has_financial_delegation`, `is_capofila`) |
-| **Geometries (Spatial)** | LINESTRING/POLYGON archiviate in PostgreSQL/PostGIS con SRID 4326 (WGS84); indice GiST; exportate in RFC 7946 GeoJSON; operazioni `ST_Intersects`, `ST_Length`, `ST_Buffer` native |
+| **Geometries (Spatial)** | LINESTRING/POLYGON archiviate in PostgreSQL/PostGIS con SRID 4326 (WGS84); indice GiST; exportate in RFC 7946 GeoJSON; operazioni `ST_INTERSECTS`, `ST_LENGTH`, `ST_BUFFER` native |
 | `applications` | La pratica e la sua macchina a stati (`draft → submitted → waiting_clearances → waiting_payment → approved`), con contesto di audit del partner che l'ha creata |
 | `routes` | Geometrie del percorso e `entity_breakdown` (km per ente) |
 | `clearances` | Workflow Nulla Osta: stati `pre_cleared` (ARS), `pending_review` (IMAP Listener), `approved`, `rejected` |
@@ -425,8 +429,8 @@ Le linee guida MIT per la sicurezza dei ponti e la gestione dei trasporti eccezi
 
 ```bash
 # 1. Clona il repository
-git clone https://github.com/provincia-pescara/gte-abruzzo.git
-cd gte-abruzzo
+git clone https://github.com/provincia-di-pescara/PNTE.git
+cd PNTE
 
 # 2. Configura l'environment
 cp .env.example .env

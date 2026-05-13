@@ -1,4 +1,4 @@
-/* GTE-Abruzzo design tokens — three palettes share the same scale */
+/* PNTE design tokens — three palettes share the same scale */
 :root {
   /* Palette A — Civic Warm (default) */
   --bg: oklch(0.985 0.008 75);

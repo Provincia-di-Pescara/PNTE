@@ -20,7 +20,7 @@ use Illuminate\Console\Command;
  */
 final class RunAllDiagnosticsCommand extends Command
 {
-    protected $signature = 'gte:diag
+    protected $signature = 'pnte:diag
         {--json : Output as JSON snapshot}
         {--quiet-ok : Suppress per-service stdout when all services succeed}
         {--no-audit : Skip writing system_audit_logs entries}';

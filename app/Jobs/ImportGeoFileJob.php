@@ -41,7 +41,7 @@ final class ImportGeoFileJob implements ShouldQueue
             'result' => null,
         ], 3600);
 
-        $exitCode = Artisan::call('gte:import-geo', ['file' => $this->storagePath]);
+        $exitCode = Artisan::call('pnte:import-geo', ['file' => $this->storagePath]);
 
         Storage::disk('local')->delete(
             str_replace(Storage::disk('local')->path(''), '', $this->storagePath)

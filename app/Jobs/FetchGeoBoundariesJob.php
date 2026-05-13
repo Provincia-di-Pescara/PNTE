@@ -82,7 +82,7 @@ final class FetchGeoBoundariesJob implements ShouldQueue
             'result' => null,
         ], 3600);
 
-        $exitCode = Artisan::call('gte:import-geo', ['file' => $fullPath]);
+        $exitCode = Artisan::call('pnte:import-geo', ['file' => $fullPath]);
 
         Storage::disk('local')->delete($filename);
 

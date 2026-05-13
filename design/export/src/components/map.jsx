@@ -78,7 +78,7 @@ const CITIES = [
 ];
 
 // ---- map component --------------------------------------------------------
-function GTEMap({
+function PNTEMap({
   height = 460,
   showRoute = true,
   showAlt = false,
@@ -298,4 +298,4 @@ function GTEMap({
   );
 }
 
-window.GTEMap = GTEMap;
+window.PNTEMap = PNTEMap;

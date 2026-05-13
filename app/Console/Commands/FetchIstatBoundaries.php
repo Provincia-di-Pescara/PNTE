@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Http;
 
 final class FetchIstatBoundaries extends Command
 {
-    protected $signature = 'gte:fetch-istat-boundaries {tipo : comuni o province} {--url= : URL sorgente personalizzato}';
+    protected $signature = 'pnte:fetch-istat-boundaries {tipo : comuni o province} {--url= : URL sorgente personalizzato}';
 
     protected $description = 'Scarica i confini ISTAT da openpolis/geojson-italy e importa nelle entities (stream su disco, retry 3x)';
 
@@ -73,7 +73,7 @@ final class FetchIstatBoundaries extends Command
         $this->info("File scaricato ({$size} MB). Avvio importazione...");
 
         try {
-            Artisan::call('gte:import-geo', ['file' => $tmpFile], $this->getOutput());
+            Artisan::call('pnte:import-geo', ['file' => $tmpFile], $this->getOutput());
         } finally {
             @unlink($tmpFile);
         }

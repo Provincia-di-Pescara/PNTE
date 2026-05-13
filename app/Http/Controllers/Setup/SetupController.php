@@ -52,7 +52,7 @@ final class SetupController extends Controller
         return view('setup.step2', [
             'currentStep' => 2,
             'data' => $request->session()->get('setup.app', [
-                'app_name' => 'GTE Abruzzo',
+                'app_name' => 'PNTE',
                 'app_timezone' => 'Europe/Rome',
                 'app_locale' => 'it',
             ]),
@@ -166,7 +166,7 @@ final class SetupController extends Controller
         Config::set('mail.mailers.smtp.username', $request->input('mail_username'));
         Config::set('mail.mailers.smtp.password', $request->input('mail_password'));
         Config::set('mail.from.address', $request->input('mail_from_address'));
-        Config::set('mail.from.name', $request->input('mail_from_name', 'GTE Abruzzo'));
+        Config::set('mail.from.name', $request->input('mail_from_name', 'PNTE'));
         Config::set('mail.default', 'smtp');
 
         try {

@@ -17,7 +17,7 @@ final class TestMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Email di test — GTE Abruzzo',
+            subject: 'Email di test — PNTE',
         );
     }
 

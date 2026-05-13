@@ -1,5 +1,5 @@
-/* global React, GTE, GTEMap */
-const { Chip: Cf, Icon: Icf, I: IIf } = window.GTE;
+/* global React, PNTE, PNTEMap */
+const { Chip: Cf, Icon: Icf, I: IIf } = window.PNTE;
 
 // ===========================================================================
 // Forze dell'Ordine — verifica QR + targa, transiti del giorno, cantieri
@@ -8,13 +8,13 @@ const { Chip: Cf, Icon: Icf, I: IIf } = window.GTE;
 function LawScreen() {
   const transits = [
     { plate: "FT 728 ZR", company: "Ferraris Trasporti S.p.A.", route: "Pescara → Sulmona",
-      window: "12 mag · 06:00–22:00", id: "GTE-2026-002418", weight: "76,4 t" },
+      window: "12 mag · 06:00–22:00", id: "PNTE-2026-002418", weight: "76,4 t" },
     { plate: "AL 091 KP", company: "Adriatica Logistic S.r.l.", route: "Pescara → L'Aquila",
-      window: "14 mag · 04:00–10:00", id: "GTE-2026-002417", weight: "92,1 t" },
+      window: "14 mag · 04:00–10:00", id: "PNTE-2026-002417", weight: "92,1 t" },
     { plate: "ED 442 BB", company: "Edilstrade Abruzzo", route: "Chieti → Avezzano",
-      window: "13 mag · 08:00–14:00", id: "GTE-2026-002416", weight: "64,8 t" },
+      window: "13 mag · 08:00–14:00", id: "PNTE-2026-002416", weight: "64,8 t" },
     { plate: "TM 619 GH", company: "Trasporti Maiella", route: "Lanciano → Roseto",
-      window: "13 mag · 22:00–05:00", id: "GTE-2026-002413", weight: "84,2 t" },
+      window: "13 mag · 22:00–05:00", id: "PNTE-2026-002413", weight: "84,2 t" },
   ];
 
   return (
@@ -79,7 +79,7 @@ function LawScreen() {
             </div>
             <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 8, fontSize: 13 }}>
               <Row k="Targa" v="FT 728 ZR" mono />
-              <Row k="Pratica" v="GTE-2026-002418" mono />
+              <Row k="Pratica" v="PNTE-2026-002418" mono />
               <Row k="Richiedente" v="Ferraris Trasporti S.p.A." />
               <Row k="P.IVA" v="01428360689" mono />
               <Row k="Convoglio" v="Motrice + 3 assi rim." />
@@ -109,7 +109,7 @@ function LawScreen() {
               <button className="btn btn-sm">Cantieri</button>
               <button className="btn btn-sm">Filtra tratta</button>
             </div>
-            <GTEMap height={260} showLegend={false} />
+            <PNTEMap height={260} showLegend={false} />
           </div>
 
           <div className="card" style={{ overflow: "hidden" }}>
@@ -175,4 +175,4 @@ function Row({ k, v, mono, tone }) {
   );
 }
 
-window.GTEScreens = { ...(window.GTEScreens || {}), LawScreen };
+window.PNTEScreens = { ...(window.PNTEScreens || {}), LawScreen };

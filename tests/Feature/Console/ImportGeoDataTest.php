@@ -46,7 +46,7 @@ final class ImportGeoDataTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'geo_').'.json';
         file_put_contents($tmpFile, $geojson);
 
-        $this->artisan('gte:import-geo', ['file' => $tmpFile])
+        $this->artisan('pnte:import-geo', ['file' => $tmpFile])
             ->assertExitCode(0);
 
         $result = DB::selectOne('SELECT geom IS NOT NULL AS has_geom FROM entities WHERE id = ?', [$entity->id]);
@@ -73,7 +73,7 @@ final class ImportGeoDataTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'geo_').'.json';
         file_put_contents($tmpFile, $geojson);
 
-        $this->artisan('gte:import-geo', ['file' => $tmpFile])
+        $this->artisan('pnte:import-geo', ['file' => $tmpFile])
             ->assertExitCode(0)
             ->expectsOutputToContain('Create: 1');
 
@@ -103,7 +103,7 @@ final class ImportGeoDataTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'geo_').'.json';
         file_put_contents($tmpFile, $geojson);
 
-        $this->artisan('gte:import-geo', ['file' => $tmpFile])
+        $this->artisan('pnte:import-geo', ['file' => $tmpFile])
             ->assertExitCode(0)
             ->expectsOutputToContain('Create: 1');
 
@@ -118,7 +118,7 @@ final class ImportGeoDataTest extends TestCase
 
     public function test_fails_when_file_not_found(): void
     {
-        $this->artisan('gte:import-geo', ['file' => '/nonexistent/path.json'])
+        $this->artisan('pnte:import-geo', ['file' => '/nonexistent/path.json'])
             ->assertExitCode(1);
     }
 }

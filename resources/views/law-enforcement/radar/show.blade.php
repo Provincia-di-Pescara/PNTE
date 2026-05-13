@@ -3,7 +3,7 @@
 @section('content')
 <div class="mb-6 flex items-center justify-between">
     <div>
-        <h1 class="text-xl font-bold tracking-tight">Autorizzazione {{ sprintf('GTE-%06d', $application->id) }}</h1>
+        <h1 class="text-xl font-bold tracking-tight">Autorizzazione {{ sprintf('PNTE-%06d', $application->id) }}</h1>
         <p class="text-sm text-ink-2 mt-1">Verifica trasporto eccezionale</p>
     </div>
     <span class="badge badge-green text-sm px-3 py-1">APPROVATA</span>
@@ -39,7 +39,7 @@
         <h2 class="text-base font-semibold mb-4">Autorizzazione</h2>
         <dl class="space-y-3 text-sm">
             <dt class="text-ink-2">Protocollo</dt>
-            <dd class="font-mono font-bold">{{ sprintf('GTE-%06d', $application->id) }}</dd>
+            <dd class="font-mono font-bold">{{ sprintf('PNTE-%06d', $application->id) }}</dd>
 
             <dt class="text-ink-2">Tipo istanza</dt>
             <dd>{{ $application->tipo_istanza->label() }}</dd>

@@ -26,7 +26,7 @@ final class StorageDiagnosticService implements DiagnosticInterface
         $start = hrtime(true);
         $disk = config('filesystems.default', 'local');
         $probe = 'diagnostics/'.Str::random(16).'.txt';
-        $payload = 'gte-diag '.now()->toIso8601String();
+        $payload = 'pnte-diag '.now()->toIso8601String();
 
         try {
             $fs = Storage::disk($disk);

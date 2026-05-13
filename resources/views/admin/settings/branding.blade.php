@@ -19,7 +19,7 @@
             <label for="brand_header_title" class="block text-xs font-semibold text-ink-2 mb-1.5">Titolo applicazione</label>
             <input type="text" id="brand_header_title" name="brand_header_title"
                    value="{{ old('brand_header_title', $settings['brand_header_title']) }}"
-                   placeholder="GTE Abruzzo"
+                   placeholder="PNTE"
                    class="w-full h-9 px-3 rounded-md border border-line bg-surface text-[13px] focus:border-accent focus:outline-none transition-colors @error('brand_header_title') border-danger @enderror">
             <p class="mt-1 text-[11px] text-ink-3">Mostrato nella sidebar e nell'intestazione.</p>
             @error('brand_header_title')<p class="mt-1 text-[11px] text-danger">{{ $message }}</p>@enderror

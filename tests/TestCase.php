@@ -12,9 +12,9 @@ abstract class TestCase extends BaseTestCase
     protected function refreshApplication(): void
     {
         // Force the test database before the app boots so dotenv (immutable) keeps this value.
-        $_ENV['DB_DATABASE'] = 'gte_abruzzo_test';
-        $_SERVER['DB_DATABASE'] = 'gte_abruzzo_test';
-        putenv('DB_DATABASE=gte_abruzzo_test');
+        $_ENV['DB_DATABASE'] = 'pnte_test';
+        $_SERVER['DB_DATABASE'] = 'pnte_test';
+        putenv('DB_DATABASE=pnte_test');
 
         parent::refreshApplication();
     }

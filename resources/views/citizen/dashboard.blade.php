@@ -67,7 +67,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
-                        <span class="mono text-[11px] text-ink-3">{{ sprintf('GTE-%04d', $app->id) }}</span>
+                        <span class="mono text-[11px] text-ink-3">{{ sprintf('PNTE-%04d', $app->id) }}</span>
                         <x-status-pill :state="$app->stato->value" />
                     </div>
                     <div class="text-[13px] font-medium mt-0.5">
