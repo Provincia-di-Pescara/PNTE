@@ -1,0 +1,20 @@
+name: publiccode.yml validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  publiccode_yml_validation:
+    runs-on: ubuntu-latest
+    name: publiccode.yml validation
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate publiccode.yml
+        uses: italia/publiccode-parser-action@v1
+        with:
+          publiccode: 'publiccode.yml'

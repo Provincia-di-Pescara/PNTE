@@ -1,18 +1,22 @@
-publiccodeYmlVersion: '0.2'
+publiccodeYmlVersion: '0.5'
 
 name: PNTE
 url: 'https://github.com/provincia-di-pescara/PNTE'
 softwareVersion: '0.1.0'
 releaseDate: '2026-04-24'
 
+organisation:
+  name: Provincia di Pescara
+  uri: 'https://www.provincia.pescara.it'
+
 platforms:
   - web
 
 categories:
   - geographic-information-systems
-  - public-services
-  - urban-issues
-  - it-infrastructure
+  - workflow-management
+  - digital-citizenship
+  - regulations-and-directives
 
 usedBy:
   - Provincia di Pescara
@@ -23,7 +27,6 @@ softwareType: standalone/web
 legal:
   license: EUPL-1.2
   mainCopyrightOwner: Provincia di Pescara
-  repoOwner: Provincia di Pescara
 
 maintenance:
   type: internal
@@ -48,7 +51,7 @@ dependsOn:
 
 localisation:
   localisationReady: true
-  supportedLanguages:
+  availableLanguages:
     - it
 
 description:
@@ -90,14 +93,9 @@ description:
       - Architettura Multi-tenant SaaS con RBAC per estensione regionale e nazionale
       - Conforme alle Linee Guida AgID e alle direttive MIT con orizzonte 2027
 
-it:
+IT:
   countryExtensionVersion: '0.2'
   piattaforme:
-    - spid
-    - cie
-    - pagopa
-    - pdnd
-  conformsTo:
-    - Linee guida design web della PA
-    - Modello di interoperabilità
-    - CAP. 69 D.Lgs. 82/2005 (CAD - riuso del software)
+    spid: true
+    cie: true
+    pagopa: true
